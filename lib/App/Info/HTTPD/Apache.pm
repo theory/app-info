@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.33 2002/06/17 17:24:05 david Exp $
+# $Id: Apache.pm,v 1.34 2002/06/21 04:38:02 david Exp $
 
 =head1 NAME
 
@@ -29,12 +29,12 @@ time they're called (See L<App::Info|App::Info> for documentation on handling
 events). To start over (after, say, someone has installed Apache) construct a
 new App::Info::HTTPD::Apache object to aggregate new metadata.
 
-Some of the methods document the same events. This is due to cross-calling of
+Some of the methods trigger the same events. This is due to cross-calling of
 methods or of functions common to methods. However, any one event should be
 triggered no more than once. For example, although the info event "Executing
 `httpd -v`" is documented for the methods C<name()>, C<version()>,
-C<major_version()>, C<minor_version()>, and C<patch_version()>, resta assured
-that it will only be triggered once, by which ever of those four methods is
+C<major_version()>, C<minor_version()>, and C<patch_version()>, rest assured
+that it will only be triggered once, by whichever of those four methods is
 called first.
 
 =cut
@@ -67,7 +67,7 @@ each. If F<httpd> cannot be found, then Apache is assumed not to be installed,
 and each of the object methods will return C<undef>.
 
 App::Info::HTTPD::Apache searches for F<httpd> along your path, as defined by
-C<File::Spec->path>. Failing that, it searches the following directories:
+C<File::Spec-E<gt>path>. Failing that, it searches the following directories:
 
 =over 4
 
@@ -476,7 +476,7 @@ Executing `httpd -V`
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
 =item unknown
 
@@ -516,7 +516,7 @@ my $get_compile_settings = sub {
         }
     }
     # Issue a warning if no httpd root was found.
-    $self->error("Could not parse HTTPD root from ",
+    $self->error("Cannot parse HTTPD root from ",
                  "`$self->{exe} -V`") unless $self->{httpd_root};
 };
 
@@ -557,7 +557,7 @@ Executing `httpd -V`
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
 =item unknown
 
@@ -609,7 +609,7 @@ Executing `httpd -V`
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
 =item unknown
 
@@ -728,11 +728,11 @@ Parsing Apache configuration file
 
 No Apache config file found
 
-Could not parse user from file
+Cannot parse user from file
 
-Could not parse group from file
+Cannot parse group from file
 
-Could not parse port from file
+Cannot parse port from file
 
 =item unknown
 
@@ -762,9 +762,9 @@ my $parse_conf_file = sub {
                    qr/^\s*Port\s+(.*)$/ );
     my ($usr, $grp, $prt) = $u->multi_search_file($conf, @regexen);
     # Issue a warning if we couldn't find the user and group.
-    $self->error("Could not parse user from file '$conf'") unless $usr;
-    $self->error("Could not parse group from file '$conf'") unless $grp;
-    $self->error("Could not parse port from file '$conf'") unless $prt;
+    $self->error("Cannot parse user from file '$conf'") unless $usr;
+    $self->error("Cannot parse group from file '$conf'") unless $grp;
+    $self->error("Cannot parse port from file '$conf'") unless $prt;
     # Assign them anyway.
     @{$self}{qw(user group port)} = ($usr, $grp, $prt);
 };
@@ -801,11 +801,11 @@ Parsing Apache configuration file
 
 No Apache config file found
 
-Could not parse user from file
+Cannot parse user from file
 
-Could not parse group from file
+Cannot parse group from file
 
-Could not parse port from file
+Cannot parse port from file
 
 =item unknown
 
@@ -849,11 +849,11 @@ Parsing Apache configuration file
 
 No Apache config file found
 
-Could not parse user from file
+Cannot parse user from file
 
-Could not parse group from file
+Cannot parse group from file
 
-Could not parse port from file
+Cannot parse port from file
 
 =item unknown
 
@@ -900,9 +900,9 @@ Searching for bin directory
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
-Could not find bin directory
+Cannot find bin directory
 
 =item unknown
 
@@ -921,7 +921,7 @@ sub bin_dir {
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for bin directory");
         $self->{bin_dir} = $u->first_cat_path('bin', $root)
-          or $self->error("Could not find bin directory");
+          or $self->error("Cannot find bin directory");
     }}
 
     # Handle unknown value.
@@ -954,9 +954,9 @@ Searching for include directory
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
-Could not find include directory
+Cannot find include directory
 
 =item unknown
 
@@ -975,7 +975,7 @@ sub inc_dir {
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for include directory");
         $self->{inc_dir} = $u->first_cat_path(['include', 'inc',], $root)
-          or $self->error("Could not find include directory");
+          or $self->error("Cannot find include directory");
     }}
     # Handle unknown value.
     $self->{inc_dir} = $self->unknown('include directory', undef, $is_dir)
@@ -1007,9 +1007,9 @@ Searching for library directory
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
-Could not find library directory
+Cannot find library directory
 
 =item unknown
 
@@ -1034,7 +1034,7 @@ sub lib_dir {
             # The Debian way.
             $self->{lib_dir} = '/usr/lib/apache/1.3';
         } else {
-            $self->error("Could not find library direcory");
+            $self->error("Cannot find library direcory");
         }
     }}
     # Handle unknown value.
@@ -1067,9 +1067,9 @@ Searching for library directory
 
 Unable to extract compile settings from `httpd -V`
 
-Could not parse HTTPD root from `httpd -V`
+Cannot parse HTTPD root from `httpd -V`
 
-Could not find library directory
+Cannot find library directory
 
 =item unknown
 
@@ -1254,9 +1254,16 @@ David Wheeler <david@wheeler.net> based on code by Sam Tregar
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>,
-L<App::Info::HTTPD|App::Info::HTTPD>,
-L<Apache|Apache>
+L<App::Info|App::Info> documents the event handling interface.
+
+L<App::Info::HTTPD|App::Info::HTTPD> is the App::Info::HTTP::Apache parent
+class.
+
+L<Apache|Apache> and L<mod_perl_mod_perl> document mod_perl.
+
+L<http://httpd.apache.org/> is the Apache web server home page.
+
+L<http://perl.apache.org/> is the mod_perl home page.
 
 =head1 COPYRIGHT AND LICENSE
 

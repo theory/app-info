@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.16 2002/06/17 17:24:05 david Exp $
+# $Id: PostgreSQL.pm,v 1.17 2002/06/21 04:38:03 david Exp $
 
 =head1 NAME
 
@@ -24,10 +24,18 @@ App::Info::RDBMS::PostgreSQL - Information about PostgreSQL
 
 App::Info::RDBMS::PostgreSQL supplies information about the PostgreSQL
 database server installed on the local system. It implements all of the
-methods defined by App::Info::RDBMS. Methods that throw errors will throw them
-only the first time they're called. To start over (after, say, someone has
+methods defined by App::Info::RDBMS. Methods that trigger events will trigger
+them only the first time they're called (See L<App::Info|App::Info> for
+documentation on handling events). To start over (after, say, someone has
 installed PostgreSQL) construct a new App::Info::RDBMS::PostgreSQL object to
 aggregate new metadata.
+
+Some of the methods trigger the same events. This is due to cross-calling of
+shared subroutines. However, any one event should be triggered no more than
+once. For example, although the info event "Executing `pg_config --version`"
+is documented for the methods C<name()>, C<version()>, C<major_version()>,
+C<minor_version()>, and C<patch_version()>, rest assured that it will only be
+triggered once, by whichever of those four methods is called first.
 
 =cut
 
@@ -58,7 +66,7 @@ PostgreSQL is assumed not to be installed, and each of the object methods will
 return C<undef>.
 
 App::Info::RDBMS::PostgreSQL searches for F<pg_config> along your path, as
-defined by C<File::Spec->path>. Failing that, it searches the following
+defined by C<File::Spec-E<gt>path>. Failing that, it searches the following
 directories:
 
 =over 4
@@ -487,7 +495,7 @@ Executing `pg_config --bindir`
 
 =item error
 
-Could not find bin directory
+Cannot find bin directory
 
 =item unknown
 
@@ -509,7 +517,7 @@ sub bin_dir {
             $self->{bin_dir} = $dir;
         } else {
             # Handle an unknown value.
-            $self->error("Could not find bin directory");
+            $self->error("Cannot find bin directory");
             $self->{bin_dir} = $self->unknown('bin directory', undef, $is_dir)
         }
     }
@@ -536,7 +544,7 @@ Executing `pg_config --includedir`
 
 =item error
 
-Could not find include directory
+Cannot find include directory
 
 =item unknown
 
@@ -554,7 +562,7 @@ sub inc_dir {
             $self->{inc_dir} = $dir;
         } else {
             # Handle an unknown value.
-            $self->error("Could not find include directory");
+            $self->error("Cannot find include directory");
             $self->{inc_dir} = $self->unknown('include directory', undef, $is_dir)
         }
     }
@@ -581,7 +589,7 @@ Executing `pg_config --includedir`
 
 =item error
 
-Could not find library directory
+Cannot find library directory
 
 =item unknown
 
@@ -599,7 +607,7 @@ sub lib_dir {
             $self->{lib_dir} = $dir;
         } else {
             # Handle an unknown value.
-            $self->error("Could not find library directory");
+            $self->error("Cannot find library directory");
             $self->{lib_dir} = $self->unknown('library directory', undef, $is_dir)
         }
     }
@@ -627,7 +635,7 @@ Executing `pg_config --includedir`
 
 =item error
 
-Could not find shared object library directory
+Cannot find shared object library directory
 
 =item unknown
 
@@ -646,7 +654,7 @@ sub so_lib_dir {
             $self->{so_lib_dir} = $dir;
         } else {
             # Handle an unknown value.
-            $self->error("Could not find shared object library directory");
+            $self->error("Cannot find shared object library directory");
             $self->{so_lib_dir} =
               $self->unknown('shared object library directory', undef, $is_dir)
         }
@@ -693,9 +701,15 @@ David Wheeler <david@wheeler.net> based on code by Sam Tregar
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>,
-L<App::Info::RDBMS|App::Info::RDBMS>,
-L<DBD::Pg|DBD::Pg>
+L<App::Info|App::Info> documents the event handling interface.
+
+L<App::Info::RDBMS|App::Info::RDBMS> is the App::Info::RDBMS::PostgreSQL
+parent class.
+
+L<DBD::Pg|DBD::Pg> is the L<DBI|DBI> driver for connecting to PostgreSQL
+databases.
+
+L<http://www.postgresql.org/> is the PostgreSQL home page.
 
 =head1 COPYRIGHT AND LICENSE
 

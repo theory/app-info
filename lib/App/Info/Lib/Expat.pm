@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.24 2002/06/08 16:10:38 david Exp $
+# $Id: Expat.pm,v 1.25 2002/06/21 04:38:02 david Exp $
 
 =head1 NAME
 
@@ -24,9 +24,17 @@ App::Info::Lib::Expat - Information about the Expat XML parser
 
 App::Info::Lib::Expat supplies information about the Expat XML parser
 installed on the local system. It implements all of the methods defined by
-App::Info::Lib. Methods that throw errors will throw them only the first time
-they're called. To start over (after, say, someone has installed Expat)
-construct a new App::Info::Lib::Expat object to aggregate new metadata.
+App::Info::Lib. Methods that trigger events will trigger them only the first
+time they're called (See L<App::Info|App::Info> for documentation on handling
+events). To start over (after, say, someone has installed Expat) construct a
+new App::Info::Lib::Expat object to aggregate new metadata.
+
+Some of the methods trigger the same events. This is due to cross-calling of
+shared subroutines. However, any one event should be triggered no more than
+once. For example, although the info event "Searching for 'expat.h'" is
+documented for the methods C<version()>, C<major_version()>,
+C<minor_version()>, and C<patch_version()>, rest assured that it will only be
+triggered once, by whichever of those four methods is called first.
 
 =cut
 
@@ -36,13 +44,17 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.07';
+$VERSION = '0.20';
 
 my $u = App::Info::Util->new;
 
-=head1 CONSTRUCTOR
+##############################################################################
 
-=head2 new
+=head1 INTERFACE
+
+=head2 Constructor
+
+=head3 new
 
   my $expat = App::Info::Lib::Expat->new(@params);
 
@@ -77,12 +89,31 @@ following files:
 If any of these files is found, then Expat is assumed to be installed.
 Otherwise, most of the object methods will return C<undef>.
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Expat libraries
+
+=item confirm
+
+Path to Expat library directory?
+
+=item unknown
+
+Path to Expat library directory?
+
+=back
+
 =cut
 
 sub new {
     # Construct the object.
     my $self = shift->SUPER::new(@_);
     # Find libexpat.
+    $self->info("Searching for Expat libraries");
     my @paths = grep { defined and length }
       ( split(' ', $Config{libsdirs}),
         split(' ', $Config{loclibpth}),
@@ -92,13 +123,45 @@ sub new {
                 "libexpat.dylib", "libexpat.0.dylib", "libexpat.0.0.1.dylib",
                 "libexpat.a", "libexpat.la"];
 
-    $self->{libexpat} = $u->first_cat_dir($libs, @paths);
+    if (my $lexpat = $u->first_cat_dir($libs, @paths)) {
+        # We found libexpat. Confirm.
+        $self->{libexpat} =
+          $self->confirm('libexpat',
+                         'Path to Expat library directory?',
+                         $lexpat,  sub { $u->first_cat_dir($libs, $_) },
+                         'No Expat libraries found in directory');
+    } else {
+        # Handle an unknown value.
+        $self->{libexpat} =
+          $self->unknown('libexpat',
+                         'Path to Expat library directory?',
+                          sub { $u->first_cat_dir($libs, $_) },
+                         'No Expat libraries found in directory');
+    }
+
     return $self;
 }
 
-=head1 OBJECT METHODS
+##############################################################################
 
-=head2 installed
+=head2 Class Method
+
+=head3 key_name
+
+  my $key_name = App::Info::Lib::Expat->key_name;
+
+Returns the unique key name that describes this class. The value returned is
+the string "Expat".
+
+=cut
+
+sub key_name { 'Expat' }
+
+##############################################################################
+
+=head2 Object Methods
+
+=head3 installed
 
   print "Expat is ", ($expat->installed ? '' : 'not '),
     "installed.\n";
@@ -113,7 +176,9 @@ then most of the other object methods will return empty values.
 
 sub installed { $_[0]->{libexpat} ? 1 : undef }
 
-=head2 name
+##############################################################################
+
+=head3 name
 
   my $name = $expat->name;
 
@@ -124,90 +189,252 @@ the string "Expat".
 
 sub name { 'Expat' }
 
-=head2 version
+##############################################################################
 
-Returns the full version number for Expat. App::Info::Lib::Expat parses the
-version number from the F<expat.h> file, if it exists. Emits a warning if
-Expat is installed but F<expat.h> could not be found or the version number
-could not be parsed.
+=head3 version
+
+Returns the full version number for Expat. App::Info::Lib::Expat attempts to
+parse the version number from the F<expat.h> file, if it exists.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for 'expat.h'
+
+Searching for include directory
+
+=item error
+
+Cannot find include directory
+
+Cannot find 'expat.h'
+
+Failed to parse version from 'expat.h'
+
+=item unknown
+
+Enter a valid Expat include directory
+
+Enter a valid Expat version number
+
+=back
 
 =cut
+
+my $get_version = sub {
+    my $self = shift;
+    $self->{version} = undef;
+    $self->info("Searching for 'expat.h'");
+    my $inc = $self->inc_dir
+      or ($self->error("Cannot find 'expat.h'")) && return;
+    my $header = $u->catfile($inc, 'expat.h');
+    my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
+                    qr/XML_MINOR_VERSION\s+(\d+)$/,
+                    qr/XML_MICRO_VERSION\s+(\d+)$/ );
+
+    my ($x, $y, $z) = $u->multi_search_file($header, @regexen);
+    if (defined $x and defined $y and defined $z) {
+        # Assemble the version number and store it.
+        my $v = "$x.$y.$z";
+        @{$self}{qw(version major minor patch)} = ($v, $x, $y, $z);
+    } else {
+        # Warn them if we couldn't get them all.
+        $self->error("Failed to parse version from '$header'");
+    }
+};
 
 sub version {
     my $self = shift;
     return unless $self->{libexpat};
-    unless (exists $self->{version}) {
-        $self->{version} = undef;
-        my $inc = $self->inc_dir
-          or ($self->error("Cannot get Expat version because file 'expat.h' " .
-                           "does not exist")) && return;
-        my $header = $u->catfile($inc, 'expat.h');
-        my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
-                        qr/XML_MINOR_VERSION\s+(\d+)$/,
-                        qr/XML_MICRO_VERSION\s+(\d+)$/ );
 
-        my ($x, $y, $z) = $u->multi_search_file($header, @regexen);
-        if (defined $x and defined $y and defined $z) {
-            # Assemble the version number and store it.
-            my $v = "$x.$y.$z";
-            @{$self}{qw(version major minor patch)} = ($v, $x, $y, $z);
-        } else {
-            # Warn them if we couldn't get them all.
-            $self->error("Failed to parse Expat version from file '$header'");
-        }
+    # Get data.
+    $get_version->($self) unless exists $self->{version};
+
+    # Handle an unknown value.
+    unless ($self->{version}) {
+        # Create a validation code reference.
+        my $chk_version = sub {
+            # Try to get the version number parts.
+            my ($x, $y, $z) = /^(\d+)\.(\d+).(\d+)$/;
+            # Return false if we didn't get all three.
+            return unless $x and defined $y and defined $z;
+            # Save all three parts.
+            @{$self}{qw(major minor patch)} = ($x, $y, $z);
+            # Return true.
+            return 1;
+        };
+        $self->{version} =
+          $self->unknown('version number', undef, $chk_version);
     }
     return $self->{version};
 }
 
-=head2 major_version
+##############################################################################
+
+=head3 major_version
 
   my $major_version = $expat->major_version;
 
-Returns the Expat major version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "1". See the
-L<version|"version"> method for a list of possible errors.
+Returns the Expat major version number. App::Info::Lib::Expat attempts to
+parse the version number from the F<expat.h> file, if it exists. For example,
+if C<version()> returns "1.95.2", then this method returns "1".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for 'expat.h'
+
+Searching for include directory
+
+=item error
+
+Cannot find include directory
+
+Cannot find 'expat.h'
+
+Failed to parse version from 'expat.h'
+
+=item unknown
+
+Enter a valid Expat include directory
+
+Enter a valid Expat major version number
+
+=back
 
 =cut
 
+# This code reference is used by major_version(), minor_version(), and
+# patch_version() to validate a version number entered by a user.
+my $is_int = sub { /^\d+$/ };
+
 sub major_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{major};
+    my $self = shift;
+    return unless $self->{libexpat};
+
+    # Get data.
+    $get_version->($self) unless exists $self->{version};
+
+    # Handle an unknown value.
+    $self->{major} = $self->unknown('major version number', undef, $is_int)
+      unless $self->{major};
+
+    return $self->{major};
 }
 
-=head2 minor_version
+##############################################################################
+
+=head3 minor_version
 
   my $minor_version = $expat->minor_version;
 
-Returns the Expat minor version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "95". See the
-L<version|"version"> method for a list of possible errors.
+Returns the Expat minor version number. App::Info::Lib::Expat attempst to
+parse the version number from the F<expat.h> file, if it exists. For example,
+if C<version()> returns "1.95.2", then this method returns "95".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for 'expat.h'
+
+Searching for include directory
+
+=item error
+
+Cannot find include directory
+
+Cannot find 'expat.h'
+
+Failed to parse version from 'expat.h'
+
+=item unknown
+
+Enter a valid Expat include directory
+
+Enter a valid Expat minor version number
+
+=back
 
 =cut
 
 sub minor_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{minor};
+    my $self = shift;
+    return unless $self->{libexpat};
+
+    # Get data.
+    $get_version->($self) unless exists $self->{version};
+
+    # Handle an unknown value.
+    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
+      unless $self->{minor};
+
+    return $self->{minor};
 }
 
-=head2 patch_version
+##############################################################################
+
+=head3 patch_version
 
   my $patch_version = $expat->patch_version;
 
-Returns the Expat patch version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "2". See the
-L<version|"version"> method for a list of possible errors.
+Returns the Expat patch version number. App::Info::Lib::Expat attempst to
+parse the version number from the F<expat.h> file, if it exists. For example,
+C<version()> returns "1.95.2", then this method returns "2".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for 'expat.h'
+
+Searching for include directory
+
+=item error
+
+Cannot find include directory
+
+Cannot find 'expat.h'
+
+Failed to parse version from 'expat.h'
+
+=item unknown
+
+Enter a valid Expat include directory
+
+Enter a valid Expat patch version number
+
+=back
 
 =cut
 
 sub patch_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{patch};
+    my $self = shift;
+    return unless $self->{libexpat};
+
+    # Get data.
+    $get_version->($self) unless exists $self->{version};
+
+    # Handle an unknown value.
+    $self->{patch} = $self->unknown('patch version number', undef, $is_int)
+      unless $self->{patch};
+
+    return $self->{patch};
 }
 
-=head2 bin_dir
+##############################################################################
+
+=head3 bin_dir
 
   my $bin_dir = $expat->bin_dir;
 
@@ -217,13 +444,14 @@ Since Expat includes no binaries, this method always returns false.
 
 sub bin_dir { return }
 
-=head2 inc_dir
+##############################################################################
+
+=head3 inc_dir
 
   my $inc_dir = $expat->inc_dir;
 
-Returns the directory path in which the file F<expat.h> was found. Throws an
-error if F<expat.h> could not be found. App::Info::Lib::Expat searches for
-F<expat.h> in the following directories:
+Returns the directory path in which the file F<expat.h> was found.
+App::Info::Lib::Expat searches for F<expat.h> in the following directories:
 
 =over 4
 
@@ -235,12 +463,35 @@ F<expat.h> in the following directories:
 
 =back
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for include directory
+
+=item error
+
+Cannot find include directory
+
+=item unknown
+
+Enter a valid Expat include directory
+
+=back
+
 =cut
+
+# This code reference is used by inc_dir() and so_lib_dir() to validate a
+# directory entered by the user.
+my $is_dir = sub { -d };
 
 sub inc_dir {
     my $self = shift;
     return unless $self->{libexpat};
     unless (exists $self->{inc_dir}) {
+        $self->info("Searching for include directory");
         # Should there be more paths than this?
         my @paths = qw(/usr/local/include
                        /usr/include
@@ -249,25 +500,33 @@ sub inc_dir {
         if (my $dir = $u->first_cat_dir('expat.h', @paths)) {
             $self->{inc_dir} = $dir;
         } else {
-            $self->error("Could not find inc directory");
-            $self->{inc_dir} = undef;
+            $self->error("Cannot find include directory");
+            $self->{inc_dir} =
+              $self->unknown('include directory', undef,
+                             sub { $u->first_cat_dir('expat.h', $_) },
+                             "File 'expat.h' not found in directory");
         }
     }
     return $self->{inc_dir};
 }
 
-=head2 lib_dir
+##############################################################################
+
+=head3 lib_dir
 
   my $lib_dir = $expat->lib_dir;
 
 Returns the directory path in which a Expat library was found. The files and
-paths searched are as described for the L<"new"|new> constructor.
+paths searched are as described for the L<"new"|new> constructor, as are
+the events.
 
 =cut
 
 sub lib_dir { $_[0]->{libexpat} }
 
-=head2 so_lib_dir
+##############################################################################
+
+=head3 so_lib_dir
 
   my $so_lib_dir = $expat->so_lib_dir;
 
@@ -292,13 +551,31 @@ Fink fans) -- for one of the following files:
 
 =back
 
-Throws an error if the shared object library directory cannot be found.
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for shared object library directory
+
+=item error
+
+Cannot find shared object library direcory
+
+=item unknown
+
+Enter a valid Expat shared object library directory
+
+=back
 
 =cut
 
 sub so_lib_dir {
-    return unless $_[0]->{libexpat};
-    unless (exists $_[0]->{so_lib_dir}) {
+    my $self = shift;
+    return unless $self->{libexpat};
+    unless (exists $self->{so_lib_dir}) {
+        $self->info("Searching for shared object library directory");
         my @paths = grep { defined and length }
           ( split(' ', $Config{libsdirs}),
             split(' ', $Config{loclibpth}),
@@ -307,16 +584,19 @@ sub so_lib_dir {
                     "libexpat.dylib", "libexpat.0.dylib",
                     "libexpat.0.0.1.dylib"];
         if (my $dir = $u->first_cat_dir($libs, @paths)) {
-            $_[0]->{so_lib_dir} = $dir;
+            $self->{so_lib_dir} = $dir;
         } else {
-            $_[0]->error("Could not find shared object lib direcory");
-            $_[0]->{so_lib_dir} = undef;
+            $self->error("Cannot find shared object library direcory");
+            $self->{inc_dir} =
+              $self->unknown('shared object library directory', undef,
+                             sub { $u->first_cat_dir($libs, $_) },
+                             "Shared object libraries not found in directory");
         }
     }
-    return $_[0]->{so_lib_dir};
+    return $self->{so_lib_dir};
 }
 
-=head2 home_url
+=head3 home_url
 
   my $home_url = $expat->home_url;
 
@@ -326,7 +606,7 @@ Returns the libexpat home page URL.
 
 sub home_url { 'http://expat.sourceforge.net/' }
 
-=head2 download_url
+=head3 download_url
 
   my $download_url = $expat->download_url;
 
@@ -346,7 +626,7 @@ that ought to be searched for libraries and includes. And if anyone knows
 how to get the version numbers, let me know!
 
 The format of the version number seems to have changed recently (1.95.1-2),
-and now I don't know where to grab it from. Patches welcome.
+and now I don't know where to find the version number. Patches welcome.
 
 =head1 BUGS
 
@@ -360,9 +640,16 @@ module.
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>,
-L<App::Info::Lib|App::Info::Lib>,
-L<XML::Parser|XML::Parser>
+L<App::Info|App::Info> documents the event handling interface.
+
+L<App::Info::Lib|App::Info::Lib> is the App::Info::Lib::Expat parent class.
+
+L<XML::Parser|XML::Parser> uses Expat to parse XML.
+
+L<Config|Config> provides Perl configure-time information used by
+App::Info::Lib::Expat to locate Expat libraries and files.
+
+L<http://expat.sourceforge.net/> is the Expat home page.
 
 =head1 COPYRIGHT AND LICENSE
 
