@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.41 2002/08/08 19:19:17 david Exp $
+# $Id: Info.pm,v 1.42 2003/08/02 02:10:54 david Exp $
 
 =head1 NAME
 
@@ -1161,7 +1161,7 @@ App::Info::Handler subclasses.
 
 Copyright (c) 2002, David Wheeler. All Rights Reserved.
 
-This module is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
