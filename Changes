@@ -2,6 +2,8 @@ Revision history for Perl extension App::Info.
 
 0.44
       - Yet another fix for test failures on Win32, this time for PostgreSQL.
+      - Fixed SQLite tests for DBD::SQLite (which is used to collect
+        informationto when the SQLite executable can't be found) work properly.
 
 0.43  2004-12-14T19:45:52
       - Added "search_*_name" parameters and methods for searching for

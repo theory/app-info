@@ -109,9 +109,11 @@ sub new {
             error    => 'Not an executable'
         );
     } else {
+        $self->info("Looking for DBD::SQLite");
         # Try using DBD::SQLite, which includes SQLite.
         for my $dbd ('SQLite', 'SQLite2') {
-            if (eval "use DBD::$dbd") {
+            eval "use DBD::$dbd";
+            unless ($@) {
                 # Looks like DBD::SQLite is installed. Set up a temp database
                 # handle so we can get information from it.
                 require DBI;
@@ -119,6 +121,7 @@ sub new {
                 $self->{dbh} = DBI->connect("dbi:$dbd:dbname=$self->{dbfile}","","");
                 # I don't think there's any way to really confirm, so just return.
                 return $self;
+            } else {
             }
         }
 
