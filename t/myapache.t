@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.7 2002/06/17 19:27:14 david Exp $
+# $Id: myapache.t,v 1.8 2002/07/01 03:46:24 david Exp $
 
 use strict;
 use Test::More;
@@ -28,12 +28,12 @@ is( $apache->key_name, 'Apache', "Check key name" );
 
 ok( $apache->installed, "Apache is installed" );
 is( $apache->name, "Apache", "Get name" );
-is( $apache->version, "1.3.23", "Test Version" );
-is( $apache->major_version, '1', "Test major version" );
-is( $apache->minor_version, '3', "Test minor version" );
-is( $apache->patch_version, '23', "Test patch version" );
 if ($apache->httpd_root eq '/usr') {
     # Apple-installed Apache
+    is( $apache->version, "1.3.26", "Test Version" );
+    is( $apache->major_version, '1', "Test major version" );
+    is( $apache->minor_version, '3', "Test minor version" );
+    is( $apache->patch_version, '26', "Test patch version" );
     is( $apache->httpd_root, "/usr", "Test httpd root" );
     ok( !$apache->mod_perl, "Test mod_perl" );
     is( $apache->conf_file, "/etc/httpd/httpd.conf", "Test conf file" );
@@ -47,7 +47,12 @@ if ($apache->httpd_root eq '/usr') {
     is( $apache->inc_dir, "/usr/include", "Test inc dir" );
     ok( eq_set( [ $apache->static_mods ], [qw(http_core mod_so)], ),
         "Check static mods" );
+    is( $apache->magic_number, '19990320:13', "Test magic number" );
 } else {
+    is( $apache->version, "1.3.23", "Test Version" );
+    is( $apache->major_version, '1', "Test major version" );
+    is( $apache->minor_version, '3', "Test minor version" );
+    is( $apache->patch_version, '23', "Test patch version" );
     is( $apache->httpd_root, "/usr/local/apache", "Test httpd root" );
     ok( $apache->mod_perl, "Test mod_perl" );
     is( $apache->conf_file, "/usr/local/apache/conf/httpd.conf", "Test conf file" );
@@ -60,11 +65,10 @@ if ($apache->httpd_root eq '/usr') {
     is( $apache->so_lib_dir, '/usr/local/apache/libexec', "Test so lib dir" );
     is( $apache->inc_dir, "/usr/local/apache/include", "Test inc dir" );
     ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
-
+    is( $apache->magic_number, '19990320:11', "Test magic number" );
 }
 
 is( $apache->port, '80', "Test port" );
-is( $apache->magic_number, '19990320:11', "Test magic number" );
 ok( $apache->mod_so, "Test mod_so" );
 
 
