@@ -1,22 +1,44 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.6 2002/06/15 00:49:55 david Exp $
+# $Id: Prompt.pm,v 1.7 2002/06/16 02:19:25 david Exp $
 
 =head1 NAME
 
-App::Info::Handler::Prompt - App::Info Prompt handler
+App::Info::Handler::Prompt - Prompting App::Info event handler
 
 =head1 SYNOPSIS
 
-  use strict;
-  use App::Info::Handler::Prompt;
   use App::Info::Category::FooApp;
+  use App::Info::Handler::Print;
 
-  my $prompt = App::Info::Handler::Prompt->new;
+  my $prompter = App::Info::Handler::Print->new;
+  my $app = App::Info::Category::FooApp->new( on_unknown => $prompter );
+
+  # Or...
+  my $app = App::Info::Category::FooApp->new( on_confirm => 'prompt' );
 
 =head1 DESCRIPTION
 
-To be written.
+App::Info::Handler::Prompt objects handle App::Info events by printing their
+messages to C<STDOUT> and then accepting a new value from C<STDIN>. The new
+value is validated by any callback supplied by the App::Info concrete subclass
+that triggered the event. If the value is valid, App::Info::Handler::Prompt
+assigns the new value to the event request. If it isn't it prints the error
+message associated with the event request, and then propmts for the data
+again.
+
+Although designed with unknown and confirm events in mind,
+App::Info::Handler::Prompt handles info and error events as well. It will
+simply print info event messages to C<STDOUT> and print error event messages
+to C<STDERR>. For more interesting info and error event handling, see
+L<App::Info::Handler::Print|App::Info::Handler::Print> and
+L<App::Info::Handler::Carp|App::Info::Handler::Carp>.
+
+Upon loading, App::Info::Handler::Print registers itself with
+App::Info::Handler, setting up a single string, "propmt", that can be passed
+to an App::Info concrete subclass constructor. This string is a shortcut that
+tells App::Info how to create an App::Info::Handler::Print object for handling
+events.
 
 =cut
 
@@ -27,8 +49,21 @@ $VERSION = '0.01';
 @ISA = qw(App::Info::Handler);
 
 # Register ourselves.
-App::Info::Handler->register_handler('prompt',
-                                     sub { __PACKAGE__->new('prompt') } );
+App::Info::Handler->register_handler
+  ('prompt' => sub { __PACKAGE__->new('prompt') } );
+
+=head1 INTERFACE
+
+=head2 Constructor
+
+=head3 new
+
+  my $prompter = App::Info::Handler::Prompt->new;
+
+Constructs a new App::Info::Handler::Prompt object and returns it. No special
+arguments are required.
+
+=cut
 
 sub new {
     my $pkg = shift;
@@ -104,8 +139,7 @@ __END__
 
 =head1 BUGS
 
-Can there really be much in the way of bugs in an abstract base class? Drop me
-a line if you happen to discover any.
+Feel free to drop me an email if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
@@ -113,11 +147,16 @@ David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>,
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>,
-L<App::Info::Lib|App::Info::Lib::Expat>,
-L<App::Info::Lib|App::Info::Lib::Iconv>
+L<App::Info|App::Info> documents the event handling interface.
+
+L<App::Info::Handler::Carp|App::Info::Handler::Carp> handles events by
+passing their messages Carp module functions.
+
+L<App::Info::Handler::Print|App::Info::Handler::Print> handles events by
+printing their messages to a file handle.
+
+L<App::Info::Handler|App::Info::Handler> describes how to implement custom
+App::Info event handlers.
 
 =head1 COPYRIGHT AND LICENSE
 
