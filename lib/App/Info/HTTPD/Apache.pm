@@ -1,6 +1,62 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.4 2002/06/01 21:41:48 david Exp $
+# $Id: Apache.pm,v 1.5 2002/06/01 23:19:30 david Exp $
+
+=head1 NAME
+
+App::Info::HTTPD::Apache - Information about Apache web server
+
+=head1 SYNOPSIS
+
+  use App::Info::HTTPD::Apache;
+
+  my $apache = App::Info::HTTPD::Apache->new;
+
+  if ($apache->installed) {
+      print "App name: ", $apache->name, "\n";
+      print "Version:  ", $apache->version, "\n";
+      print "Bin dir:  ", $apache->bin_dir, "\n";
+  } else {
+      print "Apache is not installed. :-(\n";
+  }
+
+=head1 DESCRIPTION
+
+App::Info::HTTPD::Apache supplies information about the Apache web server
+installed on the local system. It implements all of the methods defined by
+App::Info::HTTPD.
+
+When it loads, App::Info::HTTPD::Apache searches the local file system for the
+F<httpd>, F<apache-perl>, or F<apache> application. If found, the application
+(hereafer referred to as F<httpd>, regardless of how it was actually found to
+be named) will be called to gather the data necessary for each of the methods
+below. If none of the applications can be found, then Apache is assumed not to
+be installed, and each of the methods will return undef.
+
+App::Info::HTTPD::Apache searches for F<httpd> along your path, as defined by
+File::Spec->path. Failing that, it searches the following directories:
+
+=over 4
+
+=item /usr/local/apache/bin
+
+=item /usr/local/bin
+
+=item /usr/local/sbin
+
+=item /usr/bin
+
+=item /usr/sbin
+
+=item /bin
+
+=item /sw/bin
+
+=item /sw/sbin
+
+=back
+
+=cut
 
 use strict;
 use App::Info::HTTPD;
@@ -30,12 +86,61 @@ do {
     $obj->{apache_exe} = $u->first_cat_file(\@exes, @paths);
 };
 
+=head1 CONSTRUCTOR
+
+=head2 new
+
+  my $apache = App::Info::HTTPD::Apache->new;
+
+Returns an App::Info::HTTPD::Apache object. Since App::Info::HTTPD::Apache is
+implemented as a singleton class, the same object will be returned every time.
+This ensures that only the minimum number of system calls are made to gather
+the data necessary for the object methods.
+
+=cut
+
 sub new { bless $obj, ref $_[0] || $_[0] }
+
+=head1 OBJECT METHODS
+
+=head2 installed
+
+  print "apache is ", ($apache->installed ? '' : 'not '),
+    "installed.\n";
+
+Returns true if Apache is installed, and false if it is not.
+App::Info::HTTPD::Apache determines whether Apache is installed based on the
+prence of the presence or absence of the F<httpd> application on the file
+system.
+
+=cut
 
 sub installed { return $_[0]->{apache_exe} ? 1 : undef }
 
-# This should get the name from somewhere...
-sub name { return $_[0]->{apache_exe} ? 'Apache' : undef }
+=head2 name
+
+  my $name = $apache->name;
+
+Returns the name of the application. App::Info::HTTPD::Apache parses the
+name from the system call C<`httpd -v`>.
+
+=cut
+
+sub name {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{major};
+}
+
+=head2 version
+
+  my $version = $apache->version;
+
+Returns the apache version number. App::Info::HTTPD::Apache parses the version
+number from the system call C<`httpd --v`>. Returns undef if Apache is not
+installed. Emits a warning if Apache is installed but the version number could
+not be parsed.
+
+=cut
 
 sub version {
     return unless $_[0]->{apache_exe};
@@ -49,31 +154,81 @@ sub version {
         }
 
         chomp $version;
-        my ($x, $y, $z) = $version =~ /(\d+)\.(\d+).(\d+)/;
-        unless (defined $x and defined $y and defined $z) {
-            Carp::carp("Failed to parse Apache version from string '$version'");
+        my ($n, $x, $y, $z) = $version =~
+          /server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+        unless ($n and defined $x and defined $y and defined $z) {
+            Carp::carp("Failed to parse Apache name and version from string ".
+                       "'$version'");
             return;
         }
 
-        @{$_[0]}{qw(version major minor patch)} = ("$x.$y.$z", $x, $y, $z);
+        @{$_[0]}{qw(name version major minor patch)} =
+          ($n, "$x.$y.$z", $x, $y, $z);
     }
     return $_[0]->{version};
 }
 
+=head2 major_version
+
+  my $major_version = $apache->major_version;
+
+Returns the apache major version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>.For example, C<version()>
+returns "1.3.24", then this method returns "1". Returns undef if Apache is not
+installed. Emits a warning if Apache is installed but the version number could
+not be parsed.
+
+=cut
+
 sub major_version {
-    $_[0]->version unless $_[0]->{version};
+    $_[0]->version unless exists $_[0]->{version};
     return $_[0]->{major};
 }
 
+=head2 minor_version
+
+  my $minor_version = $apache->minor_version;
+
+Returns the apache minor version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>.For example, C<version()>
+returns "1.3.24", then this method returns "3". Returns undef if Apache is not
+installed. Emits a warning if Apache is installed but the version number could
+not be parsed.
+
+=cut
+
 sub minor_version {
-    $_[0]->version unless $_[0]->{version};
+    $_[0]->version unless exists $_[0]->{version};
     return $_[0]->{minor};
 }
 
+=head2 patch_version
+
+  my $patch_version = $apache->patch_version;
+
+Returns the apache patch version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>.For example, C<version()>
+returns "1.3.24", then this method returns "24". Returns undef if Apache is
+not installed. Emits a warning if Apache is installed but the version number
+could not be parsed.
+
+=cut
+
 sub patch_version {
-    $_[0]->version unless $_[0]->{version};
+    $_[0]->version unless exists $_[0]->{version};
     return $_[0]->{patch};
 }
+
+=head2 httpd_root
+
+  my $httpd_root = $apache->httpd_root;
+
+Returns the HTTPD root directory path. This path is defined at compile time,
+and App::Info::HTTPD::Apache parses it from the system call C<`httpd -V`>.
+Returns undef if Apache is not installed. Emits a warning if Apache is
+installed but the HTTPD root could not be parsed.
+
+=cut
 
 sub httpd_root {
     return unless $_[0]->{apache_exe};
@@ -101,19 +256,61 @@ sub httpd_root {
                 $_[0]->{lc $_} = 1;
             }
         }
+        # Issue a warning if no httpd root was found.
+        Carp::carp("Could not parse HTTPD Root from `$_[0]->{apache_exe} =V`")
+          unless $_[0]->{httpd_root};
     }
-    return $_[0]->{httpd_root}
+    return $_[0]->{httpd_root};
 }
+
+=head2 magic_number
+
+  my $magic_number = $apache->magic_number;
+
+Returns the "Magic Number" for the Apache installation. This number is defined
+at compile time, and App::Info::HTTPD::Apache parses it from the system call
+C<`httpd -V`>. Returns undef if Apache is not installed or if the magic number
+could not be parsed.
+
+=cut
 
 sub magic_number {
     $_[0]->httpd_root unless $_[0]->{-V};
     return $_[0]->{magic_number};
 }
 
+=head2 compile_option
+
+  my $compile_option = $apache->compile_option($option);
+
+Returns the value of the Apache compile option $option. All of the Apache
+compile options are collected from the system call C<`httpd -V`>. For compile
+options that contain a corresponding value (such as 'SUEXEC_BIN" or
+"DEFAULT_PIDLOG"), C<compile_option()> returns the value of the option if it
+exists. For other options, it returns true (1) if the option was included, and
+false(undef) if it was not. Returns undef if Apache is not installed or if the
+option could not be parsed.
+
+See the Apache documentation at L<http://httpd.apache.org/docs-project/> to
+learn about all the possible compile options.
+
+=cut
+
 sub compile_option {
     $_[0]->httpd_root unless $_[0]->{-V};
     return $_[0]->{lc $_[1]};
 }
+
+=head2 bin_dir
+
+  my $bin_dir = $apache->bin_dir;
+
+Returns the Apache binary directory path. App::Info::HTTPD::Apache simply
+looks for the F<bin> directory under the F<httpd_root> directory, as returned
+by C<$apache->httpd_root>. Returns undef if Apache is not installed or if the
+bin directory could not be found.
+
+=cut
 
 sub bin_dir {
     unless (exists $_[0]->{bin_dir}) {
@@ -127,6 +324,17 @@ sub bin_dir {
     return $_[0]->{bin_dir};
 }
 
+=head2 inc_dir
+
+  my $inc_dir = $apache->inc_dir;
+
+Returns the Apache include directory path. App::Info::HTTPD::Apache simply
+looks for the F<include> or F<inc> directory under the F<httpd_root>
+directory, as returned by C<$apache->httpd_root>. Returns undef if Apache is
+not installed or if the inc directory could not be found.
+
+=cut
+
 sub inc_dir {
     unless (exists $_[0]->{inc_dir}) {
         $_[0]->{inc_dir} = undef;
@@ -137,6 +345,17 @@ sub inc_dir {
     }
     return $_[0]->{inc_dir};
 }
+
+=head2 lib_dir
+
+  my $lib_dir = $apache->lib_dir;
+
+Returns the Apache library directory path. App::Info::HTTPD::Apache simply
+looks for the F<lib>, F<modules>, or F<libexec> directory under the
+F<httpd_root> directory, as returned by C<$apache->httpd_root>. Returns undef
+if Apache is not installed or if the lib directory could not be found.
+
+=cut
 
 sub lib_dir {
     unless (exists $_[0]->{lib_dir}) {
@@ -152,8 +371,29 @@ sub lib_dir {
     return $_[0]->{lib_dir};
 }
 
+=head2 so_lib_dir
+
+  my $so_lib_dir = $apache->so_lib_dir;
+
+Returns the Apache shared object library directory path. Currently, this
+directory is assumed to be the same as the lib directory, so this method is
+simply an alias for C<lib_dir>. Returns undef if Apache is not installed or if
+the lib directory could not be found.
+
+=cut
+
 # For now, at least, these seem to be the same.
 *so_lib_dir = \&lib_dir;
+
+=head2 static_mods
+
+Returns a list (in an array context) or an anonymous array (in a scalar
+reference) of all of the modules statically compiled into Apache. These are
+collected from the system call C<`httpd -l`>. If Apache is not installed,
+C<static_mods()> returns an empty list in an array reference, or an empty
+anonymous array in a scalar context.
+
+=cut
 
 sub static_mods {
     return unless $_[0]->{apache_exe};
@@ -178,13 +418,67 @@ sub static_mods {
     return wantarray ? @{$_[0]->{static_mods}} : $_[0]->{static_mods};
 }
 
+=head2 mod_so
+
+Boolean method that returns true when mod_so has been compiled into Apache,
+and false if it has not. The presence or absence of mod_so is determined by
+the system call C<`httpd -l`>. Returns false if Apache has not been installed.
+
+=cut
+
 sub mod_so {
     $_[0]->static_mods unless $_[0]->{static_mods};
     return $_[0]->{mod_so};
 }
 
+=head2 home_url
+
+  my $home_url = $apache->home_url;
+
+Returns the Apache home page URL.
+
+=cut
+
 sub home_url { "http://httpd.apache.org/" }
+
+=head2 download_url
+
+  my $download_url = $apache->download_url;
+
+Returns the Apache download URL.
+
+=cut
+
 sub download_url { "http://www.apache.org/dist/httpd/" }
 
 1;
 __END__
+
+=head1 KNOWN ISSUES
+
+It's likely that a lot more can be done to collect data about Apache. The
+methodology for determining the lib, inc, bin, and so_lib directories in
+particular may be considered rather weak. Patches from those who know a great
+deal more about interrogating Apache will be most welcome.
+
+=head1 BUGS
+
+Feel free to drop me a line if you discover any bugs. Patches welcome.
+
+=head1 AUTHOR
+
+David Wheeler <david@wheeler.net>
+
+=head1 SEE ALSO
+
+L<App::Info|App::Info>,
+L<App::Info::HTTPD|App::Info::HTTPD>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2002, David Wheeler. All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
+
+=cut
