@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.9 2002/06/03 18:11:00 david Exp $
+# $Id: Iconv.pm,v 1.10 2002/06/03 18:26:57 david Exp $
 
 =head1 NAME
 
@@ -360,7 +360,8 @@ sub so_lib_dir {
         $_[0]->{so_lib_dir} = undef;
         # Should there be more paths than this?
         my @paths = qw(/usr/local/lib
-                       /usr/lib);
+                       /usr/lib
+                       /sw/lib);
         # Testing is the same as for lib_dir() except that we only check for
         # sos.
         my @files = qw(libiconv.so
