@@ -465,8 +465,7 @@ sub patch_version {
   my $bin_dir = $sqlite->bin_dir;
 
 Returns the SQLite binary directory path. App::Info::RDBMS::SQLite simply
-retreives it as the directory part of the path to the F<sqlite3> or F<sqlite>
-executable.
+retreives it as the directory part of the path to the SQLite executable.
 
 =cut
 
@@ -490,44 +489,9 @@ sub bin_dir {
   my $lib_dir = $expat->lib_dir;
 
 Returns the directory path in which an SQLite library was found. The directory
-path will be one of the values returned by C<search_lib_dirs>. No search is
+path will be one of the values returned by C<search_lib_dirs()>, where a file
+with a name as returned by C<search_lib_names()> was found. No search is
 performed if SQLite is not installed or if only DBD::SQLite is installed.
-
-=over
-
-=item libsqlite3.a
-
-=item libsqlite3.la
-
-=item libsqlite3.so
-
-=item libsqlite3.so.0
-
-=item libsqlite3.so.0.0.1
-
-=item libsqlite3.dylib
-
-=item libsqlite3.0.dylib
-
-=item libsqlite3.0.0.1.dylib
-
-=item libsqlite.a
-
-=item libsqlite.la
-
-=item libsqlite.so
-
-=item libsqlite.so.0
-
-=item libsqlite.so.0.0.1
-
-=item libsqlite.dylib
-
-=item libsqlite.0.dylib
-
-=item libsqlite.0.0.1.dylib
-
-=back
 
 B<Events:>
 
@@ -550,19 +514,15 @@ Enter a valid Expat shared object library directory
 =cut
 
 my $lib_dir = sub {
-    my ($self, $label) = (shift, shift, shift);
+    my ($self, $label) = (shift, shift);
     return unless $self->{sqlite};
     $self->info("Searching for $label directory");
-    my $exe = $u->splitpath($self->{sqlite});
-    my $libs = [ map { "lib$exe.$_"} @_,
-                 qw(so so.0 so.0.0.1 dylib 0.dylib .0.0.1.dylib)
-             ];
     my $dir;
-    unless ($dir = $u->first_cat_dir($libs, $self->search_lib_dirs)) {
+    unless ($dir = $u->first_cat_dir(\@_, $self->search_lib_dirs)) {
         $self->error("Cannot find $label direcory");
         $dir = $self->unknown(
             key      => "$label directory",
-            callback => sub { $u->first_cat_dir($libs, $_) },
+            callback => sub { $u->first_cat_dir(\@_, $_) },
             error    => "No $label found in directory "
         );
     }
@@ -573,7 +533,7 @@ my $lib_dir = sub {
 sub lib_dir {
     my $self = shift;
     return unless $self->{sqlite};
-    $self->{lib_dir} = $lib_dir->($self, 'library', 'a', 'la')
+    $self->{lib_dir} = $lib_dir->($self, $self->search_lib_names)
       unless exists $self->{lib_dir};
     return $self->{lib_dir};
 }
@@ -584,38 +544,11 @@ sub lib_dir {
 
   my $so_lib_dir = $expat->so_lib_dir;
 
-Returns the directory path in which an SQLite shared object library was found.
-The directory path will be one of the values returned by C<search_lib_dirs>.
-No search is performed if SQLite is not installed or if only DBD::SQLite is
-installed.
-
-=over
-
-=item libsqlite3.so
-
-=item libsqlite3.so.0
-
-=item libsqlite3.so.0.0.1
-
-=item libsqlite3.dylib
-
-=item libsqlite3.0.dylib
-
-=item libsqlite3.0.0.1.dylib
-
-=item libsqlite.so
-
-=item libsqlite.so.0
-
-=item libsqlite.so.0.0.1
-
-=item libsqlite.dylib
-
-=item libsqlite.0.dylib
-
-=item libsqlite.0.0.1.dylib
-
-=back
+Returns the directory path in which an SQLite shared object library was
+found. The directory path will be one of the values returned by
+C<search_lib_dirs()>, where a file with a name as returned by
+C<search_so_lib_names()> was found. No search is performed if SQLite is not
+installed or if only DBD::SQLite is installed.
 
 B<Events:>
 
@@ -640,7 +573,8 @@ Enter a valid Expat shared object library directory
 sub so_lib_dir {
     my $self = shift;
     return unless $self->{sqlite};
-    $self->{so_lib_dir} = $lib_dir->($self, 'shared object library')
+    $self->{so_lib_dir} = $lib_dir->($self, 'shared object library',
+                                     $self->search_so_lib_names)
       unless exists $self->{so_lib_dir};
     return $self->{so_lib_dir};
 }
@@ -651,10 +585,11 @@ sub so_lib_dir {
 
   my $inc_dir = $sqlite->inc_dir;
 
-Returns the directory path in which the file F<sqlite3.h> or F<sqlite.h> was
-found. No search is performed if SQLite is not installed or if only
-DBD::SQLite is installed. The directories searched are those returned by
-C<search_inc_dirs()>.
+Returns the directory path in which an SQLite include file was found. The
+directory path will be one of the values returned by C<search_inc_dirs()>,
+where a file with a name as returned by C<search_inc_names()> was found. No
+search is performed if SQLite is not installed or if only DBD::SQLite is
+installed.
 
 B<Events:>
 
@@ -682,15 +617,15 @@ sub inc_dir {
     unless (exists $self->{inc_dir}) {
         $self->info("Searching for include directory");
         # Should there be more paths than this?
-        my $incs = ['sqlite3.h', 'sqlite.h'];
+        my @incs = $self->search_inc_names;
 
-        if (my $dir = $u->first_cat_dir($incs, $self->search_inc_dirs)) {
+        if (my $dir = $u->first_cat_dir(\@incs, $self->search_inc_dirs)) {
             $self->{inc_dir} = $dir;
         } else {
             $self->error("Cannot find include directory");
             $self->{inc_dir} = $self->unknown(
                 key      => 'include directory',
-                callback => sub { $u->first_cat_dir($incs, $_) },
+                callback => sub { $u->first_cat_dir(\@incs, $_) },
                 error    => "File 'sqlite.h' not found in directory"
             );
         }
@@ -757,6 +692,107 @@ sub search_bin_dirs { (shift->SUPER::search_bin_dirs, $u->path) }
 
 ##############################################################################
 
+=head3 search_lib_names
+
+  my @seach_lib_names = $self->search_lib_nams
+
+Returns a list of possible names for library files. Used by C<lib_dir()> to
+search for library files. By default, the list is:
+
+=over
+
+=item libsqlite3.a
+
+=item libsqlite3.la
+
+=item libsqlite3.so
+
+=item libsqlite3.so.0
+
+=item libsqlite3.so.0.0.1
+
+=item libsqlite3.dylib
+
+=item libsqlite3.0.dylib
+
+=item libsqlite3.0.0.1.dylib
+
+=item libsqlite.a
+
+=item libsqlite.la
+
+=item libsqlite.so
+
+=item libsqlite.so.0
+
+=item libsqlite.so.0.0.1
+
+=item libsqlite.dylib
+
+=item libsqlite.0.dylib
+
+=item libsqlite.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_lib_names {
+    my $self = shift;
+    my $exe = $u->splitpath($self->{sqlite});
+    return $self->SUPER::search_lib_names,
+      map { "lib$exe.$_"} qw(a la so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
+=head3 search_lib_names
+
+  my @seach_lib_names = $self->search_lib_nams
+
+Returns a list of possible names for shared object library files. Used by
+C<so_lib_dir()> to search for library files. By default, the list is:
+
+=over
+
+=item libsqlite3.so
+
+=item libsqlite3.so.0
+
+=item libsqlite3.so.0.0.1
+
+=item libsqlite3.dylib
+
+=item libsqlite3.0.dylib
+
+=item libsqlite3.0.0.1.dylib
+
+=item libsqlite.so
+
+=item libsqlite.so.0
+
+=item libsqlite.so.0.0.1
+
+=item libsqlite.dylib
+
+=item libsqlite.0.dylib
+
+=item libsqlite.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_so_lib_names {
+    my $self = shift;
+    my $exe = $u->splitpath($self->{sqlite});
+    return $self->SUPER::search_so_lib_names,
+      map { "lib$exe.$_"}
+        qw(so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
 =head3 search_lib_dirs
 
   my @search_lib_dirs = $app->search_lib_dirs;
@@ -772,12 +808,31 @@ sub search_lib_dirs { shift->SUPER::search_lib_dirs, $u->lib_dirs, '/sw/lib' }
 
 ##############################################################################
 
+=head3 search_inc_names
+
+  my @search_inc_names = $app->search_inc_names;
+
+Returns a list of include file names to search for. Used by C<inc_dir()> to
+search for an include file. By default, the names are F<sqlite3.h> and
+F<sqlite.h>.
+
+=cut
+
+sub search_inc_names {
+    my $self = shift;
+    my $exe = $u->splitpath($self->{sqlite});
+    return $self->SUPER::search_inc_names, "$exe.h";
+}
+
+##############################################################################
+
 =head3 search_inc_dirs
 
   my @search_inc_dirs = $app->search_inc_dirs;
 
-Returns a list of possible directories in which to search for includes files.
-By default, these are:
+Returns a list of possible directories in which to search for includes
+files. Used by C<inc_dir()> to search for an include file. By default, the
+directories are:
 
 =over 4
 

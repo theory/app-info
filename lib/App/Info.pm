@@ -128,11 +128,31 @@ parameters that can be passed to C<new()> are:
 
 =over
 
+=item search_exe_names
+
+An array reference of possible names for binary executables. These may be used
+by subclases to search for application programs that can be used to retreive
+application information, such as version numbers. The subclasses generally
+provide reasonable defaults for most cases.
+
 =item search_bin_dirs
 
 An array reference of local directories in which to search for executables.
 These may be used to search for the value of the C<bin_dir> attribute in
 addition to and in preference to the defaults used by each subclass.
+
+=item search_lib_names
+
+An array reference of possible names for library files. These may be used by
+subclases to search for library files for the application. The subclasses
+generally provide reasonable defaults for most cases.
+
+=item search_so_lib_names
+
+An array reference of possible names for shared object library files. These
+may be used by subclases to search for shared object library files for the
+application. The subclasses generally provide reasonable defaults for most
+cases.
 
 =item search_lib_dirs
 
@@ -141,18 +161,17 @@ These may be used to search for the value of the C<lib_dir> and C<so_lib_dir>
 attributes in addition to and in preference to the defaults used by each
 subclass.
 
+=item search_inc_names
+
+An array reference of possible names for include files. These may be used by
+subclases to search for include files for the application. The subclasses
+generally provide reasonable defaults for most cases.
+
 =item search_inc_dirs
 
 An array reference of local directories in which to search for include
 files. These may be used to search for the value of the C<inc_dir> attribute
 in addition to and in preference to the defaults used by each subclass.
-
-=item search_exe_names
-
-An array reference of possible names for binary executables. These may be used
-by subclases to search for application programs that can be used to retreive
-application information, such as version numbers. The subclasses generally
-provide reasonable defaults for most cases.
 
 =back
 
@@ -189,7 +208,8 @@ sub new {
     }
 
     # Set up search defaults.
-    for (qw(bin_dirs lib_dirs inc_dirs exe_names)) {
+    for (qw(bin_dirs lib_dirs inc_dirs exe_names lib_names inc_names
+            so_lib_names)) {
         local $_ = "search_$_";
         if (exists $p{$_}) {
             $p{$_} = [$p{$_}] unless ref $p{$_} eq 'ARRAY';
@@ -414,6 +434,32 @@ sub search_bin_dirs { @{shift->{search_bin_dirs}} }
 
 ##############################################################################
 
+=head3 lib_names
+
+  my @search_lib_names = $app->search_lib_names;
+
+Returns a list of possible names for library files. Typically used by the
+C<lib_dir()> method to find library files.
+
+=cut
+
+sub search_lib_names { @{shift->{search_lib_names}} }
+
+##############################################################################
+
+=head3 so_lib_names
+
+  my @search_so_lib_names = $app->search_so_lib_names;
+
+Returns a list of possible names for library files. Typically used by the
+C<so_lib_dir()> method to find shared object library files.
+
+=cut
+
+sub search_so_lib_names { @{shift->{search_so_lib_names}} }
+
+##############################################################################
+
 =head3 search_lib_dirs
 
   my @search_lib_dirs = $app->search_lib_dirs;
@@ -425,6 +471,19 @@ library files.
 =cut
 
 sub search_lib_dirs { @{shift->{search_lib_dirs}} }
+
+##############################################################################
+
+=head3 inc_names
+
+  my @search_inc_names = $app->search_inc_names;
+
+Returns a list of possible names for include files. Typically used by the
+C<inc_dir()> method to find include files.
+
+=cut
+
+sub search_inc_names { @{shift->{search_inc_names}} }
 
 ##############################################################################
 

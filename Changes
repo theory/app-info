@@ -5,13 +5,14 @@ Revision history for Perl extension App::Info.
         creating an App::Info::Handler::Prompt object.
       - Changed SQLite event messages to simply refer to "SQLite" instead
         of "sqlite3 or sqlite".
-      - Added new parameters to "new()", along with accompanying accessors
-        to collect their values: "search_exe_names", "search_bin_dirs",
-        "search_lib_dirs", and "search_inc_dirs". These are array references,
-        and their values are used to search for application files on the
-        local file system. Users can now override the directories ande files
-        that the classes search for with their own values. Subclasses override
-        the accessor methods to provide such values.
+      - Added new parameters to "new()", along with accompanying accessors to
+        collect their values: "search_exe_names", "search_bin_dirs",
+        "search_lib_names", "search_so_lib_names", search_lib_dirs",
+        "search_inc_names", and "search_inc_dirs". These are array references,
+        and their values are used to search for application files on the local
+        file system. Users can now override the directories ande files that
+        the classes search for with their own values. Subclasses override the
+        accessor methods to provide such values.
 
 0.30  2004-11-20T19:10:55
       - Fixed number of tests to skip in "sqlite_info.t" for systems that
