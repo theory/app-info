@@ -1,5 +1,37 @@
 Revision history for Perl extension App::Info.
 
+0.20  Thu Jun 27 19:58:53 2002
+      - Major upgrade. Some backwards compatibility broken. Namely, the
+        error parameter no longer exists. See event handling instead.
+      - Added App::Info::Handler. Classes derived from this class handle
+        events triggered by App::Info subclasses.      
+      - Added event handling methods to App::Info base class. The methods
+        are on_info(), on_error(), on_unknown(), and on_confirm(). They
+        have constructor parameters, too, of the same names. Pass in a
+        list of event handlers to any one of these methods to handle
+        events of that type.
+      - Added example event handling classes. They are
+        App::Info::Handler::Carp, App::Info::Handler::Print, and
+        App::Info::Handler::Prompt. Objects of these classes may be passed
+        to any of the event handling methods listed above.
+      - Added App::Info::Request. Objects of this class are passed to event
+        handler objects' handler() method as the sole argument. The request
+        object holds significant information about the request so that a
+        handler knows what to do with a a request.
+      - Added protected event triggering methods to App::Info. These are
+        info(), error(), unknown(), and confirm(). If a subclass calls one
+        of these methods, a request will be created and passed off to the
+        list of available handlers (if any) to process the request and,
+        in the case of unknown() and confirm(), return data to the App::Info
+        subclass.
+      - Refactored example subclasses to use the new event methods. Changed
+        subclasses are App::Info::HTTPD::Apache, App::Info::RDBMS::PostgreSQL,
+        App::Info::Lib::Expat, and App::Info::Lib::Iconv.
+      - Wrote extensive documentation describing how to use the event methods
+        both in App::Info subclasses and in App::Info clients.
+      - Incremented all version numbers to 0.20.
+      - Wrote extensive tests to test all features.
+
 0.13  Sat Jun  8 21:17:40 2002
       - Fixed Lib::Iconv so that version() would properly return undef when
         no include directory was found.
@@ -18,18 +50,18 @@ Revision history for Perl extension App::Info.
         methods in HTTP::Apache return values when Apache is installed, as
         sometimes folks don't have User and Group directives set in their
         httpd.conf files. Grrr...
-      - Fixed bareword references in Makefile.PL.
+      - Fixed bare word references in Makefile.PL.
 
 0.10  Wed Jun  5 23:58:54 2002
       - Added new error_level parameter to new(). This tells App::Info objects
         how to handle errors on an object-by-object basis. The new base class
         method error() is for subclasses to use for throwing errors, and
         last_error() is for client code to access the last error in non-fatal
-        error modes. See App::Info for complete documentation. This is the major
-        change the triggered the (mild) version number jump.
+        error modes. See App::Info for complete documentation. This is the
+        major change the triggered the (mild) version number jump.
       - Reworked all application subclasses to use the new error() method.
       - Changed all application subclasses so that they're no longer singleton
-        classes. Each new object construction looks for application metatdata
+        classes. Each new object construction looks for application metadata
         all over again.
       - Updated documentation on subclassing to reflect changes.
       - Added first_exe() and first_cat_exe() to App::Info::Util. Changed
