@@ -1,43 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.2 2002/06/01 21:29:05 david Exp $
-
-use strict;
-use Carp ();
-
-our $VERSION = '0.02';
-
-my $croak = sub {
-    my ($caller, $meth) = @_;
-    $caller = ref $caller || $caller;
-    if ($caller eq __PACKAGE__) {
-        $meth = __PACKAGE__ . '::' . shift;
-        Carp::croak(__PACKAGE__ . " is an abstract base class. Attempt to " .
-                    " call non-existent method $meth");
-    } else {
-        Carp::croak("Class $caller inherited from the abstract base class " .
-                    __PACKAGE__ . "but failed to redefine the $meth method. " .
-                    "Attempt to call non-existent method ${caller}::$meth");
-    }
-}
-
-sub new { $croak->(shift, 'new') }
-sub installed { $croak->(shift, 'installed') }
-sub name { $croak->(shift, 'name') }
-sub version { $croak->(shift, 'version') }
-sub major_version { $croak->(shift, 'major_version') }
-sub minor_version { $croak->(shift, 'minor_version') }
-sub patch_version { $croak->(shift, 'patch_version') }
-sub inc_dir { $croak->(shift, 'inc_dir') }
-sub bin_dir { $croak->(shift, 'bin_dir') }
-sub lib_dir { $croak->(shift, 'lib_dir') }
-sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
-sub home_url  { $croak->(shift, 'home_url') }
-sub download_url  { $croak->(shift, 'download_url') }
-
-
-1;
-__END__
+# $Id: Info.pm,v 1.3 2002/06/01 21:41:48 david Exp $
 
 =head1 NAME
 
@@ -71,6 +34,45 @@ CPAN. Contributors are welcome to extend their subclasses to provide more
 information relevant to the application for which data is to be provided (see
 L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
 encouraged to at a minimum implement the methods defined here.
+
+=cut
+
+use strict;
+use Carp ();
+
+our $VERSION = '0.02';
+
+my $croak = sub {
+    my ($caller, $meth) = @_;
+    $caller = ref $caller || $caller;
+    if ($caller eq __PACKAGE__) {
+        $meth = __PACKAGE__ . '::' . shift;
+        Carp::croak(__PACKAGE__ . " is an abstract base class. Attempt to " .
+                    " call non-existent method $meth");
+    } else {
+        Carp::croak("Class $caller inherited from the abstract base class " .
+                    __PACKAGE__ . "but failed to redefine the $meth method. " .
+                    "Attempt to call non-existent method ${caller}::$meth");
+    }
+};
+
+sub new { $croak->(shift, 'new') }
+sub installed { $croak->(shift, 'installed') }
+sub name { $croak->(shift, 'name') }
+sub version { $croak->(shift, 'version') }
+sub major_version { $croak->(shift, 'major_version') }
+sub minor_version { $croak->(shift, 'minor_version') }
+sub patch_version { $croak->(shift, 'patch_version') }
+sub inc_dir { $croak->(shift, 'inc_dir') }
+sub bin_dir { $croak->(shift, 'bin_dir') }
+sub lib_dir { $croak->(shift, 'lib_dir') }
+sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
+sub home_url  { $croak->(shift, 'home_url') }
+sub download_url  { $croak->(shift, 'download_url') }
+
+
+1;
+__END__
 
 =head1 CONSTRUTORS
 

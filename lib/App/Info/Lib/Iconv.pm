@@ -1,12 +1,13 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.4 2002/06/01 21:29:05 david Exp $
+# $Id: Iconv.pm,v 1.5 2002/06/01 21:41:48 david Exp $
 
 use strict;
 use File::Basename ();
 use App::Info::Util;
+use App::Info::Lib;
 use vars qw(@ISA $VERSION);
-@ISA = qw(App::Info);
+@ISA = qw(App::Info::Lib);
 $VERSION = '0.01';
 
 my $obj = {};
