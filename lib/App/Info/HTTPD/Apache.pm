@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.11 2002/06/03 17:48:07 david Exp $
+# $Id: Apache.pm,v 1.12 2002/06/03 17:58:55 david Exp $
 
 =head1 NAME
 
@@ -410,6 +410,7 @@ sub static_mods {
         while ($data =~ /^\s*(\w+)\.c\s*$/mg) {
             push @mods, $1;
             $_[0]->{mod_so} = 1 if $1 eq 'mod_so';
+            $_[0]->{mod_perl} = 1 if $1 eq 'mod_perl';
         }
         $_[0]->{static_mods} = \@mods;
     }
@@ -428,6 +429,20 @@ the system call C<`httpd -l`>. Returns false if Apache has not been installed.
 sub mod_so {
     $_[0]->static_mods unless $_[0]->{static_mods};
     return $_[0]->{mod_so};
+}
+
+=head2 mod_perl
+
+Boolean method that returns true when mod_perl has been statically compiled
+into Apache, and false if it has not. The presence or absence of mod_perl is
+determined by the system call C<`httpd -l`>. Returns false if Apache has not
+been installed.
+
+=cut
+
+sub mod_perl {
+    $_[0]->static_mods unless $_[0]->{static_mods};
+    return $_[0]->{mod_perl};
 }
 
 =head2 home_url
