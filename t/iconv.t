@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 
 ok( my $iconv = App::Info::Lib::Iconv->new, "Got Object");
 isa_ok($iconv, 'App::Info::Lib::Iconv');
 isa_ok($iconv, 'App::Info');
-ok( $iconv->name, "Got name" );
+is( $iconv->name, 'libiconv', "Check name" );
+is( $iconv->key_name, 'libiconv', "Check key name" );
 
 if ($iconv->installed) {
     ok( $iconv->installed, "libiconv is installed" );

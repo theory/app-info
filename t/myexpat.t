@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
-# $Id: myexpat.t,v 1.4 2002/06/13 02:32:09 david Exp $
+# $Id: myexpat.t,v 1.5 2002/06/17 19:27:14 david Exp $
 
 use strict;
 use Test::More;
 
 if (exists $ENV{APP_INFO_MAINTAINER}) {
-    plan tests => 16;
+    plan tests => 17;
 } else {
     plan skip_all => "maintainer's internal tests.";
 }
@@ -19,6 +19,8 @@ ok( my $expat = App::Info::Lib::Expat->new( on_error => 'confess' ),
 isa_ok($expat, 'App::Info::Lib::Expat');
 isa_ok($expat, 'App::Info::Lib');
 isa_ok($expat, 'App::Info');
+is( $expat->key_name, 'Expat', "Check key name" );
+
 ok( $expat->installed, "libexpat is installed" );
 is( $expat->name, "Expat", "Get name" );
 is( $expat->version, "1.95.2", "Test Version" );

@@ -1,15 +1,16 @@
 #!/usr/bin/perl -w
 
-# $Id: postgres.t,v 1.6 2002/06/10 23:47:48 david Exp $
+# $Id: postgres.t,v 1.7 2002/06/17 19:27:14 david Exp $
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 BEGIN { use_ok('App::Info::RDBMS::PostgreSQL') }
 
 ok( my $pg = App::Info::RDBMS::PostgreSQL->new, "Got Object");
 isa_ok($pg, 'App::Info::RDBMS::PostgreSQL');
 isa_ok($pg, 'App::Info');
+is( $pg->key_name, 'PostgreSQL', "Check key name" );
 
 if ($pg->installed) {
     ok( $pg->installed, "PostgreSQL is installed" );

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.6 2002/06/13 02:32:09 david Exp $
+# $Id: myapache.t,v 1.7 2002/06/17 19:27:14 david Exp $
 
 use strict;
 use Test::More;
 
 if (exists $ENV{APP_INFO_MAINTAINER}) {
-    plan tests => 26;
+    plan tests => 27;
 } else {
     plan skip_all => "maintainer's internal tests.";
 }
@@ -24,6 +24,8 @@ ok( my $apache = App::Info::HTTPD::Apache->new( on_error => 'confess' ),
 isa_ok($apache, 'App::Info::HTTPD::Apache');
 isa_ok($apache, 'App::Info::HTTPD');
 isa_ok($apache, 'App::Info');
+is( $apache->key_name, 'Apache', "Check key name" );
+
 ok( $apache->installed, "Apache is installed" );
 is( $apache->name, "Apache", "Get name" );
 is( $apache->version, "1.3.23", "Test Version" );

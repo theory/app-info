@@ -1,15 +1,16 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.11 2002/06/10 23:47:48 david Exp $
+# $Id: apache.t,v 1.12 2002/06/17 19:27:14 david Exp $
 
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 27;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
 
 ok( my $apache = App::Info::HTTPD::Apache->new, "Got Object");
 isa_ok($apache, 'App::Info::HTTPD::Apache');
 isa_ok($apache, 'App::Info');
+is( $apache->key_name, 'Apache', "Check key name" );
 
 if ($apache->installed) {
     ok( $apache->installed, "Apache is installed" );

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
-# $Id: myiconv.t,v 1.5 2002/06/13 02:32:09 david Exp $
+# $Id: myiconv.t,v 1.6 2002/06/17 19:27:14 david Exp $
 
 use strict;
 use Test::More;
 
 if (exists $ENV{APP_INFO_MAINTAINER}) {
-    plan tests => 16;
+    plan tests => 17;
 } else {
     plan skip_all => "maintainer's internal tests.";
 }
@@ -19,6 +19,8 @@ ok( my $iconv = App::Info::Lib::Iconv->new( on_error => 'confess' ),
 isa_ok($iconv, 'App::Info::Lib::Iconv');
 isa_ok($iconv, 'App::Info::Lib');
 isa_ok($iconv, 'App::Info');
+is( $iconv->key_name, 'libiconv', "Check key name" );
+
 ok( $iconv->installed, "libiconv is installed" );
 is( $iconv->name, "libiconv", "Get name" );
 is( $iconv->version, "1.7", "Test Version" );
