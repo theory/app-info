@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.11  
+0.11  Sat Jun  8 05:41:40 2002
       - Improved validation for the error_level parameter.
       - In distribution tests, no longer testing to see that user and group
         methods in HTTP::Apache return values when Apache is installed, as
