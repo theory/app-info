@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.17 2002/06/05 14:39:09 david Exp $
+# $Id: Expat.pm,v 1.18 2002/06/05 23:04:08 david Exp $
 
 =head1 NAME
 
@@ -24,11 +24,34 @@ App::Info::Lib::Expat - Information about the Expat XML parser
 
 App::Info::Lib::Expat supplies information about the Expat XML parser
 installed on the local system. It implements all of the methods defined by
-App::Info::Lib.
+App::Info::Lib. Methods that throw errors will throw them only the first time
+they're called. To start over (after, say, someone has installed Expat)
+construct a new App::Info::Lib::Expat object to aggregate new metadata.
 
-When it loads, App::Info::Lib::Expat searches all of the paths in the
-C<libsdirs> and C<loclibpth> -- as defined by the Perl L<Config|Config> module
--- plus F</sw/lib> (in support of all you Fink users out there) for one of the
+=cut
+
+use strict;
+use App::Info::Util;
+use App::Info::Lib;
+use Config;
+use vars qw(@ISA $VERSION);
+@ISA = qw(App::Info::Lib);
+$VERSION = '0.05';
+
+my $u = App::Info::Util->new;
+
+=head1 CONSTRUCTOR
+
+=head2 new
+
+  my $expat = App::Info::Lib::Expat->new;
+
+Returns an App::Info::Lib::Expat object. See L<App::Info|App::Info> for a
+complete description of argument parameters.
+
+When called, C<new()> searches all of the paths in the C<libsdirs> and
+C<loclibpth> attributes defined by the Perl L<Config|Config> module -- plus
+F</sw/lib> (in support of all you Fink users out there) -- for one of the
 following files:
 
 =over 4
@@ -52,21 +75,13 @@ following files:
 =back
 
 If any of these files is found, then Expat is assumed to be installed.
+Otherwise, most of the object methods will return C<undef>.
 
 =cut
 
-use strict;
-use App::Info::Util;
-use App::Info::Lib;
-use Config;
-use vars qw(@ISA $VERSION);
-@ISA = qw(App::Info::Lib);
-$VERSION = '0.05';
-
-my $obj = {};
-my $u = App::Info::Util->new;
-
-do {
+sub new {
+    # Construct the object.
+    my $self = shift->SUPER::new(@_);
     # Find libexpat.
     my @paths = grep { defined and length }
       ( split(' ', $Config{libsdirs}),
@@ -77,23 +92,9 @@ do {
                 "libexpat.dylib", "libexpat.0.dylib", "libexpat.0.0.1.dylib",
                 "libexpat.a", "libexpat.la"];
 
-    $obj->{libexpat} = $u->first_cat_dir($libs, @paths);
-};
-
-=head1 CONSTRUCTOR
-
-=head2 new
-
-  my $expat = App::Info::Lib::Expat->new;
-
-Returns an App::Info::Lib::Expat object. Since App::Info::Lib::Expat is
-implemented as a singleton class, the same object will be returned every time.
-This ensures that only the minimum number of system calls are made to gather
-the data necessary for the object methods.
-
-=cut
-
-sub new { bless $obj, ref $_[0] || $_[0] }
+    $self->{libexpat} = $u->first_cat_dir($libs, @paths);
+    return $self;
+}
 
 =head1 OBJECT METHODS
 
@@ -104,8 +105,9 @@ sub new { bless $obj, ref $_[0] || $_[0] }
 
 Returns true if Expat is installed, and false if it is not.
 App::Info::Lib::Expat determines whether Expat is installed based on the
-presence or absence on the file system of one of the files described in the
-L<"Description">.
+presence or absence on the file system of one of the files searched for when
+C<new()> constructed the object. If Expat does not appear to be installed,
+then most of the other object methods will return empty values.
 
 =cut
 
@@ -125,19 +127,19 @@ sub name { 'Expat' }
 =head2 version
 
 Returns the full version number for Expat. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. Returns F<undef> if Expat
-is not installed. Emits a warning if Expat is installed but F<expat.h> could
-not be found or the version number could not be parsed.
+version number from the F<expat.h> file, if it exists. Emits a warning if
+Expat is installed but F<expat.h> could not be found or the version number
+could not be parsed.
 
 =cut
 
 sub version {
-    return unless $_[0]->{libexpat};
-    unless (exists $_[0]->{version}) {
-        $_[0]->{version} = undef;
-        my $inc = $_[0]->inc_dir
-          or Carp::carp("Cannot get Expat version because file 'expat.h' " .
-                        "does not exist");
+    my $self = shift;
+    return unless $self->{libexpat};
+    unless (exists $self->{version}) {
+        my $inc = $self->inc_dir
+          or $self->error("Cannot get Expat version because file 'expat.h' " .
+                          "does not exist");
         my $header = $u->catfile($inc, 'expat.h');
         my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
                         qr/XML_MINOR_VERSION\s+(\d+)$/,
@@ -147,13 +149,14 @@ sub version {
         if (defined $x and defined $y and defined $z) {
             # Assemble the version number and store it.
             my $v = "$x.$y.$z";
-            @{$_[0]}{qw(version major minor patch)} = ($v, $x, $y, $z);
+            @{$self}{qw(version major minor patch)} = ($v, $x, $y, $z);
         } else {
             # Warn them if we couldn't get them all.
-            Carp::carp("Failed to parse Expat version from file '$header'");
+            $self->error("Failed to parse Expat version from file '$header'");
+            $self->{version} = undef;
         }
     }
-    return $_[0]->{version};
+    return $self->{version};
 }
 
 =head2 major_version
@@ -162,9 +165,8 @@ sub version {
 
 Returns the Expat major version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "1". Returns F<undef>
-if Expat is not installed. Emits a warning if Expat is installed but
-F<expat.h> could not be found or the version number could not be parsed.
+C<version()> returns "1.95.2", then this method returns "1". See the
+L<version|"version"> method for a list of possible errors.
 
 =cut
 
@@ -179,9 +181,8 @@ sub major_version {
 
 Returns the Expat minor version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "95". Returns F<undef>
-if Expat is not installed. Emits a warning if Expat is installed but
-F<expat.h> could not be found or the version number could not be parsed.
+C<version()> returns "1.95.2", then this method returns "95". See the
+L<version|"version"> method for a list of possible errors.
 
 =cut
 
@@ -196,9 +197,8 @@ sub minor_version {
 
 Returns the Expat patch version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "2". Returns F<undef>
-if Expat is not installed. Emits a warning if Expat is installed but
-F<expat.h> could not be found or the version number could not be parsed.
+C<version()> returns "1.95.2", then this method returns "2". See the
+L<version|"version"> method for a list of possible errors.
 
 =cut
 
@@ -221,9 +221,9 @@ sub bin_dir { return }
 
   my $inc_dir = $expat->inc_dir;
 
-Returns the directory path in which the file F<expat.h> was found. Returns
-F<undef> if Expat is not installed, or if F<expat.h> could not be found.
-App::Info::Lib::Expat searches for F<expat.h> in the following directories:
+Returns the directory path in which the file F<expat.h> was found. Throws an
+error if F<expat.h> could not be found. App::Info::Lib::Expat searches for
+F<expat.h> in the following directories:
 
 =over 4
 
@@ -238,25 +238,30 @@ App::Info::Lib::Expat searches for F<expat.h> in the following directories:
 =cut
 
 sub inc_dir {
-    return unless $_[0]->{libexpat};
-    unless (exists $_[0]->{inc_dir}) {
-        $_[0]->{inc_dir} = undef;
+    my $self = shift;
+    return unless $self->{libexpat};
+    unless (exists $self->{inc_dir}) {
         # Should there be more paths than this?
         my @paths = qw(/usr/local/include
                        /usr/include
                        /sw/include);
 
-        $_[0]->{inc_dir} = $u->first_cat_dir('expat.h', @paths);
+        if (my $dir = $u->first_cat_dir('expat.h', @paths)) {
+            $self->{inc_dir} = $dir;
+        } else {
+            $self->error("Could not find inc directory");
+            $self->{inc_dir} = undef;
+        }
     }
-    return $_[0]->{inc_dir};
+    return $self->{inc_dir};
 }
 
 =head2 lib_dir
 
   my $lib_dir = $expat->lib_dir;
 
-Returns the directory path in which a Expat library was found. The files
-and paths searched are as described in the L<"DESCRIPTION">.
+Returns the directory path in which a Expat library was found. The files and
+paths searched are as described for the L<"new"|new> constructor.
 
 =cut
 
@@ -267,9 +272,9 @@ sub lib_dir { $_[0]->{libexpat} }
   my $so_lib_dir = $expat->so_lib_dir;
 
 Returns the directory path in which a Expat shared object library was found.
-It searches all of the paths in the C<libsdirs> and C<loclibpth> -- as defined
-by the Perl L<Config|Config> module -- plus F</sw/lib> (for all you Fink fans)
-for one of the following files:
+It searches all of the paths in the C<libsdirs> and C<loclibpth> attributes
+defined by the Perl L<Config|Config> module -- plus F</sw/lib> (for all you
+Fink fans) -- for one of the following files:
 
 =over
 
@@ -287,6 +292,8 @@ for one of the following files:
 
 =back
 
+Throws an error if the shared object library directory cannot be found.
+
 =cut
 
 sub so_lib_dir {
@@ -299,8 +306,12 @@ sub so_lib_dir {
         my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
                     "libexpat.dylib", "libexpat.0.dylib",
                     "libexpat.0.0.1.dylib"];
-
-        $obj->{so_lib_dir} = $u->first_cat_dir($libs, @paths);
+        if (my $dir = $u->first_cat_dir($libs, @paths)) {
+            $_[0]->{so_lib_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find so lib direcory");
+            $_[0]->{so_lib_dir} = undef;
+        }
     }
     return $_[0]->{so_lib_dir};
 }
