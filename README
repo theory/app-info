@@ -1,11 +1,11 @@
 App/Info version 0.04
 =====================
 
-App::Info provides a generalized interface for providing meta data about
+App::Info provides a generalized interface for providing metadata about
 software packages installed on a system. The idea is that App::Info subclasses
 can be used in Perl application installers in order to determine whether
-software dependencies have been fulfilled, and to get necessary meta data
-about those software packages.
+software dependencies have been fulfilled, and to get necessary metadata about
+those software packages.
 
 A few sample subclasses are provided with the distribution, but others are
 invited to write their own subclasses and contribute them to the CPAN.
