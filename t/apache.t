@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.9 2002/06/05 23:50:42 david Exp $
+# $Id: apache.t,v 1.10 2002/06/06 15:39:30 david Exp $
 
 use strict;
 use Test::More tests => 26;
@@ -30,8 +30,6 @@ if ($apache->installed) {
 
     # We should be able to find httpd.conf.
     ok( $apache->conf_file, "Got Apache conf file" );
-    ok( $apache->user, "Got Apache user." );
-    ok( $apache->group, "Got Apache group." );
 } else {
     ok( !$apache->installed, "Apache is not installed" );
     ok( !$apache->name, "Don't got name" );
@@ -47,8 +45,6 @@ if ($apache->installed) {
     ok( !$apache->compile_option('DEFAULT_ERRORLOG'),
         "Don't got compile option" );
     ok( !$apache->conf_file, "Don't got Apache conf file" );
-    ok( !$apache->user, "Don't got Apache user." );
-    ok( !$apache->group, "Don't got Apache group." );
 }
 
 # Installation doesn't guarantee lib & inc installation, or port number.
@@ -57,6 +53,8 @@ $apache->bin_dir, pass("Can call bin_dir");
 $apache->so_lib_dir; pass("Can call so_lib_dir" );
 $apache->inc_dir; pass("Can call inc_dir");
 $apache->port; pass("Can call port.");
+$apache->user; pass("Got Apache user.");
+$apache->group; pass("Got Apache group.");
 
 ok( $apache->home_url, "Get home URL" );
 ok( $apache->download_url, "Get download URL" );
