@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.27 2003/11/17 21:12:32 david Exp $
+# $Id: PostgreSQL.pm,v 1.28 2004/01/02 17:43:55 david Exp $
 
 =head1 NAME
 
@@ -122,6 +122,7 @@ sub new {
     my @paths = ($u->path,
       qw(/usr/local/pgsql/bin
          /usr/local/postgres/bin
+         /usr/lib/postgresql/bin
          /opt/pgsql/bin
          /usr/local/bin
          /usr/local/sbin
