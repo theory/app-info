@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.14 2002/06/05 04:16:58 david Exp $
+# $Id: Util.pm,v 1.15 2002/06/05 14:45:37 david Exp $
 
 =head1 NAME
 
@@ -199,7 +199,7 @@ sub first_cat_path {
     my $files = ref $_[0] ? shift() : [shift()];
     foreach my $p (@_) {
         foreach my $f (@$files) {
-            my $path = File::Spec::Functions::catfile($p, $f);
+            my $path = $self->catfile($p, $f);
             return $path if -e $path;
         }
     }
@@ -224,7 +224,7 @@ sub first_cat_dir {
     my $files = ref $_[0] ? shift() : [shift()];
     foreach my $p (@_) {
         foreach my $f (@$files) {
-            my $path = File::Spec::Functions::catfile($p, $f);
+            my $path = $self->catfile($p, $f);
             return $p if -e $path;
         }
     }
