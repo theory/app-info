@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.14 2002/06/05 20:37:44 david Exp $
+# $Id: PostgreSQL.pm,v 1.15 2002/06/05 23:46:52 david Exp $
 
 =head1 NAME
 
@@ -24,12 +24,35 @@ App::Info::RDBMS::PostgreSQL - Information about PostgreSQL
 
 App::Info::RDBMS::PostgreSQL supplies information about the PostgreSQL
 database server installed on the local system. It implements all of the
-methods defined by App::Info::RDBMS.
+methods defined by App::Info::RDBMS. Methods that throw errors will throw them
+only the first time they're called. To start over (after, say, someone has
+installed PostgreSQL) construct a new App::Info::RDBMS::PostgreSQL object to
+aggregate new metadata.
 
-When it loads, App::Info::RDBMS::PostgreSQL searches the file system for the
-F<pg_config> application. If found, F<pg_config> will be called to gather the
-data necessary for each of the methods below. If F<pg_config> cannot be found,
-then PostgreSQL is assumed not to be installed, and each of the methods will
+=cut
+
+use strict;
+use App::Info::RDBMS;
+use App::Info::Util;
+use vars qw(@ISA $VERSION);
+@ISA = qw(App::Info::RDBMS);
+$VERSION = '0.06';
+
+my $u = App::Info::Util->new;
+
+=head1 CONSTRUCTOR
+
+=head2 new
+
+  my $pg = App::Info::RDBMS::PostgreSQL->new(@params);
+
+Returns an App::Info::RDBMS::PostgreSQL object. See L<App::Info|App::Info> for
+a complete description of argument parameters.
+
+When it called, C<new()> searches the file system for the F<pg_config>
+application. If found, F<pg_config> will be called by the object methods below
+to gather the data necessary for each. If F<pg_config> cannot be found, then
+PostgreSQL is assumed not to be installed, and each of the object methods will
 return C<undef>.
 
 App::Info::RDBMS::PostgreSQL searches for F<pg_config> along your path, as
@@ -58,17 +81,10 @@ directories:
 
 =cut
 
-use strict;
-use App::Info::RDBMS;
-use App::Info::Util;
-use vars qw(@ISA $VERSION);
-@ISA = qw(App::Info::RDBMS);
-$VERSION = '0.06';
+sub new {
+    # Construct the object.
+    my $self = shift->SUPER::new(@_);
 
-my $obj = {};
-my $u = App::Info::Util->new;
-
-do {
     # Find pg_config.
     my @paths = ($u->path,
       qw(/usr/local/pgsql/bin
@@ -80,23 +96,9 @@ do {
          /usr/sbin
          /bin));
 
-    $obj->{pg_config} = $u->first_cat_exe('pg_config', @paths);
-};
-
-=head1 CONSTRUCTOR
-
-=head2 new
-
-  my $pg = App::Info::RDBMS::PostgreSQL->new;
-
-Returns an App::Info::RDBMS::PostgreSQL object. Since
-App::Info::RDBMS::PostgreSQL is implemented as a singleton class, the same
-object will be returned every time. This ensures that only the minimum number
-of system calls are made to gather the data necessary for the object methods.
-
-=cut
-
-sub new { bless $obj, ref $_[0] || $_[0] }
+    $self->{pg_config} = $u->first_cat_exe('pg_config', @paths);
+    return $self;
+}
 
 # We'll use this code reference as a common way of collecting data.
 
@@ -115,7 +117,10 @@ my $get_data = sub {
 
 Returns true if PostgreSQL is installed, and false if it is not.
 App::Info::RDBMS::PostgreSQL determines whether PostgreSQL is installed based
-on the presence or absence of the F<pg_config> application on the file system.
+on the presence or absence of the F<pg_config> application on the file system
+as found when C<new()> constructed the object. If PostgreSQL does not appear
+to be installed, then all of the other object methods will return empty
+values.
 
 =cut
 
@@ -126,40 +131,46 @@ sub installed { return $_[0]->{pg_config} ? 1 : undef }
   my $name = $pg->name;
 
 Returns the name of the application. App::Info::RDBMS::PostgreSQL parses the
-name from the system call C<`pg_config --version`>. Returns C<undef> if
-PostgreSQL is not installed. Emits a warning if PostgreSQL is installed but
-the version number could not be parsed.
+name from the system call C<`pg_config --version`>. Throws an error if
+PostgreSQL is installed but the version number or name could not be parsed.
 
 =cut
 
 sub name {
-    return unless $_[0]->{pg_config};
-    unless ($_[0]->{name}) {
-        my $data = $get_data->($_[0], '--version');
+    my $self = shift;
+    return unless $self->{pg_config};
+    unless (exists $self->{name}) {
+        $self->{name} = undef;
+        my $data = $get_data->($self, '--version');
         unless ($data) {
-            Carp::carp("Failed to find PostgreSQL version with ".
-                       "`$_[0]->{pg_config} --version");
+            $self->error("Failed to find PostgreSQL version with ".
+                         "`$self->{pg_config} --version");
             return;
         }
 
         chomp $data;
         my ($name, $version) =  split /\s+/, $data, 2;
-        Carp::carp("Unable to parse name from string '$data'") unless $name;
 
+        # Check for and assign the name.
+        $name ?
+          $self->{name} = $name :
+          $self->error("Unable to parse name from string '$data'");
+
+        # Parse the version number.
         if ($version) {
             my ($x, $y, $z) = $version =~ /(\d+)\.(\d+).(\d+)/;
-            unless (defined $x and defined $y and defined $z) {
-                Carp::carp("Failed to parse PostgreSQL version parts from string ".
-                           "'$version'");
+            if (defined $x and defined $y and defined $z) {
+                @{$self}{qw(version major minor patch)} =
+                  ($version, $x, $y, $z);
+            } else {
+                $self->error("Failed to parse PostgreSQL version parts from " .
+                             "string '$version'");
             }
-            @{$_[0]}{qw(name version major minor patch)} =
-              ($name, $version, $x, $y, $z);
         } else {
-            Carp::carp("Unable to parse version from string '$data'");
-            $_[0]->{name} = $name;
+            $self->error("Unable to parse version from string '$data'");
         }
     }
-    return $_[0]->{name};
+    return $self->{name};
 }
 
 =head2 version
@@ -167,9 +178,8 @@ sub name {
   my $version = $pg->version;
 
 Returns the PostgreSQL version number. App::Info::RDBMS::PostgreSQL parses the
-version number from the system call C<`pg_config --version`>. Returns C<undef>
-if PostgreSQL is not installed. Emits a warning if PostgreSQL is installed but
-the version number could not be parsed.
+version number from the system call C<`pg_config --version`>. See the
+L<name|"name"> method for a list of possible errors.
 
 =cut
 
@@ -184,9 +194,8 @@ sub version {
 
 Returns the PostgreSQL major version number. App::Info::RDBMS::PostgreSQL
 parses the major version number from the system call C<`pg_config --version`>.
-For example, C<version()> returns "7.1.2", then this method returns "7".
-Returns C<undef> if PostgreSQL is not installed. Emits a warning if PostgreSQL
-is installed but the version number could not be parsed.
+For example, C<version()> returns "7.1.2", then this method returns "7". See
+the L<name|"name"> method for a list of possible errors.
 
 =cut
 
@@ -202,8 +211,7 @@ sub major_version {
 Returns the PostgreSQL minor version number. App::Info::RDBMS::PostgreSQL
 parses the minor version number from the system call C<`pg_config --version`>.
 For example, if C<version()> returns "7.1.2", then this method returns "2".
-Returns C<undef> if PostgreSQL is not installed. Emits a warning if PostgreSQL
-is installed but the version number could not be parsed.
+See the L<name|"name"> method for a list of possible errors.
 
 =cut
 
@@ -219,8 +227,7 @@ sub minor_version {
 Returns the PostgreSQL patch version number. App::Info::RDBMS::PostgreSQL
 parses the patch version number from the system call C<`pg_config --version`>.
 For example, if C<version()> returns "7.1.2", then this method returns "1".
-Returns C<undef> if PostgreSQL is not installed. Emits a warning if PostgreSQL
-is installed but the version number could not be parsed.
+See the L<name|"name"> method for a list of possible errors.
 
 =cut
 
@@ -234,13 +241,20 @@ sub patch_version {
   my $bin_dir = $pg->bin_dir;
 
 Returns the PostgreSQL binary directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --bindir`>. Returns
-C<undef> if PostgreSQL is not installed.
+gathers the path from the system call C<`pg_config --bindir`>. Throws an error
+if the binary directory path cannot be determined.
 
 =cut
 
 sub bin_dir {
-    $_[0]->{bin_dir} ||= $get_data->($_[0], '--bindir');
+    unless (exists $_[0]->{bin_dir} ) {
+        if (my $dir = $get_data->($_[0], '--bindir')) {
+            $_[0]->{bin_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find bin directory");
+            $_[0]->{bin_dir} = undef;
+        }
+    }
     return $_[0]->{bin_dir};
 }
 
@@ -249,13 +263,20 @@ sub bin_dir {
   my $inc_dir = $pg->inc_dir;
 
 Returns the PostgreSQL include directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --includedir`>. Returns
-C<undef> if PostgreSQL is not installed.
+gathers the path from the system call C<`pg_config --includedir`>. Throws an
+error if the include directory path cannot be determined.
 
 =cut
 
 sub inc_dir {
-    $_[0]->{inc_dir} ||= $get_data->($_[0], '--includedir');
+    unless (exists $_[0]->{inc_dir} ) {
+        if (my $dir = $get_data->($_[0], '--includedir')) {
+            $_[0]->{inc_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find bin directory");
+            $_[0]->{inc_dir} = undef;
+        }
+    }
     return $_[0]->{inc_dir};
 }
 
@@ -264,13 +285,20 @@ sub inc_dir {
   my $lib_dir = $pg->lib_dir;
 
 Returns the PostgreSQL library directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --libdir`>. Returns
-C<undef> if PostgreSQL is not installed.
+gathers the path from the system call C<`pg_config --libdir`>. Throws an error
+if the library directory path cannot be determined.
 
 =cut
 
 sub lib_dir {
-    $_[0]->{lib_dir} ||= $get_data->($_[0], '--libdir');
+    unless (exists $_[0]->{lib_dir} ) {
+        if (my $dir = $get_data->($_[0], '--libdir')) {
+            $_[0]->{lib_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find bin directory");
+            $_[0]->{lib_dir} = undef;
+        }
+    }
     return $_[0]->{lib_dir};
 }
 
@@ -280,13 +308,21 @@ sub lib_dir {
 
 Returns the PostgreSQL shared object library directory path.
 App::Info::RDBMS::PostgreSQL gathers the path from the system call
-C<`pg_config --pkglibdir`>. Returns C<undef> if PostgreSQL is not installed.
+C<`pg_config --pkglibdir`>. Throws an error if the shared object library
+directory path cannot be determined.
 
 =cut
 
 # Location of dynamically loadable modules.
 sub so_lib_dir {
-    $_[0]->{so_lib_dir} ||= $get_data->($_[0], '--pkglibdir');
+    unless (exists $_[0]->{so_lib_dir} ) {
+        if (my $dir = $get_data->($_[0], '--pkglibdir')) {
+            $_[0]->{so_lib_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find bin directory");
+            $_[0]->{so_lib_dir} = undef;
+        }
+    }
     return $_[0]->{so_lib_dir};
 }
 
