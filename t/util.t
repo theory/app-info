@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.5 2002/06/03 01:31:09 david Exp $
+# $Id: util.t,v 1.6 2002/06/03 18:43:16 david Exp $
 
 use strict;
 use Test::More tests => 17;
@@ -40,23 +40,23 @@ close F;
 is( $util->first_file("this.foo", "that.foo", "C:\\foo.tst", $tmp_file),
     $tmp_file, "Test first_file" );
 
-# Now find the same file with first_cat_file().
-is( $util->first_cat_file('app-info.tst', $util->path, $util->tmpdir),
-    $tmp_file, "Test first_cat_file" );
+# Now find the same file with first_cat_path().
+is( $util->first_cat_path('app-info.tst', $util->path, $util->tmpdir),
+    $tmp_file, "Test first_cat_path" );
 
 # And test it again using an array.
-is( $util->first_cat_file(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
+is( $util->first_cat_path(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
                           $util->path, $util->tmpdir, "C:\\mytemp"),
-    $tmp_file, "Test first_cat_file with array" );
+    $tmp_file, "Test first_cat_path with array" );
 
 # Now find the directory housing the file.
 is( $util->first_cat_dir('app-info.tst', $util->path, $util->tmpdir),
-    $util->tmpdir, "Test first_cat_file" );
+    $util->tmpdir, "Test first_cat_path" );
 
 # And test it again using an array.
 is( $util->first_cat_dir(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
                           $util->path, $util->tmpdir, "C:\\mytemp"),
-    $util->tmpdir, "Test first_cat_file with array" );
+    $util->tmpdir, "Test first_cat_path with array" );
 
 # Look for stuff in the file.
 is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
