@@ -1,6 +1,10 @@
 Revision history for Perl extension App::Info.
 
 0.27
+      - Now using quotes when passing an executable path to `` in the
+        Apache and PostgreSQL libraries so that they work properly when
+        there are spaces in the path (such as on Windows). Reported by
+        Geoff Richards.
 
 0.26  2004-11-03T17:53:58
       - Added new path to list of paths to search for PostgreSQL. The new

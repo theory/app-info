@@ -155,7 +155,7 @@ sub new {
 my $get_data = sub {
     return unless $_[0]->{pg_config};
     $_[0]->info("Executing `$_[0]->{pg_config} $_[1]`");
-    my $info = `$_[0]->{pg_config} $_[1]`;
+    my $info = `"$_[0]->{pg_config}" $_[1]`;
     chomp $info;
     return $info;
 };

@@ -232,11 +232,11 @@ Enter a valid Apache name
 my $get_version = sub {
     my $self = shift;
     $self->{-v} = 1;
-    $self->info("Executing `$self->{exe} -v`");
-    my $version = `$self->{exe} -v`;
+    $self->info(qq{Executing `"$self->{exe}" -v`});
+    my $version = `"$self->{exe}" -v`;
     unless ($version) {
         $self->error("Failed to find Apache version data with ",
-                     "`$self->{exe} -v`");
+                     qq{`"$self->{exe}" -v`});
         return;
     }
 
@@ -500,12 +500,12 @@ Enter a valid HTTPD root
 my $get_compile_settings = sub {
     my $self = shift;
     $self->{-V} = 1;
-    $self->info("Executing `$self->{exe} -V`");
+    $self->info(qq{Executing `"$self->{exe}" -V`});
     # Get the compile settings.
-    my $data = `$self->{exe} -V`;
+    my $data = `"$self->{exe}" -V`;
     unless ($data) {
         $self->error("Unable to extract compile settings from ",
-                     "`$self->{exe} -V`");
+                     qq{`"$self->{exe}" -V`});
         return;
     }
 
@@ -533,7 +533,7 @@ my $get_compile_settings = sub {
     }
     # Issue a warning if no httpd root was found.
     $self->error("Cannot parse HTTPD root from ",
-                 "`$self->{exe} -V`") unless $self->{httpd_root};
+                 qq{`"$self->{exe}" -V`}) unless $self->{httpd_root};
 };
 
 # This code reference is used by httpd_root(), lib_dir(), bin_dir(), and
@@ -1151,11 +1151,11 @@ Unable to extract needed data from `httpd -l`
 my $get_static_mods = sub {
     my $self = shift;
     $self->{static_mods} = undef;
-    $self->info("Executing `$self->{exe} -l`");
-    my $data = `$self->{exe} -l`;
+    $self->info(qq{Executing `"$self->{exe}" -l`});
+    my $data = `"$self->{exe}" -l`;
     unless ($data) {
         $self->error("Unable to extract needed data from ".
-                     "`$self->{exe} =l`");
+                     qq{`"$self->{exe}" =l`});
         return;
     }
 
