@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.12 2002/06/04 00:12:45 david Exp $
+# $Id: Util.pm,v 1.13 2002/06/04 01:29:41 david Exp $
 
 =head1 NAME
 
@@ -386,7 +386,7 @@ sub multi_search_file {
         last unless @each;
     }
     close F;
-    return unles %ret;
+    return unless %ret;
     return wantarray ? @ret{@regexen} : \@ret{@regexen};
 }
 
