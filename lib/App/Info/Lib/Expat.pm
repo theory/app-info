@@ -594,7 +594,7 @@ sub so_lib_dir {
             $self->{so_lib_dir} = $dir;
         } else {
             $self->error("Cannot find shared object library direcory");
-            $self->{inc_dir} =
+            $self->{so_lib_dir} =
               $self->unknown( key      => 'shared object library directory',
                               callback => sub { $u->first_cat_dir($libs, $_) },
                               error    => "Shared object libraries not " .
@@ -638,14 +638,14 @@ and now I don't know where to find the version number. Patches welcome.
 
 =head1 BUGS
 
-Report all bugs via the CPAN Request Tracker at
+Please send bug reports to <bug-app-info@rt.cpan.org> or file them at
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 
-David Wheeler <L<david@wheeler.net|"david@wheeler.net">> based on code by Sam
-Tregar <L<sam@tregar.com|"sam@tregar.com">> that Sam, in turn, borrowed from
-Clark Cooper's L<XML::Parser|XML::Parser> module.
+David Wheeler <david@justatheory.com> based on code by Sam Tregar
+<sam@tregar.com> that Sam, in turn, borrowed from Clark Cooper's
+L<XML::Parser|XML::Parser> module.
 
 =head1 SEE ALSO
 

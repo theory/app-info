@@ -1281,13 +1281,13 @@ parsed from the F<httpd.conf> file or C<glob>bed from the file system.
 
 =head1 BUGS
 
-Report all bugs via the CPAN Request Tracker at
+Please send bug reports to <bug-app-info@rt.cpan.org> or file them at
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 
-David Wheeler <L<david@wheeler.net|"david@wheeler.net">> based on code by Sam
-Tregar <L<sam@tregar.com|"sam@tregar.com">>.
+David Wheeler <david@justatheory.com> based on code by Sam Tregar
+<sam@tregar.com>.
 
 =head1 SEE ALSO
 
