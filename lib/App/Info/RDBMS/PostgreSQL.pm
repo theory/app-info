@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.9 2002/06/03 18:03:57 david Exp $
+# $Id: PostgreSQL.pm,v 1.10 2002/06/03 18:12:33 david Exp $
 
 =head1 NAME
 
@@ -319,12 +319,14 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <david@wheeler.net> based on code by Sam Tregar
+<sam@tregar.com>.
 
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::RDBMS|App::Info::RDBMS>
+L<App::Info::RDBMS|App::Info::RDBMS>,
+L<DBD::Pg|DBD::Pg>
 
 =head1 COPYRIGHT AND LICENSE
 
