@@ -5,6 +5,8 @@ Revision history for Perl extension App::Info.
         rather than truth, so that version numbers that are "0" will be
         ok. Thanks to Andy Lester for the spot.
       - Util now properly loads File::Spec rather than File::Spec::Functions.
+      - Changed how the version number gets stored in Lib::Expat so that it
+        only gets saved if all three version number parts are found.
 
 0.05  Wed Jun  5 00:01:57 2002
       - Eliminated possible "Use of uninitialized value in concatenation (.)
