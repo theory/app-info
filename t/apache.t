@@ -48,7 +48,7 @@ is( $apache->group, "nobody", "Test group" );
 is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
     "Check error log from compile_option()" );
 is( $apache->lib_dir, $conf_dir, "Test lib dir" );
-is( $apache->bin_dir, $test_bin, "Test bin dir" );
+is( $apache->bin_dir, $result_bin, "Test bin dir" );
 is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
 is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );

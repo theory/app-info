@@ -1,6 +1,7 @@
 Revision history for Perl extension App::Info.
 
 0.42
+      - Fixed last Win32 test failure in "apache.t".
 
 0.41  2004-11-28T20:01:57
       - Fixed Apache, SQLite, and Iconv tests to pass under Win32.
