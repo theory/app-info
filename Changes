@@ -5,6 +5,8 @@ Revision history for Perl extension App::Info.
       - Added PostgreSQL environment variables to the paths to search
         for pg_config in App::Info::RDBMS::PostgreSQL. Patch from
         Greg Sabino Mullane.
+      - Added handling of PostgreSQL beta version numbers to
+        App::Info::RDBMS::PostgreSQL. Patch from Greg Sabino Mullane.
 
 0.23  Thu Aug  8 19:32:42 2002
       - Fixed tests that check Apache info events so that they're more

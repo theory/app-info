@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.23 2003/08/11 23:25:35 david Exp $
+# $Id: PostgreSQL.pm,v 1.24 2003/08/14 19:45:02 david Exp $
 
 =head1 NAME
 
@@ -254,6 +254,10 @@ my $get_version = sub {
         if (defined $x and defined $y and defined $z) {
             @{$self}{qw(version major minor patch)} =
               ($version, $x, $y, $z);
+        } elsif ($version =~ /(\d+)\.(\d+)beta\d+/) {
+            # Beta versions are treated as patch level "0"
+            @{$self}{qw(version major minor patch)} =
+              ($version, $1, $2, 0);
         } else {
             $self->error("Failed to parse PostgreSQL version parts from " .
                          "string '$version'");
