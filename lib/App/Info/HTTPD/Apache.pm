@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.10 2002/06/02 23:42:47 david Exp $
+# $Id: Apache.pm,v 1.11 2002/06/03 17:48:07 david Exp $
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ use App::Info::Util;
 use Carp ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -83,7 +83,7 @@ do {
 
     my @exes = qw(httpd apache-perl apache);
 
-    $obj->{apache_exe} = $u->first_cat_file(\@exes, @paths);
+    $obj->{apache_exe} = $u->first_cat_path(\@exes, @paths);
 };
 
 =head1 CONSTRUCTOR
@@ -315,7 +315,7 @@ sub bin_dir {
     unless (exists $_[0]->{bin_dir}) {
         $_[0]->{bin_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_dir('bin', $root)) {
+        if (my $dir = $u->first_cat_path('bin', $root)) {
             $_[0]->{bin_dir} = $dir;
         }
 
@@ -338,7 +338,7 @@ sub inc_dir {
     unless (exists $_[0]->{inc_dir}) {
         $_[0]->{inc_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_dir(['include', 'inc',], $root)){
+        if (my $dir = $u->first_cat_path(['include', 'inc',], $root)){
             $_[0]->{inc_dir} = $dir;
         }
     }
@@ -360,7 +360,7 @@ sub lib_dir {
     unless (exists $_[0]->{lib_dir}) {
         $_[0]->{lib_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_dir(['lib', 'modules', 'libexec'], $root)){
+        if (my $dir = $u->first_cat_path(['lib', 'modules', 'libexec'], $root)){
             $_[0]->{lib_dir} = $dir;
         } elsif ($u->first_dir('/usr/lib/apache/1.3')) {
             # The Debian way.
