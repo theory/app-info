@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.23
+0.23  Thu Aug  8 19:32:42 2002
       - Fixed tests that check Apache info events so that they're more
         flexible about the name of the Apache executable. Thanks to Dave
         Rolsky for the spot.
