@@ -457,6 +457,68 @@ sub patch_version {
     return $self->{patch};
 }
 
+=head3 new
+
+  my $exe = $pg->executable;
+
+Returns the full path to the PostgreSQL server executable, which is named
+F<postgres>.  This method does not use the executable names returned by
+C<search_exe_names()>; those executable names are used to search for
+F<pg_config> only (in C<new()>).
+
+When it called, C<executable()> checks for an executable named F<postgres> in
+the directory returned by C<bin_dir()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for postgres executable
+
+=item confirm
+
+Path to postgres executable?
+
+=item unknown
+
+Path to postgres executable?
+
+=back
+
+=cut
+
+sub executable {
+    my $self = shift;
+    # Find postgres.
+    $self->info("Looking for postgres");
+
+    unless ($self->{executable}) {
+	my $bin = $self->bin_dir or return;
+	if (my $exe = $u->first_exe($u->catfile($bin, 'postgres'))) {
+	    # We found it. Confirm.
+	    $self->{executable} = $self->confirm(
+		key      => 'postgres',
+		prompt   => "Path to postgres executable?",
+		value    => $exe,
+		callback => sub { -x },
+		error    => 'Not an executable'
+	    );
+	} else {
+	    # Handle an unknown value.
+	    $self->{executable} = $self->unknown(
+		key      => 'postgres',
+		prompt   => "Path to postgres executable?",
+		callback => sub { -x },
+		error    => 'Not an executable'
+	    );
+	}
+    }
+
+    return $self->{executable};
+}
+
 ##############################################################################
 
 =head3 bin_dir
@@ -726,6 +788,9 @@ sub download_url { "http://www.postgresql.org/mirrors-ftp.html" }
 
 Returns a list of possible names for F<pg_config> executable. By default, only
 F<pg_config> is returned (or F<pg_config.exe> on Win32).
+
+Note that this method is not used to search for the PostgreSQL server
+executable, only F<pg_config>.
 
 =cut
 

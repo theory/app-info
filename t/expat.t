@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 19;
+use Test::More tests => 20;
 use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::Lib::Expat') }
@@ -29,6 +29,7 @@ is( $expat->minor_version, '95', "Test minor version" );
 is( $expat->patch_version, '8', "Test patch version" );
 is( $expat->lib_dir, $lib_dir, "Test lib dir" );
 ok( ! defined $expat->bin_dir, "Test bin dir" );
+ok( ! defined $expat->executable, "Test executable" );
 is( $expat->so_lib_dir, $lib_dir, "Test so lib dir" );
 is( $expat->inc_dir, $inc_dir, "Test inc dir" );
 is( $expat->home_url, 'http://expat.sourceforge.net/', "Get home URL" );

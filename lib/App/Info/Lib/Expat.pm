@@ -421,6 +421,18 @@ sub bin_dir { return }
 
 ##############################################################################
 
+=head3 executable
+
+  my $executable = $expat->executable;
+
+Since Expat includes no executable program, this method always returns false.
+
+=cut
+
+sub executable { return }
+
+##############################################################################
+
 =head3 inc_dir
 
   my $inc_dir = $expat->inc_dir;

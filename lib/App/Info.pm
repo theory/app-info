@@ -335,6 +335,18 @@ sub bin_dir { $croak->(shift, 'bin_dir') }
 
 ##############################################################################
 
+=head3 executable
+
+  my $executable = $app->executable;
+
+Returns the full path the application's bin directory, if it exists.
+
+=cut
+
+sub executable { $croak->(shift, 'executable') }
+
+##############################################################################
+
 =head3 inc_dir
 
   my $inc_dir = $app->inc_dir;

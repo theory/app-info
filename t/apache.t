@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 27;
+use Test::More tests => 28;
 use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
@@ -15,6 +15,7 @@ my $conf_dir = catdir 't', 'testlib';
 my $inc_dir = catdir 't', 'testinc';
 # Win32 Thinks the bin directory is the root.
 my $httpd_root = $^O eq 'MSWin32' ? $bin_dir : 't';
+my $executable = catfile $bin_dir, "httpd$ext";
 
 my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
               mod_status mod_include mod_autoindex mod_dir mod_cgi mod_asis
@@ -23,7 +24,7 @@ my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
 
 ok( my $apache = App::Info::HTTPD::Apache->new(
     search_bin_dirs => $bin_dir,
-    search_exe_names => "httpd$ext",
+    search_exe_names => $executable,
     search_conf_dirs => $conf_dir,
     search_lib_dirs  => $conf_dir,
     search_inc_dirs  => $inc_dir,
@@ -47,6 +48,7 @@ is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
     "Check error log from compile_option()" );
 is( $apache->lib_dir, $conf_dir, "Test lib dir" );
 is( $apache->bin_dir, $bin_dir, "Test bin dir" );
+is( $apache->executable, $executable, "Test executable" );
 is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
 is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );

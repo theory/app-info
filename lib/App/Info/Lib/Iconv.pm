@@ -96,7 +96,7 @@ sub new {
     if (my $exe = $u->first_cat_exe([$self->search_exe_names],
                                     $self->search_bin_dirs)) {
         # We found it. Confirm.
-        $self->{iconv_exe} = $self->confirm(
+        $self->{executable} = $self->confirm(
             key      => 'iconv_exe',
             prompt   => 'Path to iconv executable?',
             value    => $exe,
@@ -105,7 +105,7 @@ sub new {
         );
     } else {
         # No luck. Ask 'em for it.
-        $self->{iconv_exe} = $self->unknown(
+        $self->{executable} = $self->unknown(
             key      => 'iconv_exe',
             prompt   => 'Path to iconv executable?',
             callback => sub { -x },
@@ -148,7 +148,7 @@ of the other object methods will return empty values.
 
 =cut
 
-sub installed { $_[0]->{iconv_exe} ? 1 : undef }
+sub installed { $_[0]->{executable} ? 1 : undef }
 
 ##############################################################################
 
@@ -234,7 +234,7 @@ my $get_version = sub {
 
 sub version {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
 
     # Get data.
     $get_version->($self) unless exists $self->{version};
@@ -303,7 +303,7 @@ my $is_int = sub { /^\d+$/ };
 
 sub major_version {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
 
     # Get data.
     $get_version->($self) unless exists $self->{version};
@@ -356,7 +356,7 @@ Enter a valid libiconv version number
 
 sub minor_version {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
 
     # Get data.
     $get_version->($self) unless exists $self->{version};
@@ -381,6 +381,20 @@ always return false.
 =cut
 
 sub patch_version { return }
+
+##############################################################################
+
+=head3 executable
+
+  my $executable = $iconv->executable;
+
+Returns the path to the Iconv executable, which will be defined by one of the
+names returned by C<search_exe_names()>. The executable is searched for in
+C<new()>, so there are no events for this method.
+
+=cut
+
+sub executable { shift->{executable} }
 
 ##############################################################################
 
@@ -417,11 +431,11 @@ my $is_dir = sub { -d };
 
 sub bin_dir {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
     unless (exists $self->{bin_dir}) {
         # This is all probably redundant, but let's do the drill, anyway.
         $self->info("Searching for bin directory");
-        if (my $bin = File::Basename::dirname($self->{iconv_exe})) {
+        if (my $bin = File::Basename::dirname($self->{executable})) {
             # We found it!
             $self->{bin_dir} = $bin;
         } else {
@@ -475,7 +489,7 @@ Enter a valid libiconv include directory
 
 sub inc_dir {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
     unless (exists $self->{inc_dir}) {
         $self->info("Searching for include directory");
         my @incs = $self->search_inc_names;
@@ -530,7 +544,7 @@ Enter a valid libiconv library directory
 
 sub lib_dir {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
     unless (exists $self->{lib_dir}) {
         $self->info("Searching for library directory");
         my @files = $self->search_lib_names;
@@ -586,7 +600,7 @@ Enter a valid libiconv shared object library directory
 
 sub so_lib_dir {
     my $self = shift;
-    return unless $self->{iconv_exe};
+    return unless $self->{executable};
     unless (exists $self->{so_lib_dir}) {
         $self->info("Searching for shared object library directory");
         my @files = $self->search_so_lib_names;

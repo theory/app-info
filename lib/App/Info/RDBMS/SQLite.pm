@@ -101,7 +101,7 @@ sub new {
     my @exes = $self->search_exe_names;
     if (my $cfg = $u->first_cat_exe(\@exes, $self->search_bin_dirs)) {
         # We found it. Confirm.
-        $self->{sqlite} = $self->confirm(
+        $self->{executable} = $self->confirm(
             key      => 'sqlite',
             prompt   => "Path to SQLite executable?",
             value    => $cfg,
@@ -123,7 +123,7 @@ sub new {
         }
 
         # Handle an unknown value.
-        $self->{sqlite} = $self->unknown(
+        $self->{executable} = $self->unknown(
             key      => 'sqlite',
             prompt   => "Path to SQLite executable?",
             callback => sub { -x },
@@ -173,7 +173,7 @@ values.
 
 =cut
 
-sub installed { return $_[0]->{sqlite} || $_[0]->{dbh} ? 1 : undef }
+sub installed { return $_[0]->{executable} || $_[0]->{dbh} ? 1 : undef }
 
 ##############################################################################
 
@@ -196,13 +196,13 @@ my $get_version = sub {
     $self->{'--version'} = 1;
     my $version;
 
-    if ($self->{sqlite}) {
+    if ($self->{executable}) {
         # Get the version number from the executable.
-        $self->info(qq{Executing `"$self->{sqlite}" -version`});
-        $version = `"$self->{sqlite}" -version`;
+        $self->info(qq{Executing `"$self->{executable}" -version`});
+        $version = `"$self->{executable}" -version`;
         unless ($version) {
             $self->error("Failed to find SQLite version with ".
-                         "`$self->{sqlite} -version`");
+                         "`$self->{executable} -version`");
             return;
         }
         chomp $version;
@@ -460,6 +460,21 @@ sub patch_version {
 
 ##############################################################################
 
+=head3 executable
+
+  my $executable = $sqlite->executable;
+
+Returns the path to the Sqlite executable, usually F<sqlite3> or F<sqlite>,
+which will be defined by one of the names returned byC<search_exe_names()>.
+The executable is searched for in C<new()>, so there are no events for this
+method.
+
+=cut
+
+sub executable { shift->{executable} }
+
+##############################################################################
+
 =head3 bin_dir
 
   my $bin_dir = $sqlite->bin_dir;
@@ -471,9 +486,9 @@ retreives it as the directory part of the path to the SQLite executable.
 
 sub bin_dir {
     my $self = shift;
-    return unless $self->{sqlite};
+    return unless $self->{executable};
     unless (exists $self->{bin_dir} ) {
-        my @parts = $u->splitpath($self->{sqlite});
+        my @parts = $u->splitpath($self->{executable});
         $self->{bin_dir} = $u->catdir(
             ($parts[0] eq '' ? () : $parts[0]),
             $u->splitdir($parts[1])
@@ -515,7 +530,7 @@ Enter a valid Expat shared object library directory
 
 my $lib_dir = sub {
     my ($self, $label) = (shift, shift);
-    return unless $self->{sqlite};
+    return unless $self->{executable};
     $self->info("Searching for $label directory");
     my $dir;
     unless ($dir = $u->first_cat_dir(\@_, $self->search_lib_dirs)) {
@@ -532,7 +547,7 @@ my $lib_dir = sub {
 
 sub lib_dir {
     my $self = shift;
-    return unless $self->{sqlite};
+    return unless $self->{executable};
     $self->{lib_dir} = $self->$lib_dir('library', $self->search_lib_names)
       unless exists $self->{lib_dir};
     return $self->{lib_dir};
@@ -572,7 +587,7 @@ Enter a valid Expat shared object library directory
 
 sub so_lib_dir {
     my $self = shift;
-    return unless $self->{sqlite};
+    return unless $self->{executable};
     $self->{so_lib_dir} = $self->$lib_dir('shared object library',
                                           $self->search_so_lib_names)
       unless exists $self->{so_lib_dir};
@@ -613,7 +628,7 @@ Enter a valid SQLite include directory
 
 sub inc_dir {
     my $self = shift;
-    return unless $self->{sqlite};
+    return unless $self->{executable};
     unless (exists $self->{inc_dir}) {
         $self->info("Searching for include directory");
         # Should there be more paths than this?
@@ -740,7 +755,7 @@ search for library files. By default, the list is:
 
 sub search_lib_names {
     my $self = shift;
-    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
+    (my $exe = $u->splitpath($self->{executable})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_lib_names,
       map { "lib$exe.$_"} qw(a la so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
 }
@@ -786,7 +801,7 @@ C<so_lib_dir()> to search for library files. By default, the list is:
 
 sub search_so_lib_names {
     my $self = shift;
-    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
+    (my $exe = $u->splitpath($self->{executable})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_so_lib_names,
       map { "lib$exe.$_"}
         qw(so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
@@ -821,7 +836,7 @@ F<sqlite.h>.
 
 sub search_inc_names {
     my $self = shift;
-    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
+    (my $exe = $u->splitpath($self->{executable})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_inc_names, "$exe.h";
 }
 
