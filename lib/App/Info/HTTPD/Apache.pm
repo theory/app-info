@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.30 2002/06/15 00:49:55 david Exp $
+# $Id: Apache.pm,v 1.31 2002/06/16 06:02:21 david Exp $
 
 =head1 NAME
 
@@ -24,9 +24,10 @@ App::Info::HTTPD::Apache - Information about Apache web server
 
 App::Info::HTTPD::Apache supplies information about the Apache web server
 installed on the local system. It implements all of the methods defined by
-App::Info::HTTPD. Methods that throw errors will throw them only the first
-time they're called. To start over (after, say, someone has installed Apache)
-construct a new App::Info::HTTPD::Apache object to aggregate new metadata.
+App::Info::HTTPD. Methods that trigger events will trigger them only the first
+time they're called (See L<App::Info|App::Info> for documentation on handling
+events). To start over (after, say, someone has installed Apache) construct a
+new App::Info::HTTPD::Apache object to aggregate new metadata.
 
 =cut
 
@@ -35,13 +36,15 @@ use App::Info::HTTPD;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.06';
+$VERSION = '0.20';
 
 my $u = App::Info::Util->new;
 
-=head1 CONSTRUCTOR
+=head1 INTERFACE
 
-=head2 new
+=head2 Constructor
+
+=head3 new
 
   my $apache = App::Info::HTTPD::Apache->new(@params);
 
@@ -88,6 +91,24 @@ C<File::Spec->path>. Failing that, it searches the following directories:
 
 =back
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for Apache executable
+
+=item confirm
+
+Path to your httpd executable?
+
+=item unknown
+
+Path to your httpd executable?
+
+=back
+
 =cut
 
 sub new {
@@ -95,7 +116,7 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Find Apache executable.
-    $self->info("Looking for Apache binary");
+    $self->info("Looking for Apache executable");
 
     my @paths = ($u->path,
       qw(/usr/local/apache/bin
@@ -116,23 +137,40 @@ sub new {
 
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
-        $self->{binary} = $self->confirm('binary', 'Path to your httpd binary?',
-                                         $exe, sub { -x },
-                                         'Not an executable');
+        $self->{exe} = $self->confirm('executable',
+                                      'Path to your httpd executable?',
+                                      $exe, sub { -x },
+                                      'Not an executable');
     } else {
         # Handle an unknown value.
-        $self->{binary} = $self->unknown('binary', 'Path to your httpd binary?',
-                                         sub { -x },
-                                         'Not an executable');
+        $self->{exe} = $self->unknown('executable',
+                                      'Path to your httpd executable?',
+                                      sub { -x },
+                                      'Not an executable');
     }
     return $self;
 };
 
+##############################################################################
+
+=head2 Class Method
+
+=head3 key_name
+
+  my $key_name = App::Info::HTTPD::Apache->key_name;
+
+Returns the unique key name that describes this class. The value returned is
+the string "Apache".
+
+=cut
+
 sub key_name { 'Apache' }
 
-=head1 OBJECT METHODS
+##############################################################################
 
-=head2 installed
+=head2 Object Methods
+
+=head3 installed
 
   print "apache is ", ($apache->installed ? '' : 'not '),
     "installed.\n";
@@ -145,24 +183,70 @@ installed, then all of the other object methods will return empty values.
 
 =cut
 
-sub installed { return $_[0]->{binary} ? 1 : undef }
+sub installed { return $_[0]->{exe} ? 1 : undef }
 
-=head2 name
+##############################################################################
+
+=head3 name
 
   my $name = $apache->name;
 
 Returns the name of the application. App::Info::HTTPD::Apache parses the name
-from the system call C<`httpd -v`>. See the L<version|"version"> method for a
-list of possible errors.
+from the system call C<`httpd -v`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -v`
+
+=item error
+
+Failed to find Apache version data with `httpd-v`
+
+Failed to parse Apache name and version from string
+
+=item unknown
+
+Enter a valid Apache name
+
+=back
 
 =cut
 
+my $get_version = sub {
+    my $self = shift;
+    $self->{-v} = 1;
+    $self->info("Executing `$self->{exe} -v`");
+    my $version = `$self->{exe} -v`;
+    unless ($version) {
+        $self->error("Failed to find Apache version data with ",
+                     "`$self->{exe} -v`");
+        return;
+    }
+
+    chomp $version;
+    my ($n, $x, $y, $z) = $version =~
+      /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+    unless ($n and $x and defined $y and defined $z) {
+        $self->error("Failed to parse Apache name and ",
+                         "version from string '$version'");
+        return;
+    }
+
+    @{$self}{qw(name version major minor patch)} =
+      ($n, "$x.$y.$z", $x, $y, $z);
+};
+
 sub name {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
 
     # Load data.
-    $self->version unless exists $self->{version};
+    # Load data.
+    $get_version->($self) unless exists $self->{-v};
 
     # Handle an unknown name.
     $self->{name} = $self->unknown('name') unless $self->{name};
@@ -171,49 +255,51 @@ sub name {
     return $self->{name};
 }
 
-=head2 version
+##############################################################################
+
+=head3 version
 
   my $version = $apache->version;
 
 Returns the apache version number. App::Info::HTTPD::Apache parses the version
-number from the system call C<`httpd --v`>. Throws an error if Apache is
-installed but the version number or name could not be parsed.
+number from the system call C<`httpd -v`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -v`
+
+=item error
+
+Failed to find Apache version data with `httpd-v`
+
+Failed to parse Apache name and version from string
+
+=item unknown
+
+Enter a valid Apache version number
+
+=back
 
 =cut
 
 sub version {
     my $self = shift;
-    return unless $self->{binary};
-    unless (exists $self->{version}) {{
-        $self->info("Executing `$self->{binary} -v`");
-        my $version = `$self->{binary} -v`;
-        unless ($version) {
-            $self->error("Failed to find Apache version with ",
-                         "`$self->{binary} -v`");
-            last; # Double braces allow this.
-        }
+    return unless $self->{exe};
 
-        chomp $version;
-        my ($n, $x, $y, $z) = $version =~
-          /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
-        unless ($n and $x and defined $y and defined $z) {
-            $self->error("Failed to parse Apache name and ",
-                         "version from string '$version'");
-            last; # Double braces allow this.
-        }
-
-        @{$self}{qw(name version major minor patch)} =
-          ($n, "$x.$y.$z", $x, $y, $z);
-    }} # unless
+    # Load data.
+    $get_version->($self) unless exists $self->{-v};
 
     # Handle an unknown value.
     unless ($self->{version}) {
         # Create a validation code reference.
         my $chk_version = sub {
-            my $ver = shift;
             # Try to get the version number parts.
             my ($x, $y, $z) =
-              $ver =~ /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+              /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
             # Return false if we didn't get all three.
             return unless $x and defined $y and defined $z;
             # Save all three parts.
@@ -221,34 +307,63 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown('version', $chk_version);
+        $self->{version} =
+          $self->unknown('version number', undef, $chk_version);
     }
 
     # Return the version number.
     return $self->{version};
 }
 
-=head2 major_version
+##############################################################################
+
+=head3 major_version
 
   my $major_version = $apache->major_version;
 
 Returns the Apache major version number. App::Info::HTTPD::Apache parses the
 version number from the system call C<`httpd --v`>. For example, if
-C<version()> returns "1.3.24", then this method returns "1". See the
-L<version|"version"> method for a list of possible errors.
+C<version()> returns "1.3.24", then this method returns "1".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -v`
+
+=item error
+
+Failed to find Apache version data with `httpd-v`
+
+Failed to parse Apache name and version from string
+
+=item unknown
+
+Enter a valid Apache major version number
+
+=back
 
 =cut
 
+# This code reference is used by major_version(), minor_version(), and
+# patch_version() to validate a version number entered by a user.
+my $is_int = sub { /^\d+$/ };
+
 sub major_version {
     my $self = shift;
-    $self->version unless exists $self->{version};
+    # Load data.
+    $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{major} = $self->unknown('major version number')
+    $self->{major} = $self->unknown('major version number', undef, $is_int)
       unless $self->{major};
     return $self->{major};
 }
 
-=head2 minor_version
+##############################################################################
+
+=head3 minor_version
 
   my $minor_version = $apache->minor_version;
 
@@ -257,44 +372,108 @@ version number from the system call C<`httpd --v`>. For example, if
 C<version()> returns "1.3.24", then this method returns "3". See the
 L<version|"version"> method for a list of possible errors.
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -v`
+
+=item error
+
+Failed to find Apache version data with `httpd-v`
+
+Failed to parse Apache name and version from string
+
+=item unknown
+
+Enter a valid Apache minor version number
+
+=back
+
 =cut
 
 sub minor_version {
     my $self = shift;
-    $self->version unless exists $self->{version};
+    # Load data.
+    $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown('minor version number')
+    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
       unless defined $self->{minor};
     return $self->{minor};
 }
 
-=head2 patch_version
+##############################################################################
+
+=head3 patch_version
 
   my $patch_version = $apache->patch_version;
 
 Returns the Apache patch version number. App::Info::HTTPD::Apache parses the
 version number from the system call C<`httpd --v`>. For example, if
-C<version()> returns "1.3.24", then this method returns "24". See the
-L<version|"version"> method for a list of possible errors.
+C<version()> returns "1.3.24", then this method returns "24".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -v`
+
+=item error
+
+Failed to find Apache version data with `httpd-v`
+
+Failed to parse Apache name and version from string
+
+=item unknown
+
+Enter a valid Apache patch version number
+
+=back
 
 =cut
 
 sub patch_version {
     my $self = shift;
-    $self->version unless exists $self->{version};
+    # Load data.
+    $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown('patch version number')
+    $self->{patch} = $self->unknown('patch version number', undef, $is_int)
       unless defined $self->{patch};
     return $self->{patch};
 }
 
-=head2 httpd_root
+##############################################################################
+
+=head3 httpd_root
 
   my $httpd_root = $apache->httpd_root;
 
 Returns the HTTPD root directory path. This path is defined at compile time,
 and App::Info::HTTPD::Apache parses it from the system call C<`httpd -V`>.
-Throws an error if Apache is installed but the HTTPD root could not be parsed.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+=item unknown
+
+Enter a valid HTTPD root
+
+=back
 
 =cut
 
@@ -304,12 +483,12 @@ Throws an error if Apache is installed but the HTTPD root could not be parsed.
 my $get_compile_settings = sub {
     my $self = shift;
     $self->{-V} = 1;
-    $self->info("Executing `$self->{binary} -V`");
+    $self->info("Executing `$self->{exe} -V`");
     # Get the compile settings.
-    my $data = `$self->{binary} -V`;
+    my $data = `$self->{exe} -V`;
     unless ($data) {
         $self->error("Unable to extract compile settings from ",
-                     "`$self->{binary} -V`");
+                     "`$self->{exe} -V`");
         return;
     }
 
@@ -329,28 +508,53 @@ my $get_compile_settings = sub {
     }
     # Issue a warning if no httpd root was found.
     $self->error("Could not parse HTTPD root from ",
-                 "`$self->{binary} -V`") unless $self->{httpd_root};
+                 "`$self->{exe} -V`") unless $self->{httpd_root};
 };
+
+# This code reference is used by httpd_root(), lib_dir(), bin_dir(), and
+# so_lib_dir() to validate a directory entered by the user.
+my $is_dir = sub { -d };
 
 sub httpd_root {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     # Get the compile settings.
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
-    $self->{httpd_root} = $self->unknown('httpd root')
+    $self->{httpd_root} = $self->unknown('HTTPD root', undef, $is_dir)
       unless defined $self->{httpd_root};
     return $self->{httpd_root};
 }
 
-=head2 magic_number
+##############################################################################
+
+=head3 magic_number
 
   my $magic_number = $apache->magic_number;
 
 Returns the "Magic Number" for the Apache installation. This number is defined
 at compile time, and App::Info::HTTPD::Apache parses it from the system call
-C<`httpd -V`> See the L<httpd_root|"httpd_root"> method for a list of possible
-errors.
+C<`httpd -V`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+=item unknown
+
+Enter a valid magic number
+
+=back
 
 =cut
 
@@ -364,7 +568,9 @@ sub magic_number {
     return $self->{magic_number};
 }
 
-=head2 compile_option
+##############################################################################
+
+=head3 compile_option
 
   my $compile_option = $apache->compile_option($option);
 
@@ -381,6 +587,26 @@ for a list of possible errors.
 See the Apache documentation at L<http://httpd.apache.org/docs-project/> to
 learn about all the possible compile options.
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+=item unknown
+
+Enter a valid option
+
+=back
+
 =cut
 
 sub compile_option {
@@ -394,7 +620,9 @@ sub compile_option {
     return $self->{$option};
 }
 
-=head2 conf_file
+##############################################################################
+
+=head3 conf_file
 
 Returns the full path to the Apache configuration file. C<conf_file()> looks
 for the configuration file in a number of locations and under a number of
@@ -417,13 +645,29 @@ the HTTPD root directory. Failing that, it looks for the following:
 
 =back
 
-Throws an error and returns C<undef> if the file cannot be found.
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+=item error
+
+No Apache config file found
+
+=item unknown
+
+Location of httpd.conf file?
+
+=back
 
 =cut
 
 sub conf_file {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     unless (exists $self->{conf_file}) {
         $self->info("Searching for Apache configuration file");
         my $root = $self->httpd_root;
@@ -440,22 +684,52 @@ sub conf_file {
                      "/etc/httpd/httpd.conf.default");
 
         $self->{conf_file} = $u->first_file(@paths)
-          or $self->error("No server config file found");
+          or $self->error("No Apache config file found");
     }
     # Handle an unknown value.
-    $self->{conf_file} = $self->unknown('configuration file', sub { -e })
+    $self->{conf_file} = $self->unknown('conf_file',
+                                        "Location of httpd.conf file?",
+                                        sub { -f })
       unless defined $self->{conf_file};
     return $self->{conf_file};
 }
 
-=head2 user
+##############################################################################
+
+=head3 user
 
   my $user = $apache->user;
 
 Returns the name of the Apache user. This value is collected from the Apache
-configuration file as returned by C<conf_file()>. Throws an error and returns
-C<undef>if the configuration file cannot be found or if the user name, group,
-or port number could not be parsed from the configuration file.
+configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Could not parse user from file
+
+Could not parse group from file
+
+Could not parse port from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter Apache user name
+
+=back
 
 =cut
 
@@ -477,8 +751,8 @@ my $parse_conf_file = sub {
                    qr/^\s*Port\s+(.*)$/ );
     my ($usr, $grp, $prt) = $u->multi_search_file($conf, @regexen);
     # Issue a warning if we couldn't find the user and group.
-    $self->error("Could not parse user and group from file '$conf'")
-      unless $usr && $grp;
+    $self->error("Could not parse user from file '$conf'") unless $usr;
+    $self->error("Could not parse group from file '$conf'") unless $grp;
     $self->error("Could not parse port from file '$conf'") unless $prt;
     # Assign them anyway.
     @{$self}{qw(user group port)} = ($usr, $grp, $prt);
@@ -486,85 +760,200 @@ my $parse_conf_file = sub {
 
 sub user {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     $parse_conf_file->($self) unless exists $self->{user};
     # Handle an unknown value.
-    $self->{user} = $self->unknown('user', sub { getpwnam $_ })
+    $self->{user} = $self->unknown('user', 'Enter Apache user name',
+                                   sub { getpwnam $_ }, "Not a user")
       unless $self->{user};
     return $self->{user};
 }
 
-=head2 group
+##############################################################################
+
+=head3 group
 
 Returns the name of the Apache user group. This value is collected from the
-Apache configuration file as returned by C<conf_file()>. See the
-L<"user"|user> method for a list of possible errors.
+Apache configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Could not parse user from file
+
+Could not parse group from file
+
+Could not parse port from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter Apache user group name
+
+=back
 
 =cut
 
 sub group {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     $parse_conf_file->($self) unless exists $self->{group};
     # Handle an unknown value.
-    $self->{group} = $self->unknown('group', sub { getgrnam $_ })
+    $self->{group} = $self->unknown('group', 'Enter Apache user group name',
+                                   sub { getgrnam $_ }, "Not a user group")
       unless $self->{group};
     return $self->{group};
 }
 
-=head2 port
+##############################################################################
+
+=head3 port
 
 Returns the port number on which Apache listens. This value is collected from
-Apache configuration file as returned by C<conf_file()>. See the
-L<"user"|user> method for a list of possible errors.
+Apache configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Could not parse user from file
+
+Could not parse group from file
+
+Could not parse port from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter Apache TCP/IP port number
+
+=back
 
 =cut
 
 sub port {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     $parse_conf_file->($self) unless exists $self->{port};
     # Handle an unknown value.
-    $self->{port} = $self->unknown('port', sub { /^\d+$/ })
+    $self->{port} = $self->unknown('port', 'Enter Apache TCP/IP port number',
+                                   $is_int, "Not a valid port number")
       unless $self->{port};
     return $self->{port};
 }
 
-=head2 bin_dir
+##############################################################################
+
+=head3 bin_dir
 
   my $bin_dir = $apache->bin_dir;
 
 Returns the Apache binary directory path. App::Info::HTTPD::Apache simply
 looks for the F<bin> directory under the HTTPD root directory, as returned by
-C<httpd_root()>. Throws an error and eturns C<undef> if Apache is not
-installed or if the bin directory could not be found.
+C<httpd_root()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+Searching for bin directory
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+Could not find bin directory
+
+=item unknown
+
+Enter a valid HTTPD root
+
+Enter a valid Apache bin directory
+
+=back
 
 =cut
 
 sub bin_dir {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     unless (exists $self->{bin_dir}) {{
         my $root = $self->httpd_root || last; # Double braces allow this.
-        $self->info("Searching for binary directory");
+        $self->info("Searching for bin directory");
         $self->{bin_dir} = $u->first_cat_path('bin', $root)
           or $self->error("Could not find bin directory");
     }}
 
     # Handle unknown value.
-    $self->{bin_dir} = $self->unknown('binary directory', sub { -d })
+    $self->{bin_dir} = $self->unknown('bin directory', undef, $is_dir)
       unless $self->{bin_dir};
     return $self->{bin_dir};
 }
 
-=head2 inc_dir
+##############################################################################
+
+=head3 inc_dir
 
   my $inc_dir = $apache->inc_dir;
 
 Returns the Apache include directory path. App::Info::HTTPD::Apache simply
 looks for the F<include> or F<inc> directory under the F<httpd_root>
-directory, as returned by C<httpd_root()>. Throws an error and eturns C<undef>
-if Apache is not installed or if the inc directory could not be found.
+directory, as returned by C<httpd_root()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+Searching for include directory
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+Could not find include directory
+
+=item unknown
+
+Enter a valid HTTPD root
+
+Enter a valid Apache include directory
+
+=back
 
 =cut
 
@@ -574,23 +963,49 @@ sub inc_dir {
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for include directory");
         $self->{inc_dir} = $u->first_cat_path(['include', 'inc',], $root)
-          or $self->error("Could not find inc directory");
+          or $self->error("Could not find include directory");
     }}
     # Handle unknown value.
-    $self->{inc_dir} = $self->unknown('include directory', sub { -d })
+    $self->{inc_dir} = $self->unknown('include directory', undef, $is_dir)
       unless $self->{inc_dir};
     return $self->{inc_dir};
 }
 
-=head2 lib_dir
+##############################################################################
+
+=head3 lib_dir
 
   my $lib_dir = $apache->lib_dir;
 
 Returns the Apache library directory path. App::Info::HTTPD::Apache simply
 looks for the F<lib>, F<modules>, or F<libexec> directory under the HTTPD
-root> directory, as returned by C<httpd_root()>. Throws an error and returns
-C<undef> if Apache is not installed or if the lib directory could not be
-found.
+root> directory, as returned by C<httpd_root()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+Searching for library directory
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+Could not find library directory
+
+=item unknown
+
+Enter a valid HTTPD root
+
+Enter a valid Apache library directory
+
+=back
 
 =cut
 
@@ -606,36 +1021,79 @@ sub lib_dir {
             # The Debian way.
             $self->{lib_dir} = '/usr/lib/apache/1.3';
         } else {
-            $self->error("Could not find lib direcory");
+            $self->error("Could not find library direcory");
         }
     }}
     # Handle unknown value.
-    $self->{lib_dir} = $self->unknown('library directory', sub { -d })
+    $self->{lib_dir} = $self->unknown('library directory', undef, $is_dir)
       unless $self->{lib_dir};
     return $self->{lib_dir};
 }
 
-=head2 so_lib_dir
+##############################################################################
+
+=head3 so_lib_dir
 
   my $so_lib_dir = $apache->so_lib_dir;
 
 Returns the Apache shared object library directory path. Currently, this
 directory is assumed to be the same as the lib directory, so this method is
-simply an alias for C<lib_dir>. Throws an error and returns C<undef> if Apache
-is not installed or if the lib directory could not be found.
+simply an alias for C<lib_dir>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -V`
+
+Searching for library directory
+
+=item error
+
+Unable to extract compile settings from `httpd -V`
+
+Could not parse HTTPD root from `httpd -V`
+
+Could not find library directory
+
+=item unknown
+
+Enter a valid HTTPD root
+
+Enter a valid Apache library directory
+
+=back
 
 =cut
 
 # For now, at least, these seem to be the same.
 *so_lib_dir = \&lib_dir;
 
-=head2 static_mods
+##############################################################################
+
+=head3 static_mods
 
 Returns a list (in an array context) or an anonymous array (in a scalar
 reference) of all of the modules statically compiled into Apache. These are
 collected from the system call C<`httpd -l`>. If Apache is not installed,
 C<static_mods()> throws an error and returns an empty list in an array context
 or an empty anonymous array in a scalar context.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -l`
+
+=item error
+
+Unable to extract needed data from `httpd -l`
+
+=back
 
 =cut
 
@@ -644,11 +1102,11 @@ or an empty anonymous array in a scalar context.
 my $get_static_mods = sub {
     my $self = shift;
     $self->{static_mods} = undef;
-    $self->info("Collecting list of static modules");
-    my $data = `$self->{binary} -l`;
+    $self->info("Executing `$self->{exe} -l`");
+    my $data = `$self->{exe} -l`;
     unless ($data) {
         $self->error("Unable to extract needed data from ".
-                     "`$self->{binary} =l`");
+                     "`$self->{exe} =l`");
         return;
     }
 
@@ -659,23 +1117,38 @@ my $get_static_mods = sub {
         $self->{mod_so} = 1 if $1 eq 'mod_so';
         $self->{mod_perl} = 1 if $1 eq 'mod_perl';
     }
-    $self->{static_mods} = \@mods;
+    $self->{static_mods} = \@mods if @mods;
 };
 
 sub static_mods {
     my $self = shift;
-    return unless $self->{binary};
+    return unless $self->{exe};
     $get_static_mods->($self) unless exists $self->{static_mods};
     return unless $self->{static_mods};
     return wantarray ? @{$self->{static_mods}} : $self->{static_mods};
 }
 
-=head2 mod_so
+##############################################################################
+
+=head3 mod_so
 
 Boolean method that returns true when mod_so has been compiled into Apache,
 and false if it has not. The presence or absence of mod_so is determined by
-the system call C<`httpd -l`>. See the L<"static_mods"|static_mods> method for
-a list of possible errors.
+the system call C<`httpd -l`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -l`
+
+=item error
+
+Unable to extract needed data from `httpd -l`
+
+=back
 
 =cut
 
@@ -685,12 +1158,27 @@ sub mod_so {
     return $self->{mod_so};
 }
 
-=head2 mod_perl
+##############################################################################
+
+=head3 mod_perl
 
 Boolean method that returns true when mod_perl has been statically compiled
 into Apache, and false if it has not. The presence or absence of mod_perl is
-determined by the system call C<`httpd -l`>. See the
-L<"static_mods"|static_mods> method for a list of possible errors.
+determined by the system call C<`httpd -l`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `httpd -l`
+
+=item error
+
+Unable to extract needed data from `httpd -l`
+
+=back
 
 =cut
 
@@ -700,7 +1188,9 @@ sub mod_perl {
     return $self->{mod_perl};
 }
 
-=head2 home_url
+##############################################################################
+
+=head3 home_url
 
   my $home_url = $apache->home_url;
 
@@ -710,7 +1200,9 @@ Returns the Apache home page URL.
 
 sub home_url { "http://httpd.apache.org/" }
 
-=head2 download_url
+##############################################################################
+
+=head3 download_url
 
   my $download_url = $apache->download_url;
 
