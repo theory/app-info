@@ -119,10 +119,44 @@ This section documents the public interface of App::Info.
   my $app = App::Info::Category::FooApp->new(@params);
 
 Constructs an App::Info object and returns it. The @params arguments define
-how the App::Info object will respond to certain events, and correspond to
+attributes that can be used to help the App::Info object search for
+application information on the file system, as well as how the App::Info
+object will respond to certain events. The event parameters correspond to
 their like-named methods. See the L<"Event Handler Object Methods"> section
-for more information on App::Info events and how to handle them. The
-parameters to C<new()> for the different types of App::Info events are:
+for more information on App::Info events and how to handle them. The search
+parameters that can be passed to C<new()> are:
+
+=over
+
+=item search_bin_dirs
+
+An array reference of local directories in which to search for executables.
+These may be used to search for the value of the C<bin_dir> attribute in
+addition to and in preference to the defaults used by each subclass.
+
+=item search_lib_dirs
+
+An array reference of local directories in which to search for libraries.
+These may be used to search for the value of the C<lib_dir> and C<so_lib_dir>
+attributes in addition to and in preference to the defaults used by each
+subclass.
+
+=item search_inc_dirs
+
+An array reference of local directories in which to search for include
+files. These may be used to search for the value of the C<inc_dir> attribute
+in addition to and in preference to the defaults used by each subclass.
+
+=item search_exe_names
+
+An array reference of possible names for binary executables. These may be used
+by subclases to search for application programs that can be used to retreive
+application information, such as version numbers. The subclasses generally
+provide reasonable defaults for most cases.
+
+=back
+
+The parameters to C<new()> for the different types of App::Info events are:
 
 =over 4
 
@@ -152,6 +186,16 @@ sub new {
     # Set up handlers.
     for (qw(on_error on_unknown on_info on_confirm)) {
         $p{$_} = $set_handlers->($p{$_});
+    }
+
+    # Set up search defaults.
+    for (qw(bin_dirs lib_dirs inc_dirs exe_names)) {
+        local $_ = "search_$_";
+        if (exists $p{$_}) {
+            $p{$_} = [$p{$_}] unless ref $p{$_} eq 'ARRAY';
+        } else {
+            $p{$_} = [];
+        }
     }
 
     # Do it!
@@ -329,6 +373,71 @@ The URL for the software's download page.
 =cut
 
 sub download_url  { $croak->(shift, 'download_url') }
+
+##############################################################################
+##############################################################################
+
+=head2 Search Attributes
+
+These methods return lists of things to look for on the local file system when
+searching for appliation programs, library files, and include files. They are
+empty by default, since each subclass generally relies on its own settings,
+but you can add your own as preferred search parameters by specifying them
+as parameters to the C<new()> constructor.
+
+=head3 exe_names
+
+  my @search_exe_names = $app->search_exe_names;
+
+Returns a list of possible names for an executable. Typically used by the
+C<new()> constructor to search fo an executable to execute and collect
+application info.
+
+=cut
+
+sub search_exe_names { @{shift->{search_exe_names}} }
+
+##############################################################################
+
+=head3 search_bin_dirs
+
+  my @search_bin_dirs = $app->search_bin_dirs;
+
+Returns a list of possible directories in which to search an executable.
+Typically used by the C<new()> constructor to find an executable to execute
+and collect application info. The found directory will also generally then
+be returned by the C<bin_dir> method.
+
+=cut
+
+sub search_bin_dirs { @{shift->{search_bin_dirs}} }
+
+##############################################################################
+
+=head3 search_lib_dirs
+
+  my @search_lib_dirs = $app->search_lib_dirs;
+
+Returns a list of possible directories in which to search for libraries.
+Typically used by the C<lib_dir()> and C<so_lib_dir()> methods to find
+library files.
+
+=cut
+
+sub search_lib_dirs { @{shift->{search_lib_dirs}} }
+
+##############################################################################
+
+=head3 search_inc_dirs
+
+  my @search_inc_dirs = $app->search_inc_dirs;
+
+Returns a list of possible directories in which to search for includes.
+Typically used by the C<inc_dir()> method to find include files.
+
+=cut
+
+sub search_inc_dirs { @{shift->{search_inc_dirs}} }
 
 ##############################################################################
 ##############################################################################
