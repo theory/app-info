@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.29 2002/06/14 06:46:56 david Exp $
+# $Id: Info.pm,v 1.30 2002/06/14 23:48:13 david Exp $
 
 =head1 NAME
 
@@ -36,8 +36,8 @@ information relevant to the application for which data is to be provided (see
 L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
 encouraged to, at a minimum, implement the abstract methods defined here and
 in the category abstract base classes (e.g.,
-L<App::Info::HTTPD|App::Info::HTTPD> and L<App::Info::Lib|App::Info::Lib>. See
-L<Subclassing|"SUBCLASSING"> for more information on implementing new
+L<App::Info::HTTPD|App::Info::HTTPD> and L<App::Info::Lib|App::Info::Lib>).
+See L<Subclassing|"SUBCLASSING"> for more information on implementing new
 subclasses.
 
 =cut
@@ -100,18 +100,21 @@ my $set_handlers = sub {
 ##############################################################################
 ##############################################################################
 
-=head1 CONSTRUCTOR
+=head1 INTERFACE
 
-=head2 new
+This section documents the public interface of App::Info.
+
+=head2 Constructor
+
+=head3 new
 
   my $app = App::Info::Category::FooApp->new(@params);
 
-Consructs the FooApp App::Info object and returns it. The @params arguments
-define how the App::Info object will respond to certain events, and correspond
-to their like-named methods. See L<Event Handler Object Methods|"EVENT HANDLER
-OBJECT METHODS"> for more information on App::Info events and how to handle
-them. The parameters to C<new()> for the different types of App::Info events
-are as follows:
+Constructs an App::Info object and returns it. The @params arguments define
+how the App::Info object will respond to certain events, and correspond to
+their like-named methods. See the L<"Event Handler Object Methods"> section
+for more information on App::Info events and how to handle them. The
+parameters to C<new()> for the different types of App::Info events are:
 
 =over 4
 
@@ -125,10 +128,10 @@ are as follows:
 
 =back
 
-When passing in event handlers to C<new()>, the list of handlers for each even
-type should be an anonymous array:
+When passing event handlers to C<new()>, the list of handlers for each type
+should be an anonymous array, for example:
 
-  my $app = App::Info::Category::FooApp->new(on_info => [@handlers]);
+  my $app = App::Info::Category::FooApp->new( on_info => \@handlers );
 
 =cut
 
@@ -150,13 +153,25 @@ sub new {
 ##############################################################################
 ##############################################################################
 
-=head1 METADATA OBJECT METHODS
+=head2 Metadata Object Methods
 
 These are abstract methods in App::Info and must be provided by its
 subclasses. They provide the essential metadata of the software package
 supported by the App::Info subclass.
 
-=head2 installed
+=head3 key_name
+
+  my $key_name = $app->key_name;
+
+Returns a string that uniquely identifies the software for which the App::Info
+subclass provides data. This value should be unique across all App::Info
+classes. Typically, it's simply the name of the software.
+
+=cut
+
+sub key_name { $croak->(shift, 'key_name') }
+
+=head3 installed
 
   if ($app->installed) {
       print "App is installed.\n"
@@ -173,7 +188,7 @@ sub installed { $croak->(shift, 'installed') }
 
 ##############################################################################
 
-=head2 name
+=head3 name
 
   my $name = $app->name;
 
@@ -185,7 +200,7 @@ sub name { $croak->(shift, 'name') }
 
 ##############################################################################
 
-=head2 version
+=head3 version
 
   my $version = $app->version;
 
@@ -197,7 +212,7 @@ Returns the full version number of the application.
 
 sub version { $croak->(shift, 'version') }
 
-=head2 major_version
+=head3 major_version
 
   my $major_version = $app->major_version;
 
@@ -210,7 +225,7 @@ sub major_version { $croak->(shift, 'major_version') }
 
 ##############################################################################
 
-=head2 minor_version
+=head3 minor_version
 
   my $minor_version = $app->minor_version;
 
@@ -223,7 +238,7 @@ sub minor_version { $croak->(shift, 'minor_version') }
 
 ##############################################################################
 
-=head2 patch_version
+=head3 patch_version
 
   my $patch_version = $app->patch_version;
 
@@ -236,7 +251,7 @@ sub patch_version { $croak->(shift, 'patch_version') }
 
 ##############################################################################
 
-=head2 bin_dir
+=head3 bin_dir
 
   my $bin_dir = $app->bin_dir;
 
@@ -248,7 +263,7 @@ sub bin_dir { $croak->(shift, 'bin_dir') }
 
 ##############################################################################
 
-=head2 inc_dir
+=head3 inc_dir
 
   my $inc_dir = $app->inc_dir;
 
@@ -260,7 +275,7 @@ sub inc_dir { $croak->(shift, 'inc_dir') }
 
 ##############################################################################
 
-=head2 lib_dir
+=head3 lib_dir
 
   my $lib_dir = $app->lib_dir;
 
@@ -272,7 +287,7 @@ sub lib_dir { $croak->(shift, 'lib_dir') }
 
 ##############################################################################
 
-=head2 so_lib_dir
+=head3 so_lib_dir
 
   my $so_lib_dir = $app->so_lib_dir;
 
@@ -285,7 +300,7 @@ sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
 
 ##############################################################################
 
-=head2 home_url
+=head3 home_url
 
   my $home_url = $app->home_url;
 
@@ -297,7 +312,7 @@ sub home_url  { $croak->(shift, 'home_url') }
 
 ##############################################################################
 
-=head2 download_url
+=head3 download_url
 
   my $download_url = $app->download_url;
 
@@ -310,41 +325,41 @@ sub download_url  { $croak->(shift, 'download_url') }
 ##############################################################################
 ##############################################################################
 
-=head1 EVENT HANDLER OBJECT METHODS
+=head2 Event Handler Object Methods
 
-These methods provide control over event App::Info event handling. Events can
-be handled by one or more more objects of subclasses of App::Info::Handler --
-the first to return a true value will be the last to execute. This allows you
-to stack handlers, if you wish, or to implement your own. See
+These methods provide control over App::Info event handling. Events can be
+handled by one or more objects of subclasses of App::Info::Handler. The first
+to return a true value will be the last to execute. This approach allows
+handlers to be stacked, and makes it relatively easy to create new handlers.
 L<App::Info::Handler|App::Info::Handler> for information on writing event
 handlers.
 
-Each of the event handler methods takes a list of event handlers as their
+Each of the event handler methods takes a list of event handlers as its
 arguments. If none are passed, the existing list of handlers for the relevant
 event type will be returned. If new handlers are passed in, they will be
-retrurned.
+returned.
 
 The event handlers may be specified as one or more objects of the
 App::Info::Handler class or subclasses, as one or more strings that tell
 App::Info construct such handlers itself, or a combination of the two. The
 strings can only be used if the relevant App::Info::Handler subclasses have
-registered the appropriate strings with App::Info. For example, the
-App::Info::Handler::Print class included in the App::Info distribution
-registers the strings "stderr" and "stdout" when it starts up. These strings
-may then be used to tell App::Info to construct App::Info::Handler::Print
-objects that print to STDERR or to STDOUT, respectively. See the
-App::Info::Handler subclasses for what strings they register with App::Info.
+registered strings with App::Info. For example, the App::Info::Handler::Print
+class included in the App::Info distribution registers the strings "stderr"
+and "stdout" when it starts up. These strings may then be used to tell
+App::Info to construct App::Info::Handler::Print objects that print to STDERR
+or to STDOUT, respectively. See the App::Info::Handler subclasses for what
+strings they register with App::Info.
 
-=head2 on_info
+=head3 on_info
 
   my @handlers = $app->on_info;
   $app->on_info(@handlers);
 
 Info events are triggered when the App::Info subclass wants to send an
-informational status message to the user. By default, these events are
-ignored, but a common need is for such messages to simply print to STDOUT. Use
-the L<App::Info::Handler::Print|App::Info::Handler::Print> class included with
-the App::Info distribution to have info messages print to STDOUT:
+informational status message. By default, these events are ignored, but a
+common need is for such messages to simply print to STDOUT. Use the
+L<App::Info::Handler::Print|App::Info::Handler::Print> class included with the
+App::Info distribution to have info messages print to STDOUT:
 
   use App::Info::Handler::Print;
   $app->on_info('stdout');
@@ -360,7 +375,7 @@ sub on_info {
     return @{ $self->{on_info} };
 }
 
-=head2 on_error
+=head3 on_error
 
   my @handlers = $app->on_error;
   $app->on_error(@handlers);
@@ -368,7 +383,7 @@ sub on_info {
 Error events are triggered when the App::Info subclass runs into an unexpected
 but not fatal problem. (Note that fatal problems will likely throw an
 exception.) By default, these events are ignored. A common way of handling
-these events is to print to STDERR, once again using the
+these events is to print them to STDERR, once again using the
 L<App::Info::Handler::Print|App::Info::Handler::Print> class included with the
 App::Info distribution:
 
@@ -396,7 +411,7 @@ sub on_error {
     return @{ $self->{on_error} };
 }
 
-=head2 on_unknown
+=head3 on_unknown
 
   my @handlers = $app->on_unknown;
   $app->on_uknown(@handlers);
@@ -424,16 +439,16 @@ sub on_unknown {
     return @{ $self->{on_unknown} };
 }
 
-=head2 on_confirm
+=head3 on_confirm
 
   my @handlers = $app->on_confirm;
   $app->on_confirm(@handlers);
 
 Confirm events are triggered when the App::Info subclass has found an
-important piece of information (such as the location of the binary it'll use
-to collect information for the rest of its methods) and wants to confirm that
-the information is correct. These events will most often be triggered during
-the App::Info subclass object construction. Here, too, the
+important piece of information (such as the location of the executable it'll
+use to collect information for the rest of its methods) and wants to confirm
+that the information is correct. These events will most often be triggered
+during the App::Info subclass object construction. Here, too, the
 App::Info::Handler::Prompt class included with the App::Info distribution can
 help out:
 
@@ -442,9 +457,6 @@ help out:
   # Or:
   my $prompter = App::Info::Handler::Prompt;
   $app->on_confirm($prompter);
-
-Again, consult the L<App::Info::Handler::Prompt|App::Info::Handler::Prompt>
-documentation for details on its operation.
 
 =cut
 
@@ -460,10 +472,20 @@ sub on_confirm {
 =head1 SUBCLASSING
 
 As an abstract base class, App::Info is not intended to be used directly.
-Instead, you'll use subclasses that implement the interface it defines. These
-subclasses each provide the metadata necessary for a given software package,
-via the interface outlined above (plus any additional methods the class author
-feels make sense for a given application).
+Instead, you'll use concrete subclasses that implement the interface it
+defines. These subclasses each provide the metadata necessary for a given
+software package, via the interface outlined above (plus any additional
+methods the class author deems sensible for a given application).
+
+This section describes the facilities App::Info provides for subclassing. The
+goal of the App::Info design has been to make subclassing straight-forward, so
+that developers can focus on gathering the data they need for their
+application and minimize the work necessary to handle unknown values or to
+confirm values. As a result, there are essentially three concepts that
+developers need to understand when subclassing App::Info: organization,
+utility methods, and events.
+
+=head2 Organization
 
 The organizational idea behind App::Info is to name subclasses by broad
 software categories. This approach allows the categories themselves to
@@ -472,23 +494,38 @@ specify more methods for all of their base classes to implement. For example,
 App::Info::HTTPD has specified the C<httpd_root()> abstract method that its
 subclasses must implement. So as you get ready to implement your own subclass,
 think about what category of software you're gathering information about.
+New categories can be added as necessary.
+
+=head2 Utility Methods
 
 Once you've decided on the proper category, you can start implementing your
-App::Info subclass. As you do so, take advantage of the tools that App::Info
-provides to make the job easier. These tools are divided into two categories:
-common tasks and event triggering.
+App::Info concrete subclass. As you do so, take advantage of App::Info::Util,
+wherein I've tried to encapsulate common functionality to make subclassing
+easier. I found that most of what I was doing repetitively was looking for
+files and directories, and searching through files. Thus, App::Info::Util
+subclasses L<File::Spec|File::Spec> in order to offer easy access to
+commonly-used methods from that class, e.g., C<path()>. Plus, it has several
+of its own methods to assist you in finding files and directories in lists of
+files and directories, as well as methods for searching through files and
+returning the values found in those files. See
+L<App::Info::Util|App::Info::Util> for more information, and the App::Info
+subclasses in this distribution for usage examples.
 
-Use a package-scoped lexical App::Info::Util object to carry out common tasks.
-If you find you're doing something over and over that's not already addressed
-by an App::Info::Util method, consider submitting a patch to App::Info::Util
-to add the functionality you need. See L<App::Info::Util|App::Info::Util> for
-complete documentation of its interface.
+I recommend the use of a package-scoped lexical App::Info::Util object. That
+way it's nice and handy when you need to carry out common tasks. If you find
+you're doing something over and over that's not already addressed by an
+App::Info::Util method, consider submitting a patch to App::Info::Util to add
+the functionality you need.
 
-Use the methods described below to trigger events. These events may optionally
-handled by module users who assign App::Info::Handler subclass objects to your
-App::Info subclass object. See the L<Event Handler Object Methods|"EVENT
-HANDLER OBJECT METHODS"> for a description of how the events can be handled by
-class users. The event methods are as follows.
+=head2 Events
+
+Use the methods described below to trigger events. Events are designed to
+provide a simple way for App::Info subclass developers to send status messages
+and errors, to confirm data values, and to request a value when the class
+caonnot determine a value itself. Events may optionally be handled by module
+users who assign App::Info::Handler subclass objects to your App::Info
+subclass object using the event handling methods described in the L<"Event
+Handler Object Methods"> section.
 
 =cut
 
@@ -517,18 +554,17 @@ my $handler = sub {
 
 ##############################################################################
 
-=head2 info
+=head3 info
 
   $self->info($message);
 
-Use this method when you wish to display status messages for the user. You may
-wish to use this method to inform users that you're searching for a particular
-file, or attempting to parse a file or some other resource for the data you
-need. For example, a commong use might be in the object constructor.
-Generally, when an App::Info object is created, some important initial piece
-of information is being sought, such as an executable file. That file may be
-in one of many locations, so it makes sense to let the user know that you're
-looking for it:
+Use this method to display status messages for the user. You may wish to use
+it to inform users that you're searching for a particular file, or attempting
+to parse a file or some other resource for the data you need. For example, a
+common use might be in the object constructor. Generally, when an App::Info
+object is created, some important initial piece of information is being
+sought, such as an executable file. That file may be in one of many locations,
+so it makes sense to let the user know that you're looking for it:
 
   $self->info("Searching for executable");
 
@@ -546,13 +582,13 @@ sub info {
 
 ##############################################################################
 
-=head2 error
+=head3 error
 
   $self->error($error);
 
-Use this method when you wish to inform the user that something unexpected
-happened. An example might be when you invoke another program to parse its
-output, but it's output isn't what you expected:
+Use this method to inform the user that something unexpected has happened. An
+example might be when you invoke another program to parse its output, but it's
+output isn't what you expected:
 
   $self->error("Unable to parse version from `/bin/myapp -c`");
 
@@ -569,9 +605,9 @@ sub error {
 
 ##############################################################################
 
-=head2 unknown
+=head3 unknown
 
-  $self->unknown($key, $prompt, $callback, $error);
+  my $val = $self->unknown($key, $prompt, $callback, $error);
 
 Use this method when a value is unknown. This will give the user the option --
 assuming the appropriate handler handles the event -- to provide the needed
@@ -583,8 +619,9 @@ data. The arguments are as follows:
 
 The C<$key> argument uniquely identifies the data point in your class, and is
 used by App::Info to ensure that an unknown event is handled only once, no
-matter how many times the method is called. Typical values are "version" and
-"lib_dir".
+matter how many times the method is called. The same value will be returned by
+subsequent calls to C<unknown()> as was returned by the first call, and no
+handlers will be activated. Typical values are "version" and "lib_dir".
 
 =item C<$prompt>
 
@@ -597,20 +634,24 @@ version".
 
 =item C<$callback>
 
-Assuming a handler has collected a value for your uknown data point, it might
+Assuming a handler has collected a value for your unknown data point, it might
 make sense to validate the value. For example, if you prompt the user for a
-directory location, and the user enters one, it makes sense to validate that
-the directory actually exists. The C<$callback> argument allows you to do
-this. It is a code reference that takes the new value as its first argument,
-and returns true if the value is valid, and false if it is not. For the
-directory example, a good callback might be C<sub { -d $_[0] }>.
+directory location, and the user enters one, it makes sense to ensure that the
+directory actually exists. The C<$callback> argument allows you to do this. It
+is a code reference that takes the new value or values as its arguments, and
+returns true if the value is valid, and false if it is not. For the sake of
+convenience, the first argument to the callback code reference is also stored
+in C<$_> .This makes it easy to validate using functions or operators that,
+er, operate on $_ by default, but still allows you to get more information
+from C<@_> if necessary. For the directory example, a good callback might be
+C<sub { -d }>.
 
 =item C<$error>
 
-The C<$error> argument is the error message to display in the event of the
-C<$callback> code reference returning a false value. This message may then be
-used by the event handler to let the user know what went wrong with the data
-she entered. For example, if the unknown value was a directory, and the user
+The C<$error> argument is the error message to display in the event that the
+C<$callback> code reference returns false. This message may then be used by
+the event handler to let the user know what went wrong with the data she
+entered. For example, if the unknown value was a directory, and the user
 entered a value that the C<$callback> identified as invalid, a message to
 display might be something like "Invalid directory path". Note that if the
 C<$error> argument is not provided, App::Info will supply the generic error
@@ -619,34 +660,23 @@ message "Invalid value".
 =back
 
 This may be the event method you use most, as it should be called in every
-method if you cannot provide the data needed by that method. It will
-typically be the last part of the method. Here's an example:
+metadata method if you cannot provide the data needed by that method. It will
+typically be the last part of the method. Here's an example demonstrating each
+of the above arguments:
 
-  sub lib_dir {
-      my $self = shift;
-      # ... Do stuff to try to find the lib directory.
-
-      # Trigger unknown event if you couldn't find the lib directory.
-      $self->{lib_dir} =
-        $self->unknown('lib_dir', "Enter lib directory path",
-                       sub { -d $_[0] }, "Not a directory")
-        unless $self->{lib_dir};
-
-      # Return the value (which may still be unknown, depending on how
-      # the unknown event was handled).
-      return $self->{lib_dir};
-  }
+  my $dir = $self->unknown('lib_dir', "Enter lib directory path",
+                           sub { -d }, "Not a directory")
 
 =cut
 
 sub unknown {
     my ($self, $key, $prompt, $cb, $err, $sigil) = @_;
+    # Just return the value if we've already handled this value. Ideally this
+    # shouldn't happen.
+    return $self->{__unknown__}{$key} if exists $self->{__unknown__}{$key};
 
-    # Create a prompt, if necessary.
-    unless ($prompt) {
-        my $name = $self->key_name;
-        $prompt = "Enter a valid $name $key";
-    }
+    # Create a prompt and error message, if necessary.
+    $prompt ||= "Enter a valid " . $self->key_name . " $key";
     $err ||= 'Invalid value';
 
     # Prepare the request arguments.
@@ -657,50 +687,82 @@ sub unknown {
 
     # Execute the handler sequence.
     my $req = $handler->($self, "unknown", $params);
-    return $req->value;
+
+    # Mark that we've provided this value.
+    $self->{__unknown__}{$key} = $req->value;
+    return $self->{__unknown__}{$key}
 }
 
 ##############################################################################
 
-=head2 confirm
+=head3 confirm
 
-  $self->confirm($key, $message, $value, $callback, $error);
+  my $val = $self->confirm($key, $prompt, $value, $callback, $error);
 
 This method is very similar to C<unknown()>, but serves a different purpose.
-Use this method for significant data points where you've found a relevant
+Use this method for significant data points where you've found an appropriate
 value, but want to ensure it's really the correct value. A "significant data
-point" is usually going to be a value essential for your class to collect
-other data values. For example, you might need to locate an executable that
-you can then call to collect other data. In general, this will only happen
-once in a class -- during the object construction -- but there may be cases in
-which it is needed more than that. Hopefully, though, once you've confirmed in
-the constructor that you've found the software, you can use that information
-to collect the data needed by all of the other methods and rely that they'll
-be right because that first, significant data point has been confirmed.
+point" is usually a value essential for your class to collect metadata values.
+For example, you might need to locate an executable that you can then call to
+collect other data. In general, this will only happen once in a class --
+during object construction -- but there may be cases in which it is needed
+more than that. But hopefully, once you've confirmed in the constructor that
+you've found what you need, you can use that information to collect the data
+needed by all of the metadata methods and can assume that they'll be right
+because that first, significant data point has been confirmed.
 
-Other than where and how often to use C<confirm()> its use is quite similar
+Other than where and how often to call C<confirm()>, its use is quite similar
 to that of C<unknown()>. Its arguments are as follows:
 
 =over
 
 =item C<$key>
 
+Same as for C<unknown()>, a string that uniquely identifies the data point in
+your class, and ensures that the event is handled only once for a given key.
+The same value will be returned by subsequent calls to C<confirm()> as was
+returned by the first call for a given key.
 
+=item C<$prompt>
+
+Same as for C<unknown()>. Although C<confirm()> is called to confirm a value,
+typically the prompt should request the relevant value, just as for
+C<unknown()>. The difference is that the handler I<should> use the C<$value>
+argument as the default should the user not provide a value.
+
+=item C<$value>
+
+The value to be confirmed. This is the value you've found, and it will be
+provided to the user as the default option when they're prompted for a new
+value.
+
+=item C<$callback>
+
+Same as for C<unknown()>. Because the user can enter data to replace the
+default value provided via the C<$value> argument, you might want to validate
+it. Use this code reference to do so.
+
+=item C<$error>
+
+Same as for C<unknown()>: an error message to display in the event that a
+value entered by the user isn't validated by the C<$callback> code reference.
 
 =back
+
+Here's an example usage demonstrating all of the above arguments:
+
+  my $exe = $self->confirm('shell', 'Path to your shell?', '/bin/sh',
+                           sub { -x }, 'Not an executable');
 
 =cut
 
 sub confirm {
     my ($self, $key, $prompt, $val, $cb, $err, $sigil) = @_;
     # Just return the value if we've already confirmed this value.
-    return $val if $self->{__confirm__}{$key};
+    return $self->{__confirm__}{$key} if exists $self->{__confirm__}{$key};
 
-    # Create a prompt, if necessary.
-    unless ($prompt) {
-        my $name = $self->key_name;
-        $prompt = "Enter a valid $name $key";
-    }
+    # Create a prompt and error message, if necessary.
+    $prompt ||= "Enter a valid " . $self->key_name . " $key";
     $err ||= 'Invalid value';
 
     # Prepare the request arguments.
@@ -714,17 +776,219 @@ sub confirm {
     my $req = $handler->($self, "confirm", $params);
 
     # Mark that we've confirmed this value.
-    $self->{"_conf_$key"} = 1;
+    $self->{__confirm__}{$key} = $req->value;
 
-    return $req->value;
+    return $self->{__confirm__}{$key}
 }
 
 1;
 __END__
 
-=pod
+=head2 Event Examples
 
-Here are some guidelines for subclassing App::Info.
+Below I provide some examples demonstrating the use of the event methods.
+These are meant to emphasize the contexts in which it's appropriate to use
+them.
+
+Let's start with the simplest, first. Let's say that to find the version
+number for an application, you need to search a file for the relevant data.
+Your App::Info concrete subclass might have a private method that handles this
+work, and this method is the appropriate place to use the C<info()> and, if
+necessary, C<error()> methods.
+
+  sub _find_version {
+      my $self = shift;
+
+      # Try to find the revelant file. We cover this method below.
+      # Just return if we cant' find it.
+      my $file = $self->_find_file('version.conf') or return;
+
+      # Send a status message.
+      $self->info("Searching '$file' file for version");
+
+      # Search the file. $util is an App::Info::Util object.
+      my $ver = $util->search_file($file, qr/^Version\s+(.*)$/);
+
+      # Trigger an error message, if necessary. We really think we'll have the
+      # value, but we have to cover our butts in the unlikely event that we're
+      # wrong.
+      $self->error("Unable to find version in file '$file'") unless $ver;
+
+      # Return the version number.
+      return $ver;
+  }
+
+Here we've used the C<info()> method to display a status message to let the
+user know what we're doing. Then we used the C<error()> method when something
+unexpected happened, which in this case was that we weren't able to find the
+version number in the file.
+
+Note the C<_find_file()> method we've thrown in. This might be a method that
+we call whenever we need to find a file that might be in one of a list of
+directories. This method, too, will be an appropriate place for an C<info()>
+method call. But rather than call the C<error()> method when the file can't be
+found, you might want to give an event handler a chance to supply that value
+for you. Use the C<unknown()> method for a case such as this:
+
+  sub _find_file {
+      my ($self, $file) = @_;
+
+      # Send a status message.
+      $self->info("Searching for '$file' file");
+
+      # Look for the file. See App::Info:Utility for its interface.
+      my @paths = qw(/usr/conf /etc/conf /foo/conf);
+      my $found = $util->first_cat_path($file, @paths);
+
+      # If we didn't find it, trigger an unknown event to
+      # give a handler a chance to get the value.
+      $found ||= $self->unknown("file_$file", "Location of '$file' file?",
+                                sub { -f }, "Not a file");
+
+      # Now return the file name, regardless of whether we found it or not.
+      return $found;
+  }
+
+Note how in this method, we've tried to locate the file ourselves, but if we
+can't find it, we trigger an unknown event. This allows clients of our
+App::Info subclass to try to establish the value themselves by having an
+App::Info::Handler subclass handle the event. If a value is found by an
+App::Info::Handler subclass, it will be returned by C<unknown()> and we can
+continue. But we can't assume that the unknown event will even be handled, and
+thus must expect that an unknown value may remain unknown. This is why the
+C<_find_version()> method above simply returns if C<_find_file()> doesn't
+return a file name; there's no point in searching through a file that doesn't
+exist.
+
+Attentive readers may be left to wonder how to decide when to use C<error()>
+and when to use C<unknown()>. To a large extent, this decision must be based
+on one's own understanding of what's most appropriate. Nevertheless, I offer
+the following simple guidelines: Use C<error()> when you expect something to
+work and then it just doesn't (as when a file exists and should contain the
+information you seek, but then doesn't). Use C<unknown()> when you're less
+sure of your processes for finding the value, and also for any of the values
+that should be returned by any of the L<metadata object methods|"Metadata
+Object Methods">. And of course, C<error()> would be more appropriate when you
+encounter an unexpected condition and don't think that it could be handled in
+any other way.
+
+Now, more than likely, a method such C<_find_version()> would be called by the
+C<version()> method, which is a metadata method mandated by the App::Info
+abstract base class. This is the more appropriate place to handle an unknown
+version value. Indeed, every one of your metadata methods should make use of
+the C<unknown()> method. The C<version()> method then should look something
+like this:
+
+  sub version {
+      my $self = shift;
+
+      unless (exists $self->{version}) {
+          # Try to find the version number.
+          $self->{version} = $self->_find_version ||
+            $self->unknown('version', "Enter the version number");
+      }
+
+      # Now return the version number.
+      return $self->{version};
+  }
+
+Note how this method only tries to find the version number once. Any
+subsequent calls to C<version()> will return the same value that was returned
+the first time it was called. Of course, thanks to the first argument to
+C<unknown()>, we could have have tried to enumerate the version number every
+time, as C<unknown()> will return the same value every time it is called (as,
+indeed, should C<_find_version()>. But by checking for the C<version> key in
+C<$self> ourselves, we save some of the overhead.
+
+But as I said before, every metadata method should make use of the
+C<unknown()> method. Thus, the C<major()> method might looks something like
+this:
+
+  sub major {
+      my $self = shift;
+
+      unless (exists $self->{major}) {
+          # Try to get the major version from the full version number.
+          ($self->{major}) = $self->version =~ /^(\d+)\./;
+          # Handle an unknown value.
+          $self->{major} = $self->unknown('major', "Enter major version",
+                                          sub { /^\d+$/ }, "Not a number")
+            unless defined $self->{major};
+      }
+
+      return $self->{version};
+  }
+
+Finally, the C<confirm()> method should be used to verify core pieces of data
+that significant numbers of other methods rely on. Typically such data are
+executables or configuration files from which will be drawn other metadata.
+Most often, such major data points will be sought in the object constructor.
+Here's an example:
+
+  sub new {
+      # Construct the object.
+      my $self = shift->SUPER::new(@_);
+
+      # Try to find the executable.
+      $self->info("Searching for executable");
+      if (my $exe = $util->first_exe('/bin/myapp', '/usr/bin/myapp')) {
+          # Confirm it.
+          $self->{exe} =
+            $self->confirm('binary', 'Path to your executable?',
+                           $exe, sub { -x }, 'Not an executable');
+      } else {
+          # Handle an unknown value.
+          $self->{exe} =
+            $self->unknown('binary', 'Path to your executable?',
+                           sub { -x }, 'Not an executable');
+      }
+
+      # We're done.
+      return $self;
+  }
+
+By now, most of what's going on here should be quite familiar. The use of the
+C<confirm()> method is quite similar to that of C<unknown()>. Really the only
+difference is that the value is known, but we need verification or a new value
+supplied if the value we found isn't correct. Such may be the case when
+multiple copies of the executable have been installed on the system, we found
+F</bin/myapp>, but the user may really be interested in F</usr/bin/myapp>.
+Thus the C<confirm()> event gives the user the chance to change the value if
+the confirm event is handled.
+
+The final thing to note about this constructor is the first line:
+
+  my $self = shift->SUPER::new(@_);
+
+The first thing an App::Info subclass should do is execute this line to allow
+the super class to construct the object first. Doing so allows any event
+handling arguments to set up the event handlers, so that when we call
+C<confirm()> or C<unknown()> the event will be handled as the client expects.
+
+If we needed our subclass to take arguments, the approach is to specify the
+same C<key => $arg> syntax as is used by App::Info's C<new()> method. Say we
+wanted to allow clients of our App::Info subclass to pass in a list of
+alternate executable locations for us to search. Such an argument would most
+make sense as an array reference. So we specify that the key be C<alt_paths>
+and allow the user to construct an object like this:
+
+  my $app = App::Info::Category::FooApp->new( alt_paths => \@paths );
+
+This approach allows the super class constructor arguments to pass unmolested
+(as long as we use unique keys!):
+
+  my $app = App::Info::Category::FooApp->new( on_error  => \@handlers,
+                                              alt_paths => \@paths );
+
+Then, to retrieve these paths inside our C<new()> construcotr, all we need do
+is access them directly from the object:
+
+  my $self = shift->SUPER::new(@_);
+  my $alt_paths = $self->{alt_paths};
+
+=head2 Subclassing Guidelines
+
+To summarize, here are some guidelines for subclassing App::Info.
 
 =over 4
 
@@ -735,56 +999,55 @@ App::Info namespace well-organized. New categories can be added as needed.
 
 =item *
 
-When you create the new() constructor, always call SUPER::new(). This ensures
-that the methods handle by the App::Info base classes (e.g., C<error()>) work
-properly.
+When you create the C<new()> constructor, always call C<SUPER::new(@_)>. This
+ensures that the event handling methods methods defined by the App::Info base
+classes (e.g., C<error()>) will work properly.
 
 =item *
 
 Use a package-scoped lexical App::Info::Util object to carry out common tasks.
 If you find you're doing something over and over that's not already addressed
-by an App::Info::Util method, consider submitting a patch to App::Info::Util
-to add the functionality you need. See L<App::Info::Util|App::Info::Util> for
-complete documentation of its interface.
+by an App::Info::Util method, and you think that others might find your
+solution useful, consider submitting a patch to App::Info::Util to add the
+functionality you need. See L<App::Info::Util|App::Info::Util> for complete
+documentation of its interface.
 
 =item *
 
-Use the C<error()> method to report problems to clients of your App::Info
-subclass. Doing so ensures that all problems encountered in interrogating
-software package can be reported to and handled by client users in a uniform
-manner. Furthermore, don't assume that calling C<error()> causes the program
-to exit or to return from method execution. Clients can choose to ignore
-errors by using the "silent" C<error_level>. Of course, fatal problem should
-still be fatal, but non-fatal issues -- such as when an important file cannot
-be found, resulting in less metadata being provided by the App::Info object --
-should be noted by use of the C<error()> method exclusively.
+Use the C<info()> event triggering method to send messages to users of your
+subclass.
 
 =item *
 
-Be sure to implement B<all> of the abstract methods defined by your category
-abstract base class -- even if they don't do anything. Doing so ensures that
-all App::Info subclasses share a common interface, and can, if necessary, be
-used without regard to subclass. Any method not implemented but called on an
-object will generate a fatal exception.
+Use the C<error()> event triggering method to alert users of unexpected
+conditions. Fatal errors should still be fatal; use C<Carp::croak()> to throw
+exceptions for fatal errors.
+
+=item *
+
+Use the C<unknown()> event triggering method when a metadata or other
+important value is unknown and you want to give any event handlers the chance
+to provide the data.
+
+=item *
+
+Use the C<confirm()> event triggering method when a core piece of data is
+known (such as the location of an executable in the C<new()> constructor) and
+you need to make sure that you have the I<correct> information.
+
+=item *
+
+Be sure to implement B<all> of the abstract methods defined by App::Info and
+by your category abstract base class -- even if they don't do anything. Doing
+so ensures that all App::Info subclasses share a common interface, and can, if
+necessary, be used without regard to subclass. Any method not implemented but
+called on an object will generate a fatal exception.
 
 =back
 
-Feel free to use the subclasses included in this distribution as examples to
-follow when creating your own subclasses. I've tried to encapsulate common
-functionality in L<App::Info::Util|App::Info::Util> to make the job easier. I
-found that most of what I was doing repetitively was looking for files and
-directories, and searching through files. Thus, App::Info::Util subclasses
-L<File::Spec|File::Spec> in order to offer easy access to commonly-used
-methods from that class (e.g., C<path()>. Plus, it has several of its own
-methods to assist you in finding files and directories in lists of files and
-directories, as well as methods for searching through files and returning the
-values found in those files. See L<App::Info::Util|App::Info::Util> for more
-information, and the App::Info subclasses in this distribution for actual
-usage examples.
-
 Otherwise, have fun! There are a lot of software packages for which relevant
-information might be collected and aggregated into an App::Info subclass
-(witness all of the Automake macros in the world!), and folks who are
+information might be collected and aggregated into an App::Info concrete
+subclass (witness all of the Automake macros in the world!), and folks who are
 knowledgeable about particular software packages or categories of software are
 warmly invited to contribute. As more subclasses are implemented, it will make
 sense, I think, to create separate distributions based on category -- or even,
@@ -795,8 +1058,7 @@ But I get ahead of myself...
 
 =head1 BUGS
 
-Can there really be much in the way of bugs in an abstract base class? Drop me
-a line if you happen to discover any.
+Feel free to drop me an email if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
@@ -804,13 +1066,56 @@ David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
-L<App::Info::Lib|App::Info::HTTPD>,
-L<App::Info::Lib|App::Info::RDBMS>,
-L<App::Info::Lib|App::Info::Lib>,
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>,
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>,
-L<App::Info::Lib|App::Info::Lib::Expat>,
-L<App::Info::Lib|App::Info::Lib::Iconv>
+The following classes define a few software package categories in which
+App::Info subclasses can be placed. Check them out for ideas on how to
+create new category subclasses.
+
+=over 4
+
+=item L<App::Info::HTTP|App::Info::HTTPD>
+
+=item L<App::Info::RDBMS|App::Info::RDBMS>
+
+=item L<App::Info::Lib|App::Info::Lib>
+
+=back
+
+The following classes implement the App::Info interface for various software
+packages. Check them out for examples of how to implement new App::Info
+concrete subclasses.
+
+=over
+
+=item L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>
+
+=item L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>
+
+=item L<App::Info::Lib::Expat|App::Info::Lib::Expat>
+
+=item L<App::Info::Lib::Iconv|App::Info::Lib::Iconv>
+
+=back
+
+L<App::Info::Util|App::Info::Util> provides utility methods for App::Info
+subclasses.
+
+L<App::Info::Handler|App::Info::Handler> defines an interface for event
+handlers to subclass. Consult its documentation for information on creating
+custom event handlers.
+
+The following classes implement the App::Info::Handler interface to offer some
+simple event handling. Check them out for examples of how to implement new
+App::Info::Handler subclasses.
+
+=over 4
+
+=item L<App::Info::Handler::Print|App::Info::Handler::Print>
+
+=item L<App::Info::Handler::Carp|App::Info::Handler::Carp>
+
+=item L<App::Info::Handler::Prompt|App::Info::Handler::Prompt>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
