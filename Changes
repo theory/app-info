@@ -1,5 +1,9 @@
 Revision history for Perl extension App::Info.
 
+0.07  
+      - Added first_exe() to App::Info::Util. Changed RDBMS::PostgreSQL,
+        HTTP::Apache, and Lib::Iconv to use it.
+
 0.06  Wed Jun  5 15:36:36 2002
       - Fixed all version tests in test scripts to check for definedness
         rather than truth, so that version numbers that are "0" will be
