@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.11 2002/06/03 23:55:40 david Exp $
+# $Id: Expat.pm,v 1.12 2002/06/04 01:15:41 david Exp $
 
 =head1 NAME
 
@@ -29,7 +29,7 @@ App::Info::Lib.
 When it loads, App::Info::Lib::Expat searches all of the paths in the
 C<libsdirs> and C<loclibpth> -- as defined by the Perl L<Config|Config> module
 -- plus F</sw/lib> (in support of all you Fink users out there) for one of the
-following files:n
+following files:
 
 =over 4
 
@@ -331,6 +331,9 @@ __END__
 This is a pretty simple class. It's possible that there are more directories
 that ought to be searched for libraries and includes. And if anyone knows
 how to get the version numbers, let me know!
+
+The format of the version number seems to have changed recently (1.95.1-2),
+and now I don't know where to grab it from. Patches welcome.
 
 =head1 BUGS
 
