@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.36 2002/06/28 22:34:54 david Exp $
+# $Id: Info.pm,v 1.37 2002/06/30 22:18:40 david Exp $
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ use App::Info::Handler;
 use App::Info::Request;
 use vars qw($VERSION);
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 ##############################################################################
 ##############################################################################
@@ -1101,7 +1101,7 @@ Feel free to drop me an email if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">>
 
 =head1 SEE ALSO
 

@@ -1,12 +1,12 @@
 package App::Info::HTTPD;
 
-# $Id: HTTPD.pm,v 1.7 2002/06/15 00:49:55 david Exp $
+# $Id: HTTPD.pm,v 1.8 2002/06/30 22:18:41 david Exp $
 
 use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -54,7 +54,7 @@ The root directory of the HTTPD server.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">>
 
 =head1 SEE ALSO
 

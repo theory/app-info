@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.26 2002/06/27 18:13:31 david Exp $
+# $Id: Expat.pm,v 1.27 2002/06/30 22:18:41 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 my $u = App::Info::Util->new;
 
@@ -642,9 +642,9 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net> based on code by Sam Tregar <sam@tregar.com>
-that Sam, in turn, borrowed from Clark Cooper's L<XML::Parser|XML::Parser>
-module.
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">> based on code by Sam
+Tregar <L<sam@tregar.com|"sam@tregar.com">> that Sam, in turn, borrowed from
+Clark Cooper's L<XML::Parser|XML::Parser> module.
 
 =head1 SEE ALSO
 

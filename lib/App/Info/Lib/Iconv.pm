@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.21 2002/06/27 18:46:21 david Exp $
+# $Id: Iconv.pm,v 1.22 2002/06/30 22:18:41 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 my $u = App::Info::Util->new;
 
@@ -747,8 +747,8 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net> based on code by Sam Tregar
-<sam@tregar.com>.
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">> based on code by Sam
+Tregar <L<sam@tregar.com|"sam@tregar.com">>.
 
 =head1 SEE ALSO
 

@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.36 2002/06/27 19:56:52 david Exp $
+# $Id: Apache.pm,v 1.37 2002/06/30 22:18:41 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::HTTPD;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 my $u = App::Info::Util->new;
 
@@ -1275,8 +1275,8 @@ Feel free to drop me an email if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net> based on code by Sam Tregar
-<sam@tregar.com>.
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">> based on code by Sam
+Tregar <L<sam@tregar.com|"sam@tregar.com">>.
 
 =head1 SEE ALSO
 

@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.19 2002/06/15 00:49:55 david Exp $
+# $Id: Util.pm,v 1.20 2002/06/30 22:18:41 david Exp $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ use strict;
 use File::Spec ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
@@ -438,7 +438,7 @@ email.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <L<david@wheeler.net|"david@wheeler.net">>
 
 =head1 SEE ALSO
 
