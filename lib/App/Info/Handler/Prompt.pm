@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.2 2002/06/12 18:18:58 david Exp $
+# $Id: Prompt.pm,v 1.3 2002/06/12 21:17:09 david Exp $
 
 =head1 NAME
 
@@ -109,9 +109,15 @@ sub handler {
             }
         }
 
-    } else {
+    } elsif ($type eq 'info') {
         # Just print the message.
-        print $req->message, "\n";
+        print STDOUT $req->message, "\n";
+    } elsif ($type eq 'error') {
+        # Just print the message.
+        print STDERR $req->message, "\n";
+    } else {
+        # This shouldn't happen.
+        Carp::croak("Invalid request type '$type'");
     }
 
     # Save the answer.
