@@ -6,6 +6,7 @@ Revision history for Perl extension App::Info.
         methods in HTTP::Apache return values when Apache is installed, as
         sometimes folks don't have User and Group directives set in their
         httpd.conf files. Grrr...
+      - Fixed bareword references in Makefile.PL.
 
 0.10  Wed Jun  5 23:58:54 2002
       - Added new error_level parameter to new(). This tells App::Info objects
