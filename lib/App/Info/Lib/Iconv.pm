@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.16 2002/06/05 23:25:28 david Exp $
+# $Id: Iconv.pm,v 1.17 2002/06/05 23:26:47 david Exp $
 
 =head1 NAME
 
@@ -419,6 +419,10 @@ __END__
 
 This is a pretty simple class. It's possible that there are more directories
 that ought to be searched for libraries and includes.
+
+=head1 TO DO
+
+Improve this class by borrowing code from Matt Seargent's AxKit F<Makefil.PL>.
 
 =head1 BUGS
 
