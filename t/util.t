@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.3 2002/06/01 21:29:05 david Exp $
+# $Id: util.t,v 1.4 2002/06/02 23:45:12 david Exp $
 
 use strict;
-use Test::More tests => 8;
+use Test::More tests => 10;
 use File::Spec::Functions;
 use File::Path;
 
@@ -48,6 +48,16 @@ is( $util->first_cat_file('app-info.tst', $util->path, $util->tmpdir),
 is( $util->first_cat_file(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
                           $util->path, $util->tmpdir, "C:\\mytemp"),
     $tmp_file, "Test first_cat_file with array" );
+
+# Now find the directory housing the file.
+is( $util->first_cat_dir('app-info.tst', $util->path, $util->tmpdir),
+    $util->tmpdir, "Test first_cat_file" );
+
+# And test it again using an array.
+is( $util->first_cat_dir(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
+                          $util->path, $util->tmpdir, "C:\\mytemp"),
+    $util->tmpdir, "Test first_cat_file with array" );
+
 
 
 # Don't forget to delete our temporary file.
