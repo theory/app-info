@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.11 2002/06/03 23:56:38 david Exp $
+# $Id: Iconv.pm,v 1.12 2002/06/04 01:20:03 david Exp $
 
 =head1 NAME
 
@@ -26,12 +26,11 @@ App::Info::Lib::Iconv supplies information about the libiconv library
 installed on the local system. It implements all of the methods defined by
 App::Info::Lib.
 
-When it loads, App::Info::Lib::Iconv searches the local file system for the
-F<iconv> application. If F<iconv> is found, libiconv will be assumed to be
-installed.
+When it loads, App::Info::Lib::Iconv searches the file system for the F<iconv>
+application. If F<iconv> is found, libiconv will be assumed to be installed.
 
 App::Info::Lib::Iconv searches for F<iconv> along your path, as defined by
-File::Spec->path. Failing that, it searches the following directories:
+C<File::Spec->path>. Failing that, it searches the following directories:
 
 =over 4
 
@@ -161,10 +160,10 @@ sub version {
   my $major_version = $iconv->major_version;
 
 Returns the Iconv major version number. App::Info::Lib::Iconv parses the
-version number from the iconv.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "1". Returns C<undef> if Iconv is not
-installed. Emits a warning if Iconv is installed but F<iconv.h> could not be
-found or the version number could not be parsed.
+version number from the iconv.h file, if it exists. For example, if
+C<version()> returns "1.95.2", then this method returns "1". Returns C<undef>
+if Iconv is not installed. Emits a warning if Iconv is installed but
+F<iconv.h> could not be found or the version number could not be parsed.
 
 =cut
 
@@ -178,10 +177,10 @@ sub major_version {
   my $minor_version = $iconv->minor_version;
 
 Returns the Iconv minor version number. App::Info::Lib::Iconv parses the
-version number from the iconv.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "95". Returns C<undef> if Iconv is not
-installed. Emits a warning if Iconv is installed but F<iconv.h> could not be
-found or the version number could not be parsed.
+version number from the iconv.h file, if it exists. For example, if
+C<version()> returns "1.95.2", then this method returns "95". Returns C<undef>
+if Iconv is not installed. Emits a warning if Iconv is installed but
+F<iconv.h> could not be found or the version number could not be parsed.
 
 =cut
 
@@ -402,8 +401,7 @@ __END__
 =head1 KNOWN ISSUES
 
 This is a pretty simple class. It's possible that there are more directories
-that ought to be searched for libraries and includes. And if anyone knows
-how to get the version numbers, let me know!
+that ought to be searched for libraries and includes.
 
 =head1 BUGS
 
