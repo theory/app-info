@@ -6,7 +6,7 @@ use strict;
 use Test::More;
 
 if (exists $ENV{APP_INFO_MAINTAINER}) {
-    plan tests => 17;
+    plan tests => 18;
 } else {
     plan skip_all => "maintainer's internal tests.";
 }
@@ -31,6 +31,7 @@ is( $pg->lib_dir, '/usr/local/pgsql/lib', "Test lib dir" );
 is( $pg->bin_dir, '/usr/local/pgsql/bin', "Test bin dir" );
 is( $pg->so_lib_dir, '/usr/local/pgsql/lib', "Test so lib dir" );
 is( $pg->inc_dir, "/usr/local/pgsql/include", "Test inc dir" );
+is( $pg->configure, '', "Test configure" );
 is( $pg->home_url, 'http://www.postgresql.org/', "Get home URL" );
-is( $pg->download_url, 'http://www.ca.postgresql.org/sitess.html',
+is( $pg->download_url, 'http://www.postgresql.org/mirrors-ftp.html',
     "Get download URL" );
