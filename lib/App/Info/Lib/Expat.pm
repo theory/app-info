@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.6 2002/06/03 01:55:45 david Exp $
+# $Id: Expat.pm,v 1.7 2002/06/03 01:58:09 david Exp $
 
 =head1 NAME
 
@@ -126,6 +126,7 @@ could not be parsed.
 sub version {
     return unless $_[0]->{libexpat};
     unless (exists $_[0]->{version}) {
+        $_[0]->{version} = undef;
         my $inc = $_[0]->inc_dir
           or Carp::carp("Cannot get Expat version because file 'expat.h' " .
                         "does not exist");
