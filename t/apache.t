@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.4 2002/06/01 21:39:58 david Exp $
+# $Id: apache.t,v 1.5 2002/06/03 17:59:28 david Exp $
 
 use strict;
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
 
@@ -22,6 +22,8 @@ if ($apache->installed) {
     ok( $apache->magic_number, "Got magic number" );
     $apache->mod_so;
     pass("Can get mod_so");
+    $apache->mod_perl;
+    pass("Can get mod_perl");
     is( ref $apache->static_mods, 'ARRAY', "Got static mods" );
     ok( $apache->compile_option('SERVER_CONFIG_FILE'), "Got compile option" );
 } else {
@@ -34,6 +36,7 @@ if ($apache->installed) {
     ok( !$apache->httpd_root, "Don't got httpd root" );
     ok( !$apache->magic_number, "Don't got magic number" );
     ok( !$apache->mod_so, "Don't got mod_so" );
+    ok( !$apache->mod_perl, "Don't got mod_perl" );
     ok( !$apache->static_mods, "Don't got static mods" );
     ok( !$apache->compile_option('SERVER_CONFIG_FILE'),
         "Don't got compile option" );
