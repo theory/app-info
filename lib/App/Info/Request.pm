@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.1 2002/06/10 06:03:06 david Exp $
+# $Id: Request.pm,v 1.2 2002/06/12 00:48:43 david Exp $
 
 =head1 NAME
 
@@ -88,6 +88,15 @@ sub new {
         $params->{sigil} = '$';
     }
 
+    # Validate type parameter.
+    if (my $t = $params->{type}) {
+        Carp::croak("Invalid handler type '$t'")
+          unless $t eq 'error' or $t eq 'info' or $t eq 'unknown'
+          or $t eq 'confirm';
+    } else {
+        $params->{type} = 'info';
+    }
+
     # Return the request object.
     bless $params, $class;
 }
@@ -95,6 +104,7 @@ sub new {
 sub message { $_[0]->{message} }
 sub prompt { $_[0]->{prompt} }
 sub sigil { $_[0]->{sigil} }
+sub type { $_[0]->{type} }
 
 sub callback {
     my $self = shift;
