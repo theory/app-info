@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.15 2002/06/05 20:37:20 david Exp $
+# $Id: Iconv.pm,v 1.16 2002/06/05 23:25:28 david Exp $
 
 =head1 NAME
 
@@ -24,10 +24,33 @@ App::Info::Lib::Iconv - Information about libiconv
 
 App::Info::Lib::Iconv supplies information about the libiconv library
 installed on the local system. It implements all of the methods defined by
-App::Info::Lib.
+App::Info::Lib. Methods that throw errors will throw them only the first time
+they're called. To start over (after, say, someone has installed libiconv)
+construct a new App::Info::Lib::Iconv object to aggregate new metadata.
 
-When it loads, App::Info::Lib::Iconv searches the file system for the F<iconv>
-application. If F<iconv> is found, libiconv will be assumed to be installed.
+=cut
+
+use strict;
+use File::Basename ();
+use App::Info::Util;
+use App::Info::Lib;
+use vars qw(@ISA $VERSION);
+@ISA = qw(App::Info::Lib);
+$VERSION = '0.05';
+
+my $u = App::Info::Util->new;
+
+=head1 CONSTRUCTOR
+
+=head2 new
+
+  my $iconv = App::Info::Lib::Iconv->new;
+
+Returns an App::Info::Lib::Iconv object.
+
+When called, C<new()> searches the file system for the F<iconv> application.
+If F<iconv> is found, libiconv will be assumed to be installed. Otherwise,
+most of the object methods will return C<undef>.
 
 App::Info::Lib::Iconv searches for F<iconv> along your path, as defined by
 C<File::Spec->path>. Failing that, it searches the following directories:
@@ -54,18 +77,8 @@ C<File::Spec->path>. Failing that, it searches the following directories:
 
 =cut
 
-use strict;
-use File::Basename ();
-use App::Info::Util;
-use App::Info::Lib;
-use vars qw(@ISA $VERSION);
-@ISA = qw(App::Info::Lib);
-$VERSION = '0.05';
-
-my $obj = {};
-my $u = App::Info::Util->new;
-
-do {
+sub new {
+    my $self = shift->SUPER::new(@_);
     # Find iconv.
     my @paths = ($u->path,
       qw(/usr/local/bin
@@ -77,23 +90,9 @@ do {
          /sbin
          /sw/sbin));
 
-    $obj->{iconv_exe} = $u->first_cat_exe('iconv', @paths);
-};
-
-=head1 CONSTRUCTOR
-
-=head2 new
-
-  my $iconv = App::Info::Lib::Iconv->new;
-
-Returns an App::Info::Lib::Iconv object. Since App::Info::Lib::Iconv is
-implemented as a singleton class, the same object will be returned every time.
-This ensures that only the minimum number of system calls are made to gather
-the data necessary for the object methods.
-
-=cut
-
-sub new { bless $obj, ref $_[0] || $_[0] }
+    $self->{iconv_exe} = $u->first_cat_exe('iconv', @paths);
+    return $self;
+}
 
 =head1 OBJECT METHODS
 
@@ -104,7 +103,9 @@ sub new { bless $obj, ref $_[0] || $_[0] }
 
 Returns true if libiconv is installed, and false if it is not.
 App::Info::Lib::Iconv determines whether libiconv is installed based on the
-presence or absence of the F<iconv> application on the file system.
+presence or absence of the F<iconv> applicatio, as found when C<new()>
+constructed the object. If libiconv does not appear to be installed, then most
+of the other object methods will return empty values.
 
 =cut
 
@@ -126,19 +127,20 @@ sub name { 'libiconv' }
   my $version = $iconv->version;
 
 Returns the full version number for libiconv. App::Info::Lib::Iconv parses the
-version number from the iconv.h file, if it exists. Returns C<undef> if Iconv
-is not installed. Emits a warning if Iconv is installed but F<iconv.h> could
-not be found or the version number could not be parsed.
+version number from the F<iconv.h> file, if it exists. Emits a warning if
+libiconv is installed but F<iconv.h> could not be found or the version number
+could not be parsed.
 
 =cut
 
 sub version {
-    return unless $_[0]->{iconv_exe};
-    unless (exists $_[0]->{version}) {
-        $_[0]->{version} = undef;
-        my $inc = $_[0]->inc_dir
-          or Carp::carp("Cannot get libiconv version because file 'iconv.h' " .
-                        "does not exist");
+    my $self = shift;
+    return unless $self->{iconv_exe};
+    unless (exists $self->{version}) {
+        $self->{version} = undef;
+        my $inc = $self->inc_dir
+          or $self->error("Cannot get libiconv version because file " .
+                          "'iconv.h' does not exist");
         my $header = $u->catfile($inc, 'iconv.h');
         # This is the line we're looking for:
         # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
@@ -151,13 +153,13 @@ sub version {
             # Left shift 8 and subtract from version.
             my $minor = $ver - ($major << 8);
             # Store 'em!
-            @{$_[0]}{qw(version major minor)} =
+            @{$self}{qw(version major minor)} =
               ("$major.$minor", $major, $minor);
         } else {
-            Carp::carp("Unable to parse version number from file '$header'");
+            $self->error("Unable to parse version number from file '$header'");
         }
     }
-    return $_[0]->{version};
+    return $self->{version};
 }
 
 =head2 major_version
@@ -166,9 +168,8 @@ sub version {
 
 Returns the Iconv major version number. App::Info::Lib::Iconv parses the
 version number from the iconv.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "1". Returns C<undef>
-if Iconv is not installed. Emits a warning if Iconv is installed but
-F<iconv.h> could not be found or the version number could not be parsed.
+C<version()> returns "1.95.2", then this method returns "1". See the
+L<version|"version"> method for a list of possible errors.
 
 =cut
 
@@ -183,9 +184,8 @@ sub major_version {
 
 Returns the Iconv minor version number. App::Info::Lib::Iconv parses the
 version number from the iconv.h file, if it exists. For example, if
-C<version()> returns "1.95.2", then this method returns "95". Returns C<undef>
-if Iconv is not installed. Emits a warning if Iconv is installed but
-F<iconv.h> could not be found or the version number could not be parsed.
+C<version()> returns "1.95.2", then this method returns "95". See the
+L<version|"version"> method for a list of possible errors.
 
 =cut
 
@@ -203,14 +203,14 @@ return false.
 
 =cut
 
-sub patch_version {}
+sub patch_version { return }
 
 =head2 bin_dir
 
   my $bin_dir = $iconv->bin_dir;
 
-Returns the path of the directory in which the F<iconv> application was found.
-Returns C<undef> if libiconv is not installed.
+Returns the path of the directory in which the F<iconv> application was found
+when the object was constructed by C<new()>.
 
 =cut
 
@@ -226,9 +226,9 @@ sub bin_dir {
 
   my $inc_dir = $iconv->inc_dir;
 
-Returns the directory path in which the file F<iconv.h> was found. Returns
-C<undef> if libiconv is not installed, or if F<iconv.h> could not be found.
-App::Info::Lib::Iconv searches for F<iconv.h> in the following directories:
+Returns the directory path in which the file F<iconv.h> was found. Throws an
+error if F<iconv.h> could not be found. App::Info::Lib::Iconv searches for
+F<iconv.h> in the following directories:
 
 =over 4
 
@@ -245,13 +245,17 @@ App::Info::Lib::Iconv searches for F<iconv.h> in the following directories:
 sub inc_dir {
     return unless $_[0]->{iconv_exe};
     unless (exists $_[0]->{inc_dir}) {
-        $_[0]->{inc_dir} = undef;
         # Should there be more paths than this?
         my @paths = qw(/usr/local/include
                        /usr/include
                        /sw/include);
 
-        $_[0]->{inc_dir} = $u->first_cat_dir('iconv.h', @paths);
+        if (my $dir = $u->first_cat_dir('iconv.h', @paths)) {
+            $_[0]->{inc_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find inc directory");
+            $_[0]->{inc_dir} = undef;
+        }
     }
     return $_[0]->{inc_dir};
 }
@@ -260,9 +264,9 @@ sub inc_dir {
 
   my $lib_dir = $iconv->lib_dir;
 
-Returns the directory path in which a libiconv library was found. Returns
-C<undef> if libiconv is not installed, or if no libiconv library could be
-found. App::Info::Lib::Iconv searches for these files:
+Returns the directory path in which a libiconv library was found. Throws an
+error if no libiconv library could be found. App::Info::Lib::Iconv searches
+for these files:
 
 =over 4
 
@@ -301,7 +305,6 @@ found. App::Info::Lib::Iconv searches for these files:
 sub lib_dir {
     return unless $_[0]->{iconv_exe};
     unless (exists $_[0]->{lib_dir}) {
-        $_[0]->{lib_dir} = undef;
         # Should there be more paths than this?
         my @paths = qw(/usr/local/lib
                        /usr/lib
@@ -315,7 +318,12 @@ sub lib_dir {
                        libiconv.a
                        libiconv.la);
 
-        $_[0]->{lib_dir} = $u->first_cat_dir(\@files, @paths);
+        if (my $dir = $u->first_cat_dir(\@files, @paths)) {
+            $_[0]->{lib_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find lib direcory");
+            $_[0]->{lib_dir} = undef;
+        }
     }
     return $_[0]->{lib_dir};
 }
@@ -325,8 +333,8 @@ sub lib_dir {
   my $so_lib_dir = $iconv->so_lib_dir;
 
 Returns the directory path in which a libiconv shared object library was
-found. Returns C<undef> if libiconv is not installed, or if no libiconv shared
-object library could be found. App::Info::Lib::Iconv searches for these files:
+found. Throws an error if no libiconv shared object library could be found.
+App::Info::Lib::Iconv searches for these files:
 
 =over 4
 
@@ -361,7 +369,6 @@ object library could be found. App::Info::Lib::Iconv searches for these files:
 sub so_lib_dir {
     return unless $_[0]->{iconv_exe};
     unless (exists $_[0]->{so_lib_dir}) {
-        $_[0]->{so_lib_dir} = undef;
         # Should there be more paths than this?
         my @paths = qw(/usr/local/lib
                        /usr/lib
@@ -375,7 +382,12 @@ sub so_lib_dir {
                        libiconv.2.dylib
                        libiconv.2.0.4.dylib);
 
-        $_[0]->{so_lib_dir} = $u->first_cat_dir(\@files, @paths);
+        if (my $dir = $u->first_cat_dir(\@files, @paths)) {
+            $_[0]->{so_lib_dir} = $dir;
+        } else {
+            $_[0]->error("Could not find shared object lib direcory");
+            $_[0]->{so_lib_dir} = undef;
+        }
     }
     return $_[0]->{so_lib_dir};
 }
