@@ -24,60 +24,61 @@ BEGIN { use_ok('App::Info::RDBMS::SQLite') }
 
 # Test info events.
 ok( my $info = EventTest->new, "Create info EventTest" );
-ok( my $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
+ok( my $sqlite = App::Info::RDBMS::SQLite->new( on_info => $info ),
     "Got Object");
 is( $info->message, "Looking for SQLite",
     "Check constructor info" );
 
 SKIP: {
     # Skip tests?
-    skip "SQLite not installed", SKIP unless $pg->installed;
+    skip "SQLite not installed", SKIP unless $sqlite->installed;
 
     # Check version.
-    ok( $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
+    ok( $sqlite = App::Info::RDBMS::SQLite->new( on_info => $info ),
         "Got Object 2");
-    $info->message; # Throw away constructor message.
-    $pg->version;
-    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
+    $info->message while defined $info->message; # Throw away constructor messages.
+    $sqlite->version;
+    like($info->message, qr/^(Executing `".*sqlite3?(.exe)?" -version`|Grabbing version from DBD::SQLite)$/,
         "Check version info" );
 
-    $pg->version;
+    $sqlite->version;
     ok( ! defined $info->message, "No info" );
-    $pg->major_version;
+    $sqlite->major_version;
     ok( ! defined $info->message, "Still No info" );
 
     # Check major version.
-    ok( $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
+    ok( $sqlite = App::Info::RDBMS::SQLite->new( on_info => $info ),
         "Got Object 3");
-    $info->message; # Throw away constructor message.
-    $pg->major_version;
-    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
+    $info->message while defined $info->message; # Throw away constructor messages.
+    $sqlite->major_version;
+    like($info->message, qr/^(Executing `".*sqlite3?(.exe)?" -version`|Grabbing version from DBD::SQLite)$/,
         "Check major info" );
 
     # Check minor version.
-    ok( $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
+    ok( $sqlite = App::Info::RDBMS::SQLite->new( on_info => $info ),
         "Got Object 4");
-    $info->message; # Throw away constructor message.
-    $pg->minor_version;
-    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
+    $info->message while defined $info->message; # Throw away constructor messages.
+    $sqlite->minor_version;
+    like($info->message, qr/^(Executing `".*sqlite3?(.exe)?" -version`|Grabbing version from DBD::SQLite)$/,
         "Check minor info" );
 
     # Check patch version.
-    ok( $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
+    ok( $sqlite = App::Info::RDBMS::SQLite->new( on_info => $info ),
         "Got Object 5");
-    $info->message; # Throw away constructor message.
-    $pg->patch_version;
-    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
+    $info->message while defined $info->message; # Throw away constructor messages.
+    $sqlite->patch_version;
+    like($info->message, qr/^(Executing `".*sqlite3?(.exe)?" -version`|Grabbing version from DBD::SQLite)$/,
         "Check patch info" );
 
     # Check dir methods.
-    $pg->inc_dir;
+    skip "No directories when using DBD::SQLite", 3 unless $sqlite->executable;
+    $sqlite->inc_dir;
     like( $info->message, qr/^Searching for include directory$/,
         "Check inc info" );
-    $pg->lib_dir;
+    $sqlite->lib_dir;
     like( $info->message, qr/^Searching for library directory$/,
           "Check lib info" );
-    $pg->so_lib_dir;
+    $sqlite->so_lib_dir;
     like( $info->message, qr/^Searching for shared object library directory$/,
         "Check so lib info" );
 }
