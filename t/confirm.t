@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: confirm.t,v 1.1 2002/07/01 03:40:33 david Exp $
+# $Id: confirm.t,v 1.2 2002/07/01 03:42:54 david Exp $
 
 use strict;
 use File::Spec::Functions qw(tmpdir);
@@ -40,7 +40,8 @@ my $stdin = tie *STDIN, 'TieOut' or die "Cannot tie STDIN: $!\n";
 print STDIN "foo3424324\n";
 print STDIN "\n";
 
-ok( App::Info::HTTPD::Apache->new( on_confirm => $p),
+ok( App::Info::HTTPD::Apache->new( on_confirm => $p,
+                                   on_unknown => $p ),
     "Set up for Apache confirm" );
 
 my $expected = qr/Path to your httpd executable?.* Not an executable: 'foo3424324'\nPath to your httpd executable?/;
@@ -54,7 +55,8 @@ like ($stdout->read, $expected, "Check Apache cofirm" );
 print STDIN "foo3424324\n";
 print STDIN "\n";
 
-ok( App::Info::RDBMS::PostgreSQL->new( on_confirm => $p),
+ok( App::Info::RDBMS::PostgreSQL->new( on_confirm => $p,
+                                       on_unknown => $p ),
     "Set up for Pg confirm" );
 
 $expected = qr/Path to pg_config?.* Not an executable: 'foo3424324'\nPath to pg_config?/;
@@ -68,7 +70,8 @@ like ($stdout->read, $expected, "Check Pg cofirm" );
 print STDIN "foo3424324\n";
 print STDIN "\n";
 
-ok( App::Info::Lib::Expat->new( on_confirm => $p),
+ok( App::Info::Lib::Expat->new( on_confirm => $p,
+                                on_unknown => $p ),
     "Set up for Expat confirm" );
 
 $expected = qr/Path to Expat library directory?.* No Expat libraries found in directory: 'foo3424324'\nPath to Expat library directory?/;
@@ -82,7 +85,8 @@ like ($stdout->read, $expected, "Check Expat cofirm" );
 print STDIN "foo3424324\n";
 print STDIN "\n";
 
-ok( App::Info::Lib::Iconv->new( on_confirm => $p),
+ok( App::Info::Lib::Iconv->new( on_confirm => $p,
+                                on_unknown => $p ),
     "Set up for Iconv confirm" );
 
 $expected = qr/Path to iconv executable?.* Not an executable: 'foo3424324'\nPath to iconv executable?/;
