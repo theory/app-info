@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.13 2002/06/04 01:29:41 david Exp $
+# $Id: Util.pm,v 1.14 2002/06/05 04:16:58 david Exp $
 
 =head1 NAME
 
@@ -45,10 +45,10 @@ class offers methods that simplify those tasks.
 =cut
 
 use strict;
-use File::Spec::Functions ();
+use File::Spec ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
