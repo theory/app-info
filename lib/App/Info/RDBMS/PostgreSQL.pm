@@ -1,6 +1,62 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.4 2002/06/01 21:41:48 david Exp $
+# $Id: PostgreSQL.pm,v 1.5 2002/06/01 22:23:30 david Exp $
+
+=head1 NAME
+
+App::Info - Information about PostgreSQL
+
+=head1 SYNOPSIS
+
+  use App::Info::RDBMS::PostgreSQL;
+
+  my $pg = App::Info::RDBMS::PostgreSQL->new;
+
+  if ($pg->installed) {
+      print "App name: ", $pg->name, "\n";
+      print "Version:  ", $pg->version, "\n";
+      print "Bin dir:  ", $pg->bin_dir, "\n";
+  } else {
+      print "PostgreSQL is not installed. :-(\n";
+  }
+
+=head1 DESCRIPTION
+
+App::Info::RDBMS::PostgreSQL supplies information about the PostgreSQL
+database server installed on the local system. It implements all of the
+methods defined by App::Info::RDBMS.
+
+When it loads, App::Info::RDBMS::PostgreSQL searches the local file system for
+the F<pg_config> application. If found, F<pg_config> will be called to gather
+the data necessary for each of the methods below. If F<pg_config> cannot be
+found, then PostgreSQL is assumed not to be installed, and each of the methods
+will return undef.
+
+App::Info::RDBMS::PostgreSQL searches for F<pg_config> in along your path, as
+defined by File::Spec->path. Failing that, it searches the following
+directories:
+
+=over 4
+
+=item /usr/local/pgsql/bin
+
+=item /usr/local/postgres/bin
+
+=item /opt/pgsql/bin
+
+=item /usr/local/bin
+
+=item /usr/local/sbin
+
+=item /usr/bin
+
+=item /usr/sbin
+
+=item /bin
+
+=back
+
+=cut
 
 use strict;
 use App::Info::RDBMS;
@@ -15,19 +71,35 @@ my $u = App::Info::Util->new;
 do {
     # Find pg_config.
     my @paths = ($u->path,
-      qw(/usr/local/pgsql/bin/pg_config
-         /usr/local/postgres/bin/pg_config
-         /opt/pgsql/bin/pg_config
-         /usr/local/bin/pg_config
-         /usr/local/sbin/pg_config
-         /usr/bin/pg_config
-         /usr/sbin/pg_config
-         /bin/pg_config));
+      qw(/usr/local/pgsql/bin
+         /usr/local/postgres/bin
+         /opt/pgsql/bin
+         /usr/local/bin
+         /usr/local/sbin
+         /usr/bin
+         /usr/sbin
+         /bin));
 
     $obj->{pg_config} = $u->first_cat_file('pg_config', @paths);
 };
 
+=head1 CONSTRUCTOR
+
+=head2 new
+
+  my $pg = App::Info::RDBMS::PostgreSQL->new;
+
+Returns an App::Info::RDBMS::PostgreSQL object. Since
+App::Info::RDBMS::PostgreSQL is implemented as a singleton class, the same
+object will be returned every time. This also ensures that only the minimum
+number of system calls are made to gather the data necessary for the object
+methods.
+
+=cut
+
 sub new { bless $obj, ref $_[0] || $_[0] }
+
+# We'll use this code reference as a common way of collecting data.
 
 my $get_data = sub {
     my $pgc = $_[0]->{pg_config} || return;
@@ -36,7 +108,29 @@ my $get_data = sub {
     return $info;
 };
 
+=head1 OBJECT METHODS
+
+=head2 installed
+
+  print "PostgreSQL is ", ($pg->installed ? '' : 'not '), "installed.\n";
+
+Returns true if PostgreSQL is installed, and false if it is not.
+App::Info::RDBMS::PostgreSQL determines whether PostgreSQL is installed based
+on the prence of the presence or absence of the F<pg_config> application on
+the file system.
+
+=cut
+
 sub installed { return $_[0]->{pg_config} ? 1 : undef }
+
+=head2 name
+
+  my $name = $pg->name;
+
+Returns the name of the application. App::Info::RDBMS::PostgreSQL parses the
+name from the system call `pg_config --version`.
+
+=cut
 
 sub name {
     unless ($_[0]->{name}) {
@@ -67,40 +161,116 @@ sub name {
     return $_[0]->{name};
 }
 
+=head2 version
+
+  my $version = $pg->version;
+
+Returns the PostgreSQL version number. App::Info::RDBMS::PostgreSQL parses the
+version number from the system call `pg_config --version`.
+
+=cut
+
 sub version {
     $_[0]->name unless $_[0]->{version};
     return $_[0]->{version};
 }
+
+=head2 major version
+
+  my $major_version = $pg->major_version;
+
+Returns the PostgreSQL major version number. App::Info::RDBMS::PostgreSQL
+parses the major version number from the system call `pg_config --version`.
+For example, C<version()> returns "7.1.2", then this method returns "7".
+
+=cut
 
 sub major_version {
     $_[0]->name unless $_[0]->{version};
     return $_[0]->{major};
 }
 
+=head2 minor version
+
+  my $minor_version = $pg->minor_version;
+
+Returns the PostgreSQL minor version number. App::Info::RDBMS::PostgreSQL
+parses the minor version number from the system call `pg_config --version`.
+For example, if C<version()> returns "7.1.2", then this method returns "2".
+
+=cut
+
 sub minor_version {
     $_[0]->name unless $_[0]->{version};
     return $_[0]->{minor};
 }
+
+=head2 patch version
+
+  my $patch_version = $pg->patch_version;
+
+Returns the PostgreSQL patch version number. App::Info::RDBMS::PostgreSQL
+parses the patch version number from the system call `pg_config --version`.
+For example, if C<version()> returns "7.1.2", then this method returns "1".
+
+=cut
 
 sub patch_version {
     $_[0]->name unless $_[0]->{version};
     return $_[0]->{patch};
 }
 
-sub inc_dir {
-    $_[0]->{inc_dir} ||= $get_data->($_[0], '--includedir');
-    return $_[0]->{inc_dir};
-}
+=head2 bin_dir
+
+  my $bin_dir = $pg->bin_dir;
+
+Returns the PostgreSQL binary directory path. App::Info::RDBMS::PostgreSQL
+gathers the path from the system call `pg_config --bindir`
+
+=cut
 
 sub bin_dir {
     $_[0]->{bin_dir} ||= $get_data->($_[0], '--bindir');
     return $_[0]->{bin_dir};
 }
 
+=head2 inc_dir
+
+  my $inc_dir = $pg->inc_dir;
+
+Returns the PostgreSQL include directory path. App::Info::RDBMS::PostgreSQL
+gathers the path from the system call `pg_config --includedir`
+
+=cut
+
+sub inc_dir {
+    $_[0]->{inc_dir} ||= $get_data->($_[0], '--includedir');
+    return $_[0]->{inc_dir};
+}
+
+=head2 lib_dir
+
+  my $lib_dir = $pg->lib_dir;
+
+Returns the PostgreSQL library directory path. App::Info::RDBMS::PostgreSQL
+gathers the path from the system call `pg_config --libdir`
+
+=cut
+
 sub lib_dir {
     $_[0]->{lib_dir} ||= $get_data->($_[0], '--libdir');
     return $_[0]->{lib_dir};
 }
+
+=head2 so_lib_dir
+
+  my $so_lib_dir = $pg->so_lib_dir;
+
+Returns the PostgreSQL shared object library directory path.
+App::Info::RDBMS::PostgreSQL gathers the path from the system call
+`pg_config --pkglibdir`
+
+=cut
 
 # Location of dynamically loadable modules.
 sub so_lib_dir {
@@ -108,8 +278,47 @@ sub so_lib_dir {
     return $_[0]->{so_lib_dir};
 }
 
+=head2 home_url
+
+  my $home_url = $pg->home_url;
+
+Returns the PostgreSQL home page URL.
+
+=cut
+
 sub home_url { "http://www.postgresql.org/" }
+
+=head2 download_url
+
+  my $download_url = $pg->download_url;
+
+Returns the PostgreSQL download URL.
+
+=cut
+
 sub download_url { "http://www.ca.postgresql.org/sitess.html" }
 
 1;
 __END__
+
+=head1 BUGS
+
+Feel free to drop me a line if you discover any bugs. Patches welcome.
+
+=head1 AUTHOR
+
+David Wheeler <david@wheeler.net>
+
+=head1 SEE ALSO
+
+L<App::Info|App::Info>,
+L<App::Info::RDBMS|App::Info::RDBMS>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2002, David Wheeler. All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
+
+=cut

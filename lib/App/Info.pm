@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.5 2002/06/01 21:54:43 david Exp $
+# $Id: Info.pm,v 1.6 2002/06/01 22:23:30 david Exp $
 
 =head1 NAME
 
@@ -111,25 +111,22 @@ Returns the full version number of the application.
 
   my $major_version = $app->major_version;
 
-Returns the major version number of the application. For example, if the
-version number returned by C<version()> returns "7.1.2", then this method
-would return "7".
+Returns the major version number of the application. For example, if
+C<version()> returns "7.1.2", then this method returns "7".
 
 =head2 minor_version
 
   my $minor_version = $app->minor_version;
 
-Returns the minor version number of the application. For example, if the
-version number returned by C<version()> returns "7.1.2", then this method
-would return "1".
+Returns the minor version number of the application. For example, if
+C<version()> returns "7.1.2", then this method returns "1".
 
 =head2 patch_version
 
   my $patch_version = $app->patch_version;
 
-Returns the patch version number of the application. For example, if the
-version number returned by C<version()> returns "7.1.2", then this method
-would return "2".
+Returns the patch version number of the application. For example, if
+C<version()> returns "7.1.2", then this method returns "2".
 
 =head2 bin_dir
 

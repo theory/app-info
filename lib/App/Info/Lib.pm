@@ -9,7 +9,7 @@ $VERSION = '0.01';
 1;
 __END__
 
-# $Id: Lib.pm,v 1.2 2002/06/01 21:54:43 david Exp $
+# $Id: Lib.pm,v 1.3 2002/06/01 22:23:30 david Exp $
 
 =head1 NAME
 
@@ -29,7 +29,7 @@ David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>
+L<App::Info|App::Info>,
 L<App::Info::Lib::Iconv|App::Info::Lib::Iconv>
 
 =head1 COPYRIGHT AND LICENSE
