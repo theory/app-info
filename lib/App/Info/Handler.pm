@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.11 2002/08/08 19:19:18 david Exp $
+# $Id: Handler.pm,v 1.12 2003/08/26 01:50:19 david Exp $
 
 =head1 NAME
 
@@ -297,7 +297,7 @@ App::Info clients.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2003, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.

@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.25 2003/08/26 01:02:08 david Exp $
+# $Id: PostgreSQL.pm,v 1.26 2003/08/26 01:50:20 david Exp $
 
 =head1 NAME
 
@@ -733,7 +733,7 @@ L<http://www.postgresql.org/> is the PostgreSQL home page.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2003, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.

@@ -1,6 +1,6 @@
 package App::Info::HTTPD;
 
-# $Id: HTTPD.pm,v 1.9 2002/08/08 19:19:18 david Exp $
+# $Id: HTTPD.pm,v 1.10 2003/08/26 01:50:19 david Exp $
 
 use strict;
 use App::Info;
@@ -59,7 +59,7 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 
-David Wheeler <L<david@wheeler.net|"david@wheeler.net">>
+David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
@@ -68,7 +68,7 @@ L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2003, David Wheeler. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
