@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.21 2002/06/05 23:47:13 david Exp $
+# $Id: Apache.pm,v 1.22 2002/06/08 07:22:06 david Exp $
 
 =head1 NAME
 
@@ -115,7 +115,6 @@ sub new {
     $self->{apache_exe} = $u->first_cat_exe(\@exes, @paths);
     return $self;
 };
-
 
 =head1 OBJECT METHODS
 

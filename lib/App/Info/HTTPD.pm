@@ -1,5 +1,7 @@
 package App::Info::HTTPD;
 
+# $Id: HTTPD.pm,v 1.6 2002/06/08 07:22:06 david Exp $
+
 use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
@@ -22,11 +24,8 @@ my $croak = sub {
 
 sub httpd_root { $croak->(shift, 'httpd_root') }
 
-
 1;
 __END__
-
-# $Id: HTTPD.pm,v 1.5 2002/06/03 19:11:04 david Exp $
 
 =head1 NAME
 

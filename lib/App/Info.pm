@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.19 2002/06/08 03:01:50 david Exp $
+# $Id: Info.pm,v 1.20 2002/06/08 07:22:06 david Exp $
 
 =head1 NAME
 
@@ -43,17 +43,18 @@ information on implementing new subclasses.
 
 use strict;
 use Carp ();
+use vars qw($VERSION);
 
-our $VERSION = '0.11';
-my %error_levels = ( croak   => sub { Carp::croak(@_) },
-                     carp    => sub { Carp::carp(@_) },
-                     cluck   => sub { Carp::cluck(@_) },
-                     confess => sub { Carp::confess(@_) },
-                     silent  => sub {} );
+$VERSION = '0.12';
 
-# A couple of aliases.
-$error_levels{die} = $error_levels{croak};
-$error_levels{warn} = $error_levels{carp};
+my %handlers;
+
+sub register_handler {
+    my ($pkg, $key, $code) = @_;
+    Carp::croak("Handler '$key' already exists")
+      if $handlers{$key};
+    $handlers{$key} = $code;
+}
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -70,18 +71,46 @@ my $croak = sub {
     }
 };
 
+my $set_handlers = sub {
+    my $on_key = shift;
+    # Default is to do nothing.
+    return [] unless $on_key;
+    my $ref = ref $on_key;
+    if ($ref) {
+        $on_key = [$on_key] unless $ref eq 'ARRAY';
+        # Make sure they're all handlers.
+        foreach my $h (@$on_key) {
+            if (my $r = ref $h) {
+                Carp::croak("$r object is not an App::Info::Handler")
+                  unless UNIVERSAL::isa($h, 'App::Info::Handler');
+            } else {
+                # Look up the handler.
+                Carp::croak("No such handler '$h'") unless $handlers{$on_key};
+                # $h is an alias, so direct assignment works.
+                $h = $handlers{$h}->();
+            }
+        }
+        # Return 'em!
+        return $on_key;
+    } else {
+        # Look up the handler.
+        Carp::croak("No such handler '$on_key'")
+          unless $handlers{$on_key};
+        return [ $handlers{$on_key}->() ];
+    }
+};
+
 sub new {
     my ($pkg, %p) = @_;
     my $class = ref $pkg || $pkg;
     # Fail if the method isn't overridden.
     $croak->($pkg, 'new') if $class eq __PACKAGE__;
-    # Make sure we have an error level.
-    if (exists $p{error_level}) {
-        $error_levels{$p{error_level}}
-          or Carp::croak("Invalid error_level '$p{error_level}'");
-    } else {
-        $p{error_level} ||= 'carp';
-    }
+
+    # We can dump support for error_level eventually.
+    my $on_err = $p{on_error} || $p{error_level};
+    $p{on_error} = $set_handlers->($on_err);
+    $p{on_null} = $set_handlers->($p{on_null});
+
     # Do it!
     return bless \%p, $class;
 }
@@ -91,10 +120,26 @@ sub error {
     # Sanity check. We really want to keep control over this.
     Carp::croak("Cannot call protected method error()")
       unless UNIVERSAL::isa($self, __PACKAGE__);
+
     # Do the deed.
-    $error_levels{$self->{error_level}}->(@_);
+    foreach my $eh (@{$self->{on_error}}) {
+        last if $eh->handler(@_) eq OK;
+    }
+
     # If we haven't died, save the error.
-    $self->{error} = $_[0];
+    $self->{error} = $_[0]->{error};
+}
+
+sub null {
+    my $self = shift;
+    # Sanity check. We really want to keep control over this.
+    Carp::croak("Cannot call protected method error()")
+      unless UNIVERSAL::isa($self, __PACKAGE__);
+
+    # Do the deed.
+    foreach my $eh (@{$self->{on_null}}) {
+        last if $eh->handler(@_) eq OK;
+    }
 }
 
 sub last_error { $_[0]->{error} }

@@ -1,5 +1,8 @@
 Revision history for Perl extension App::Info.
 
+0.12  
+
+
 0.11  Sat Jun  8 05:49:40 2002
       - Improved validation for the error_level parameter.
       - In distribution tests, no longer testing to see that user and group
