@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.29 2002/06/14 19:09:34 david Exp $
+# $Id: Apache.pm,v 1.30 2002/06/15 00:49:55 david Exp $
 
 =head1 NAME
 
@@ -738,7 +738,7 @@ parsed from the F<httpd.conf> file or C<glob>bed from the file system.
 
 =head1 BUGS
 
-Feel free to drop me a line if you discover any bugs. Patches welcome.
+Feel free to drop me an email if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 

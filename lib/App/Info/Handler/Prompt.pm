@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.5 2002/06/13 22:20:20 david Exp $
+# $Id: Prompt.pm,v 1.6 2002/06/15 00:49:55 david Exp $
 
 =head1 NAME
 
@@ -32,7 +32,7 @@ App::Info::Handler->register_handler('prompt',
 
 sub new {
     my $pkg = shift;
-    my $self = $pkg->SUPER::new;
+    my $self = $pkg->SUPER::new(@_);
     $self->{tty} = -t STDIN && ( -t STDOUT || !( -f STDOUT || -c STDOUT ) );
     # We're done!
     return $self;

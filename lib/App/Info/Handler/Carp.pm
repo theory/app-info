@@ -1,6 +1,6 @@
 package App::Info::Handler::Carp;
 
-# $Id: Carp.pm,v 1.4 2002/06/13 22:20:20 david Exp $
+# $Id: Carp.pm,v 1.5 2002/06/15 00:49:55 david Exp $
 
 =head1 NAME
 
@@ -38,16 +38,16 @@ $levels{warn} = $levels{carp};
 
 # Register ourselves.
 for my $c (qw(croak carp cluck confess die warn)) {
-    App::Info::Handler->register_handler($c, sub { __PACKAGE__->new($c) } );
+    App::Info::Handler->register_handler
+      ($c => sub { __PACKAGE__->new( level => $c ) } );
 }
 
 sub new {
-    my ($pkg, $level) = @_;
-    my $self = $pkg->SUPER::new;
-    if ($level) {
-        Carp::croak("Invalid error handler '$level'")
-          unless $levels{$level};
-        $self->{level} = $level;
+    my $pkg = shift;
+    my $self = $pkg->SUPER::new(@_);
+    if ($self->{level}) {
+        Carp::croak("Invalid error handler '$self->{level}'")
+          unless $levels{$self->{level}};
     } else {
         $self->{level} = 'carp';
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: print.t,v 1.3 2002/06/12 18:18:58 david Exp $
+# $Id: print.t,v 1.4 2002/06/15 00:49:55 david Exp $
 
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
@@ -42,14 +42,14 @@ my $file = catfile tmpdir, 'app-info-print.tst';
 # Start by testing the default.
 my $stderr = tie *STDERR, 'TieOut' or die "Cannot tie STDERR: $!\n";
 ok( my $p = App::Info::Handler::Print->new, "Create default" );
-ok( my $app = App::Info::Category::FooApp->new( on_info => $p),
+ok( my $app = App::Info::Category::FooApp->new( on_info => $p ),
     "Set up for default" );
 $app->version;
 is ($stderr->read, "$msg\n", "Check default" );
 
 # Now try STDERR, which should be the same thing.
-ok( $p = App::Info::Handler::Print->new('stderr'), "Create STDERR" );
-ok( $app = App::Info::Category::FooApp->new( on_info => $p),
+ok( $p = App::Info::Handler::Print->new( fh => 'stderr' ), "Create STDERR" );
+ok( $app = App::Info::Category::FooApp->new( on_info => $p ),
     "Set up for STDERR" );
 $app->version;
 is ($stderr->read, "$msg\n", "Check STDERR" );
@@ -60,8 +60,8 @@ untie *STDERR;
 
 # Now test STDOUT.
 my $stdout = tie *STDOUT, 'TieOut' or die "Cannot tie STDOUT: $!\n";
-ok( $p = App::Info::Handler::Print->new('stdout'), "Create STDOUT" );
-ok( $app = App::Info::Category::FooApp->new( on_info => $p),
+ok( $p = App::Info::Handler::Print->new( fh => 'stdout' ), "Create STDOUT" );
+ok( $app = App::Info::Category::FooApp->new( on_info => $p ),
     "Set up for STDOUT" );
 $app->version;
 is ($stdout->read, "$msg\n", "Check STDOUT" );
@@ -72,7 +72,7 @@ untie *STDOUT;
 
 # Try a file handle.
 my $fh = FileHandle->new(">$file");
-ok( $p = App::Info::Handler::Print->new($fh), "Create with file handle" );
+ok( $p = App::Info::Handler::Print->new( fh => $fh ), "Create with file handle" );
 ok( $app->on_info($p), "Set file handle handler" );
 $app->version;
 $fh->close;
@@ -80,7 +80,7 @@ chk_file($file, "Check file handle output", "$msg\n");
 
 # Try appending.
 $fh = FileHandle->new(">>$file");
-ok( $p = App::Info::Handler::Print->new($fh), "Create with append" );
+ok( $p = App::Info::Handler::Print->new( fh => $fh ), "Create with append" );
 ok( $app->on_info($p), "Set append handler" );
 $app->version;
 $fh->close;
@@ -88,14 +88,14 @@ chk_file($file, "Check append output", "$msg\n$msg\n");
 
 # Try a file handle glob.
 open F, ">$file" or die "Cannot open $file: $!\n";
-ok( $p = App::Info::Handler::Print->new(\*F), "Create with glob" );
+ok( $p = App::Info::Handler::Print->new( fh => \*F ), "Create with glob" );
 ok( $app->on_info($p), "Set glob handler" );
 $app->version;
 close F or die "Cannot close $file: $!\n";
 chk_file($file, "Check glob output", "$msg\n");
 
 # Try an invalid argument.
-eval { App::Info::Handler::Print->new('foo') };
+eval { App::Info::Handler::Print->new( fh => 'foo') };
 like( $@, qr/^Invalid argument to new\(\): 'foo'/, "Check invalid argument" );
 
 # Delete the test file.

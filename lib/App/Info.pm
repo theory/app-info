@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.30 2002/06/14 23:48:13 david Exp $
+# $Id: Info.pm,v 1.31 2002/06/15 00:49:55 david Exp $
 
 =head1 NAME
 
@@ -86,14 +86,14 @@ my $set_handlers = sub {
                   unless UNIVERSAL::isa($h, 'App::Info::Handler');
             } else {
                 # Look up the handler.
-                $h = App::Info::Handler->new($h);
+                $h = App::Info::Handler->new( key => $h);
             }
         }
         # Return 'em!
         return $on_key;
     } else {
         # Look up the handler.
-        return [ App::Info::Handler->new($on_key) ];
+        return [ App::Info::Handler->new( key => $on_key) ];
     }
 };
 
