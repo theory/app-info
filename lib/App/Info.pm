@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.18 2002/06/06 00:30:53 david Exp $
+# $Id: Info.pm,v 1.19 2002/06/08 03:01:50 david Exp $
 
 =head1 NAME
 
@@ -165,7 +165,7 @@ Ignores the error.
 In the cases of "cluck", "carp", "warn", and "silent", the last error can
 always be retrieved via the C<last_error()> method.
 
-=head1 PUBLIC OBJECT METHODS
+=head1 OBJECT METHODS
 
 =head2 installed
 
@@ -366,8 +366,8 @@ David Wheeler <david@wheeler.net>
 L<App::Info::Lib|App::Info::HTTPD>,
 L<App::Info::Lib|App::Info::RDBMS>,
 L<App::Info::Lib|App::Info::Lib>,
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>
+L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>,
+L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>,
 L<App::Info::Lib|App::Info::Lib::Expat>,
 L<App::Info::Lib|App::Info::Lib::Iconv>
 
