@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.15 2002/06/05 14:45:37 david Exp $
+# $Id: Util.pm,v 1.16 2002/06/05 20:27:12 david Exp $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ use strict;
 use File::Spec ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
@@ -147,6 +147,21 @@ ignored.
 sub first_file {
     shift;
     foreach (@_) { return $_ if -f }
+    return;
+}
+
+=head first_exe
+
+  my $exe = $util->first_exe(@exelist);
+
+Examines each of the files in @exelist and returns the first one that exists
+on the file system as an executable file. Directories will be ignored.
+
+=cut
+
+sub first_exe {
+    shift;
+    foreach (@_) { return $_ if -f && -x }
     return;
 }
 
