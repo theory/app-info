@@ -13,6 +13,9 @@ Revision history for Perl extension App::Info.
         file system. Users can now override the directories ande files that
         the classes search for with their own values. Subclasses override the
         accessor methods to provide such values.
+      - Added "search_conf_names" and "search_conf_dirs" parameters and
+        methods to App::Info::HTTPD::Apache to allow users to affect the
+        file names paths used to search for Apache configuration files.
 
 0.30  2004-11-20T19:10:55
       - Fixed number of tests to skip in "sqlite_info.t" for systems that
