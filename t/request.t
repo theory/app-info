@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: request.t,v 1.3 2002/06/11 06:09:45 david Exp $
+# $Id: request.t,v 1.4 2002/06/12 00:53:15 david Exp $
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 BEGIN { use_ok('App::Info::Request') }
 
@@ -21,16 +21,18 @@ like( $@, qr/^Callback parameter 'foo' is not a code reference/,
 
 
 # Now create a request we can actually use for testing stuff.
-my %args = ( message => 'Testing request',
+my %args = ( message  => 'Testing request',
              callback => sub { ref $_[0] eq 'HASH' && $_[0]->{val} == 1 },
              sigil    => '%',
              prompt   => 'Enter a value',
+             type     => 'info'
            );
 
 ok( $req = App::Info::Request->new( \%args ), "New custom request" );
 is( $req->message, $args{message}, "Check message" );
 is( $req->prompt, $args{prompt}, "Check prompt" );
 is( $req->sigil, $args{sigil}, "Check sigil" );
+is( $req->type, $args{type}, "Check type" );
 
 ok( !$req->callback('foo'),  "Fail callback" );
 my $val = { val => 1 };
