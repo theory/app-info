@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.16 2002/06/03 23:51:52 david Exp $
+# $Id: Apache.pm,v 1.17 2002/06/04 01:09:18 david Exp $
 
 =head1 NAME
 
@@ -26,7 +26,7 @@ App::Info::HTTPD::Apache supplies information about the Apache web server
 installed on the local system. It implements all of the methods defined by
 App::Info::HTTPD.
 
-When it loads, App::Info::HTTPD::Apache searches the local file system for the
+When it loads, App::Info::HTTPD::Apache searches the file system for the
 F<httpd>, F<apache-perl>, or F<apache> application. If found, the application
 (hereafer referred to as F<httpd>, regardless of how it was actually found to
 be named) will be called to gather the data necessary for each of the methods
@@ -171,11 +171,11 @@ sub version {
 
   my $major_version = $apache->major_version;
 
-Returns the apache major version number. App::Info::HTTPD::Apache parses the
-version number from the system call C<`httpd --v`>.For example, C<version()>
-returns "1.3.24", then this method returns "1". Returns C<undef> if Apache is not
-installed. Emits a warning if Apache is installed but the version number could
-not be parsed.
+Returns the Apache major version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>. For example, if
+C<version()> returns "1.3.24", then this method returns "1". Returns C<undef>
+if Apache is not installed. Emits a warning if Apache is installed but the
+version number could not be parsed.
 
 =cut
 
@@ -188,11 +188,11 @@ sub major_version {
 
   my $minor_version = $apache->minor_version;
 
-Returns the apache minor version number. App::Info::HTTPD::Apache parses the
-version number from the system call C<`httpd --v`>.For example, C<version()>
-returns "1.3.24", then this method returns "3". Returns C<undef> if Apache is not
-installed. Emits a warning if Apache is installed but the version number could
-not be parsed.
+Returns the Apache minor version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>. For example, if
+C<version()> returns "1.3.24", then this method returns "3". Returns C<undef>
+if Apache is not installed. Emits a warning if Apache is installed but the
+version number could not be parsed.
 
 =cut
 
@@ -205,11 +205,11 @@ sub minor_version {
 
   my $patch_version = $apache->patch_version;
 
-Returns the apache patch version number. App::Info::HTTPD::Apache parses the
-version number from the system call C<`httpd --v`>.For example, C<version()>
-returns "1.3.24", then this method returns "24". Returns C<undef> if Apache is
-not installed. Emits a warning if Apache is installed but the version number
-could not be parsed.
+Returns the Apache patch version number. App::Info::HTTPD::Apache parses the
+version number from the system call C<`httpd --v`>. For example, if
+C<version()> returns "1.3.24", then this method returns "24". Returns C<undef>
+if Apache is not installed. Emits a warning if Apache is installed but the
+version number could not be parsed.
 
 =cut
 
@@ -282,13 +282,14 @@ sub magic_number {
 
   my $compile_option = $apache->compile_option($option);
 
-Returns the value of the Apache compile option $option. All of the Apache
-compile options are collected from the system call C<`httpd -V`>. For compile
-options that contain a corresponding value (such as 'SUEXEC_BIN" or
-"DEFAULT_PIDLOG"), C<compile_option()> returns the value of the option if it
-exists. For other options, it returns true (1) if the option was included, and
-false(C<undef>) if it was not. Returns C<undef> if Apache is not installed or if the
-option could not be parsed.
+Returns the value of the Apache compile option C<$option>. The compile option
+is looked up caset-insensitively. All of the Apache compile options are
+collected from the system call C<`httpd -V`>. For compile options that contain
+a corresponding value (such as 'SUEXEC_BIN" or "DEFAULT_PIDLOG"),
+C<compile_option()> returns the value of the option if the option exists. For
+other options, it returns true (1) if the option was included, and
+false(C<undef>) if it was not. Returns C<undef> if Apache is not installed or
+if the option could not be parsed.
 
 See the Apache documentation at L<http://httpd.apache.org/docs-project/> to
 learn about all the possible compile options.
@@ -304,12 +305,12 @@ sub compile_option {
 
 Returns the full path to the Apache configuration file. C<conf_file()> looks
 for the configuration file in a number of locations and under a number of
-names. First it tries to use the file specifed by the SERVER_CONFIG_FILE
-compile option (as returned by a call to C<compile_option()> -- and if it's a
+names. First it tries to use the file specifed by the C<SERVER_CONFIG_FILE>
+compile option (as returned by a call to C<compile_option()>) -- and if it's a
 relative file name, it gets appended to the directory returned by
 C<httpd_root()>. If that file isn't found, C<conf_file()> then looks for the
 files F<httpd.conf> and F<httpd.conf.default> in the F<conf> subdirectory of
-the httpd root directory. Failing that, it looks for the following:
+the HTTPD root directory. Failing that, it looks for the following:
 
 =over 4
 
@@ -415,9 +416,9 @@ sub port {
   my $bin_dir = $apache->bin_dir;
 
 Returns the Apache binary directory path. App::Info::HTTPD::Apache simply
-looks for the F<bin> directory under the F<httpd_root> directory, as returned
-by C<$apache->httpd_root>. Returns C<undef> if Apache is not installed or if the
-bin directory could not be found.
+looks for the F<bin> directory under the HTTPD root directory, as returned by
+C<httpd_root()>. Returns C<undef> if Apache is not installed or if the bin
+directory could not be found.
 
 =cut
 
@@ -439,8 +440,8 @@ sub bin_dir {
 
 Returns the Apache include directory path. App::Info::HTTPD::Apache simply
 looks for the F<include> or F<inc> directory under the F<httpd_root>
-directory, as returned by C<$apache->httpd_root>. Returns C<undef> if Apache is
-not installed or if the inc directory could not be found.
+directory, as returned by C<httpd_root()>. Returns C<undef> if Apache is not
+installed or if the inc directory could not be found.
 
 =cut
 
@@ -461,8 +462,8 @@ sub inc_dir {
 
 Returns the Apache library directory path. App::Info::HTTPD::Apache simply
 looks for the F<lib>, F<modules>, or F<libexec> directory under the
-F<httpd_root> directory, as returned by C<$apache->httpd_root>. Returns C<undef>
-if Apache is not installed or if the lib directory could not be found.
+HTTPD root> directory, as returned by C<httpd_root()>. Returns C<undef> if
+Apache is not installed or if the lib directory could not be found.
 
 =cut
 
@@ -486,8 +487,8 @@ sub lib_dir {
 
 Returns the Apache shared object library directory path. Currently, this
 directory is assumed to be the same as the lib directory, so this method is
-simply an alias for C<lib_dir>. Returns C<undef> if Apache is not installed or if
-the lib directory could not be found.
+simply an alias for C<lib_dir>. Returns C<undef> if Apache is not installed or
+if the lib directory could not be found.
 
 =cut
 
