@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.6 2002/06/01 22:23:30 david Exp $
+# $Id: Info.pm,v 1.7 2002/06/03 16:16:26 david Exp $
 
 =head1 NAME
 
@@ -40,7 +40,7 @@ encouraged to, at a minimum, implement the methods defined here.
 use strict;
 use Carp ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 my $croak = sub {
     my ($caller, $meth) = @_;

@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.9 2002/06/03 16:14:20 david Exp $
+# $Id: Util.pm,v 1.10 2002/06/03 16:16:10 david Exp $
 
 =head1 NAME
 
@@ -47,7 +47,7 @@ use strict;
 use File::Spec::Functions ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
