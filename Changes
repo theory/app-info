@@ -5,6 +5,7 @@ Revision history for Perl extension App::Info.
         return when the user accepted the default value (with confirm
         events).
       - Changed email address in AUTHOR section so that it's a link.
+      - Added tests for confirm events.
 
 0.20  Thu Jun 27 20:28:34 2002
       - Major upgrade. Some backwards compatibility broken. Namely, the
