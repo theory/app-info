@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.33 2002/06/16 00:50:18 david Exp $
+# $Id: Info.pm,v 1.34 2002/06/27 18:06:50 david Exp $
 
 =head1 NAME
 
@@ -561,7 +561,7 @@ my $handler = sub {
 Use this method to display status messages for the user. You may wish to use
 it to inform users that you're searching for a particular file, or attempting
 to parse a file or some other resource for the data you need. For example, a
-common use might be in the object constructor. Generally, when an App::Info
+common use might be in the object constructor: generally, when an App::Info
 object is created, some important initial piece of information is being
 sought, such as an executable file. That file may be in one of many locations,
 so it makes sense to let the user know that you're looking for it:
@@ -572,8 +572,9 @@ Note that, due to the nature of App::Info event handlers, your informational
 message may be used or displayed any number of ways, or indeed not at all (as
 is the default behavior).
 
-The C<@message> will be joined into a single string and stored in the message
-attribute of the App::Info::Request object passed to info event handlers.
+The C<@message> will be joined into a single string and stored in the
+C<message> attribute of the App::Info::Request object passed to info event
+handlers.
 
 =cut
 
@@ -598,7 +599,7 @@ output isn't what you expected:
 As with all events, keep in mind that error events may be handled in any
 number of ways, or not at all.
 
-The C<@erorr> will be joined into a single string and stored in the message
+The C<@erorr> will be joined into a single string and stored in the C<message>
 attribute of the App::Info::Request object passed to error event handlers. If
 that seems confusing, think of it as an "error message" rather than an "error
 error." :-)
@@ -615,58 +616,61 @@ sub error {
 
 =head3 unknown
 
-  my $val = $self->unknown($key, $prompt, $callback, $error);
+  my $val = $self->unknown(@params);
 
 Use this method when a value is unknown. This will give the user the option --
 assuming the appropriate handler handles the event -- to provide the needed
-data. The arguments are as follows:
+data. The value entered will be returned by C<unknown()>. The parameters are
+as follows:
 
 =over 4
 
-=item C<$key>
+=item key
 
-The C<$key> argument uniquely identifies the data point in your class, and is
+The C<key> parameter uniquely identifies the data point in your class, and is
 used by App::Info to ensure that an unknown event is handled only once, no
 matter how many times the method is called. The same value will be returned by
 subsequent calls to C<unknown()> as was returned by the first call, and no
 handlers will be activated. Typical values are "version" and "lib_dir".
 
-=item C<$prompt>
+=item prompt
 
-The C<$prompt> argument is the prompt to be displayed should an event handler
+The C<prompt> parameter is the prompt to be displayed should an event handler
 decide to prompt for the appropriate value. Such a prompt might be something
-like "Path to your httpd binary?". If this value is not provided, App::Info
-will construct one for you using your class' C<key_name()> method and the
-C<$key> argument. The result would be something like "Enter a valid FooApp
-version". This value will be stored in the message attribute of the
-App::Info::Request object passed to event handlers.
+like "Path to your httpd executable?". If this parameter is not provided,
+App::Info will construct one for you using your class' C<key_name()> method
+and the C<key> parameter. The result would be something like "Enter a valid
+FooApp version". The C<prompt> parameter value will be stored in the
+C<message> attribute of the App::Info::Request object passed to event
+handlers.
 
-=item C<$callback>
+=item callback
 
 Assuming a handler has collected a value for your unknown data point, it might
 make sense to validate the value. For example, if you prompt the user for a
 directory location, and the user enters one, it makes sense to ensure that the
-directory actually exists. The C<$callback> argument allows you to do this. It
+directory actually exists. The C<callback> parameter allows you to do this. It
 is a code reference that takes the new value or values as its arguments, and
 returns true if the value is valid, and false if it is not. For the sake of
 convenience, the first argument to the callback code reference is also stored
 in C<$_> .This makes it easy to validate using functions or operators that,
-er, operate on $_ by default, but still allows you to get more information
+er, operate on C<$_> by default, but still allows you to get more information
 from C<@_> if necessary. For the directory example, a good callback might be
-C<sub { -d }>. This value will be stored in the callback attribute of the
+C<sub { -d }>. The C<callback> parameter code reference will be stored in the
+C<callback> attribute of the App::Info::Request object passed to event
+handlers.
+
+=item error
+
+The error parameter is the error message to display in the event that the
+C<callback> code reference returns false. This message may then be used by the
+event handler to let the user know what went wrong with the data she entered.
+For example, if the unknown value was a directory, and the user entered a
+value that the C<callback> identified as invalid, a message to display might
+be something like "Invalid directory path". Note that if the C<error>
+parameter is not provided, App::Info will supply the generic error message
+"Invalid value". This value will be stored in the C<error> attribute of the
 App::Info::Request object passed to event handlers.
-
-=item C<$error>
-
-The C<$error> argument is the error message to display in the event that the
-C<$callback> code reference returns false. This message may then be used by
-the event handler to let the user know what went wrong with the data she
-entered. For example, if the unknown value was a directory, and the user
-entered a value that the C<$callback> identified as invalid, a message to
-display might be something like "Invalid directory path". Note that if the
-C<$error> argument is not provided, App::Info will supply the generic error
-message "Invalid value". This value will be stored in the error attribute of
-the App::Info::Request object passed to event handlers.
 
 =back
 
@@ -675,46 +679,46 @@ metadata method if you cannot provide the data needed by that method. It will
 typically be the last part of the method. Here's an example demonstrating each
 of the above arguments:
 
-  my $dir = $self->unknown('lib_dir', "Enter lib directory path",
-                           sub { -d }, "Not a directory")
+  my $dir = $self->unknown( key      => 'lib_dir',
+                            prompt   => "Enter lib directory path",
+                            callback => sub { -d },
+                            error    => "Not a directory");
 
 =cut
 
 sub unknown {
-    my ($self, $key, $prompt, $cb, $err) = @_;
+    my ($self, %params) = @_;
+    my $key = delete $params{key}
+      or Carp::croak("No key parameter passed to unknown()");
     # Just return the value if we've already handled this value. Ideally this
     # shouldn't happen.
     return $self->{__unknown__}{$key} if exists $self->{__unknown__}{$key};
 
     # Create a prompt and error message, if necessary.
-    $prompt ||= "Enter a valid " . $self->key_name . " $key";
-    $err ||= 'Invalid value';
-
-    # Prepare the request arguments.
-    my $params = { message  => $prompt,
-                   error    => $err,
-                   callback => $cb };
+    $params{message} = delete $params{prompt} ||
+      "Enter a valid " . $self->key_name . " $key";
+    $params{error} ||= 'Invalid value';
 
     # Execute the handler sequence.
-    my $req = $handler->($self, "unknown", $params);
+    my $req = $handler->($self, "unknown", \%params);
 
-    # Mark that we've provided this value.
+    # Mark that we've provided this value and then return it.
     $self->{__unknown__}{$key} = $req->value;
-    return $self->{__unknown__}{$key}
+    return $self->{__unknown__}{$key};
 }
 
 ##############################################################################
 
 =head3 confirm
 
-  my $val = $self->confirm($key, $prompt, $value, $callback, $error);
+  my $val = $self->confirm(@params);
 
 This method is very similar to C<unknown()>, but serves a different purpose.
 Use this method for significant data points where you've found an appropriate
 value, but want to ensure it's really the correct value. A "significant data
 point" is usually a value essential for your class to collect metadata values.
 For example, you might need to locate an executable that you can then call to
-collect other data. In general, this will only happen once in a class --
+collect other data. In general, this will only happen once for an object --
 during object construction -- but there may be cases in which it is needed
 more than that. But hopefully, once you've confirmed in the constructor that
 you've found what you need, you can use that information to collect the data
@@ -722,74 +726,74 @@ needed by all of the metadata methods and can assume that they'll be right
 because that first, significant data point has been confirmed.
 
 Other than where and how often to call C<confirm()>, its use is quite similar
-to that of C<unknown()>. Its arguments are as follows:
+to that of C<unknown()>. Its parameters are as follows:
 
 =over
 
-=item C<$key>
+=item key
 
 Same as for C<unknown()>, a string that uniquely identifies the data point in
 your class, and ensures that the event is handled only once for a given key.
 The same value will be returned by subsequent calls to C<confirm()> as was
 returned by the first call for a given key.
 
-=item C<$prompt>
+=item prompt
 
 Same as for C<unknown()>. Although C<confirm()> is called to confirm a value,
 typically the prompt should request the relevant value, just as for
-C<unknown()>. The difference is that the handler I<should> use the C<$value>
-argument as the default should the user not provide a value. This value will
-be stored in the message attribute of the App::Info::Request object passed to
-event handlers.
+C<unknown()>. The difference is that the handler I<should> use the C<value>
+parameter as the default should the user not provide a value. The C<prompt>
+parameter will be stored in the C<message> attribute of the App::Info::Request
+object passed to event handlers.
 
-=item C<$value>
+=item value
 
 The value to be confirmed. This is the value you've found, and it will be
 provided to the user as the default option when they're prompted for a new
-value. This value will be stored in the value attribute of the
+value. This value will be stored in the C<value> attribute of the
 App::Info::Request object passed to event handlers.
 
-=item C<$callback>
+=item callback
 
 Same as for C<unknown()>. Because the user can enter data to replace the
-default value provided via the C<$value> argument, you might want to validate
-it. Use this code reference to do so. This value will be stored in the
-callback attribute of the App::Info::Request object passed to event handlers.
+default value provided via the C<value> parameter, you might want to validate
+it. Use this code reference to do so. The callback will be stored in the
+C<callback> attribute of the App::Info::Request object passed to event
+handlers.
 
-=item C<$error>
+=item error
 
 Same as for C<unknown()>: an error message to display in the event that a
-value entered by the user isn't validated by the C<$callback> code reference.
-This value will be stored in the error attribute of the App::Info::Request
+value entered by the user isn't validated by the C<callback> code reference.
+This value will be stored in the C<error> attribute of the App::Info::Request
 object passed to event handlers.
 
 =back
 
 Here's an example usage demonstrating all of the above arguments:
 
-  my $exe = $self->confirm('shell', 'Path to your shell?', '/bin/sh',
-                           sub { -x }, 'Not an executable');
+  my $exe = $self->confirm( key      => 'shell',
+                            prompt   => 'Path to your shell?',
+                            value    => '/bin/sh',
+                            callback => sub { -x },
+                            error    => 'Not an executable');
 
 
 =cut
 
 sub confirm {
-    my ($self, $key, $prompt, $val, $cb, $err) = @_;
-    # Just return the value if we've already confirmed this value.
+    my ($self, %params) = @_;
+    my $key = delete $params{key}
+      or Carp::croak("No key parameter passed to confirm()");
     return $self->{__confirm__}{$key} if exists $self->{__confirm__}{$key};
 
     # Create a prompt and error message, if necessary.
-    $prompt ||= "Enter a valid " . $self->key_name . " $key";
-    $err ||= 'Invalid value';
-
-    # Prepare the request arguments.
-    my $params = { message  => $prompt,
-                   error    => $err,
-                   value    => $val,
-                   callback => $cb };
+    $params{message} = delete $params{prompt} ||
+      "Enter a valid " . $self->key_name . " $key";
+    $params{error} ||= 'Invalid value';
 
     # Execute the handler sequence.
-    my $req = $handler->($self, "confirm", $params);
+    my $req = $handler->($self, "confirm", \%params);
 
     # Mark that we've confirmed this value.
     $self->{__confirm__}{$key} = $req->value;
@@ -858,8 +862,10 @@ for you. Use the C<unknown()> method for a case such as this:
 
       # If we didn't find it, trigger an unknown event to
       # give a handler a chance to get the value.
-      $found ||= $self->unknown("file_$file", "Location of '$file' file?",
-                                sub { -f }, "Not a file");
+      $found ||= $self->unknown( key      => "file_$file",
+                                 prompt   => "Location of '$file' file?",
+                                 callback => sub { -f },
+                                 error    => "Not a file");
 
       # Now return the file name, regardless of whether we found it or not.
       return $found;
@@ -890,10 +896,10 @@ any other way.
 
 Now, more than likely, a method such C<_find_version()> would be called by the
 C<version()> method, which is a metadata method mandated by the App::Info
-abstract base class. This is the more appropriate place to handle an unknown
-version value. Indeed, every one of your metadata methods should make use of
-the C<unknown()> method. The C<version()> method then should look something
-like this:
+abstract base class. This is an appropriate place to handle an unknown version
+value. Indeed, every one of your metadata methods should make use of the
+C<unknown()> method. The C<version()> method then should look something like
+this:
 
   sub version {
       my $self = shift;
@@ -901,7 +907,8 @@ like this:
       unless (exists $self->{version}) {
           # Try to find the version number.
           $self->{version} = $self->_find_version ||
-            $self->unknown('version', "Enter the version number");
+            $self->unknown( key    => 'version',
+                            prompt => "Enter the version number");
       }
 
       # Now return the version number.
@@ -910,11 +917,11 @@ like this:
 
 Note how this method only tries to find the version number once. Any
 subsequent calls to C<version()> will return the same value that was returned
-the first time it was called. Of course, thanks to the first argument to
-C<unknown()>, we could have have tried to enumerate the version number every
-time, as C<unknown()> will return the same value every time it is called (as,
-indeed, should C<_find_version()>. But by checking for the C<version> key in
-C<$self> ourselves, we save some of the overhead.
+the first time it was called. Of course, thanks to the C<key> parameter in the
+call to C<unknown()>, we could have have tried to enumerate the version number
+every time, as C<unknown()> will return the same value every time it is called
+(as, indeed, should C<_find_version()>. But by checking for the C<version> key
+in C<$self> ourselves, we save some of the overhead.
 
 But as I said before, every metadata method should make use of the
 C<unknown()> method. Thus, the C<major()> method might looks something like
@@ -927,8 +934,10 @@ this:
           # Try to get the major version from the full version number.
           ($self->{major}) = $self->version =~ /^(\d+)\./;
           # Handle an unknown value.
-          $self->{major} = $self->unknown('major', "Enter major version",
-                                          sub { /^\d+$/ }, "Not a number")
+          $self->{major} = $self->unknown( key      => 'major',
+                                           prompt   => "Enter major version",
+                                           callback => sub { /^\d+$/ },
+                                           error    => "Not a number")
             unless defined $self->{major};
       }
 
@@ -942,7 +951,7 @@ Most often, such major data points will be sought in the object constructor.
 Here's an example:
 
   sub new {
-      # Construct the object.
+      # Construct the object so that handlers will work properly.
       my $self = shift->SUPER::new(@_);
 
       # Try to find the executable.
@@ -950,13 +959,18 @@ Here's an example:
       if (my $exe = $util->first_exe('/bin/myapp', '/usr/bin/myapp')) {
           # Confirm it.
           $self->{exe} =
-            $self->confirm('binary', 'Path to your executable?',
-                           $exe, sub { -x }, 'Not an executable');
+            $self->confirm( key      =>    'binary',
+                            prompt   => 'Path to your executable?',
+                            value    => $exe,
+                            callback => sub { -x },
+                            error    => 'Not an executable');
       } else {
           # Handle an unknown value.
           $self->{exe} =
-            $self->unknown('binary', 'Path to your executable?',
-                           sub { -x }, 'Not an executable');
+            $self->unknown( key      => 'binary',
+                            prompt   => 'Path to your executable?',
+                            callback => sub { -x },
+                            error    => 'Not an executable');
       }
 
       # We're done.
@@ -981,12 +995,13 @@ the super class to construct the object first. Doing so allows any event
 handling arguments to set up the event handlers, so that when we call
 C<confirm()> or C<unknown()> the event will be handled as the client expects.
 
-If we needed our subclass to take arguments, the approach is to specify the
-same C<key => $arg> syntax as is used by App::Info's C<new()> method. Say we
-wanted to allow clients of our App::Info subclass to pass in a list of
-alternate executable locations for us to search. Such an argument would most
-make sense as an array reference. So we specify that the key be C<alt_paths>
-and allow the user to construct an object like this:
+If we needed our subclass constructor to take its own parameter argumente, the
+approach is to specify the same C<key => $arg> syntax as is used by
+App::Info's C<new()> method. Say we wanted to allow clients of our App::Info
+subclass to pass in a list of alternate executable locations for us to search.
+Such an argument would most make sense as an array reference. So we specify
+that the key be C<alt_paths> and allow the user to construct an object like
+this:
 
   my $app = App::Info::Category::FooApp->new( alt_paths => \@paths );
 
@@ -996,7 +1011,7 @@ This approach allows the super class constructor arguments to pass unmolested
   my $app = App::Info::Category::FooApp->new( on_error  => \@handlers,
                                               alt_paths => \@paths );
 
-Then, to retrieve these paths inside our C<new()> construcotr, all we need do
+Then, to retrieve these paths inside our C<new()> constructor, all we need do
 is access them directly from the object:
 
   my $self = shift->SUPER::new(@_);

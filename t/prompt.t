@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.6 2002/06/21 05:43:12 david Exp $
+# $Id: prompt.t,v 1.7 2002/06/27 18:06:50 david Exp $
 
 use strict;
-use Test::More tests => 27;
+use Test::More tests => 29;
 use File::Spec::Functions qw(:ALL);
 
 ##############################################################################
@@ -30,18 +30,43 @@ use vars qw(@ISA);
 sub key_name { 'FooApp' }
 my $tmpdir = tmpdir;
 
-sub inc_dir { shift->unknown('bin', 'Path to tmpdir', sub { -d $_[0] },
-                             'Not a valid directory'), }
-sub lib_dir { shift->confirm('bin', 'Path to tmpdir', $tmpdir, sub { -d $_[0] },
-                             'Not a valid directory') }
+sub inc_dir {
+    shift->unknown( key      => 'bin',
+                    prompt   => 'Path to tmpdir',
+                    callback => sub { -d $_[0] },
+                    error    => 'Not a valid directory')
+ }
+
+sub lib_dir {
+    shift->confirm( key      => 'bin',
+                    prompt   => 'Path to tmpdir',
+                    value    => $tmpdir,
+                    callback => sub { -d $_[0] },
+                    error    => 'Not a valid directory')
+}
+
 sub patch { shift->info("Info message" ) }
 sub major { shift->error("Error message" ) }
-sub minor { shift->unknown('minor version number') }
-sub version { shift->unknown('version number', undef,
-                             sub { $_[0] =~ /^\d+$/ } )}
+sub minor { shift->unknown( key => 'minor version number') }
 
-sub so_lib_dir { shift->confirm('shared object directory', undef, '/foo33') }
-sub name { shift->confirm('name', undef, 'ick', sub { $_[0] !~ /\d/ }) }
+sub version {
+    shift->unknown( key      => 'version number',
+                    callback => sub { $_[0] =~ /^\d+$/ } )
+}
+
+sub so_lib_dir {
+    shift->confirm( key   => 'shared object directory',
+                    value => '/foo33')
+}
+
+sub name {
+    shift->confirm( key      => 'name',
+                    value    => 'ick',
+                    callback => sub { $_[0] !~ /\d/ })
+}
+
+sub bin_dir { shift->confirm }
+sub foo_dir { shift->unknown }
 
 ##############################################################################
 # Set up the tests.
@@ -181,6 +206,19 @@ undef $stderr;
 untie *STDOUT;
 untie *STDIN;
 untie *STDERR;
+
+##############################################################################
+# Test for errors when no key argument is passed.
+{
+    my $msg;
+    local $SIG{__DIE__} = sub { $msg = shift };
+    eval { $app->bin_dir };
+    like( $msg, qr/No key parameter passed to confirm/,
+          "Check no key confirm" );
+    eval { $app->foo_dir };
+    like( $msg, qr/No key parameter passed to unknown/,
+          "Check no key unknown" );
+}
 
 ##############################################################################
 # Interactive tests for maintainer.
