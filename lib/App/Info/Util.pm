@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.17 2002/06/05 20:34:27 david Exp $
+# $Id: Util.pm,v 1.18 2002/06/05 23:56:23 david Exp $
 
 =head1 NAME
 
@@ -150,7 +150,7 @@ sub first_file {
     return;
 }
 
-=head first_exe
+=head2 first_exe
 
   my $exe = $util->first_exe(@exelist);
 
