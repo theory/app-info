@@ -48,6 +48,9 @@ $VERSION = '0.43';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
+my @EXES = qw(postgres createdb createlang createuser dropdb droplang
+              dropuser initdb pg_dump pg_dumpall pg_restore postmaster
+              vacuumdb psql);
 
 =head1 INTERFACE
 
@@ -66,6 +69,43 @@ of directories returned by C<search_bin_dirs()>. If found, F<pg_config> will
 be called by the object methods below to gather the data necessary for
 each. If F<pg_config> cannot be found, then PostgreSQL is assumed not to be
 installed, and each of the object methods will return C<undef>.
+
+C<new()> also takes a number of optional parameters in addition to those
+documented for App::Info. These parameters allow you to specify alternate
+names for PostgreSQL executables (other than F<pg_config>, which you specify
+via the C<search_exe_names> parameter). These parameters are:
+
+=over
+
+=item search_postgres_names
+
+=item search_createdb_names
+
+=item search_createlang_names
+
+=item search_createuser_names
+
+=item search_dropd_names
+
+=item search_droplang_names
+
+=item search_dropuser_names
+
+=item search_initdb_names
+
+=item search_pg_dump_names
+
+=item search_pg_dumpall_names
+
+=item search_pg_restore_names
+
+=item search_postmaster_names
+
+=item search_psql_names
+
+=item search_vacuumdb_names
+
+=back
 
 B<Events:>
 
@@ -110,6 +150,16 @@ sub new {
                                              prompt   => "Path to pg_config?",
                                              callback => sub { -x },
                                              error    => 'Not an executable');
+    }
+
+    # Set up search defaults.
+    for my $exe (@EXES) {
+        my $attr = "search_$exe\_names";
+        if (exists $self->{$attr}) {
+            $self->{$attr} = [$self->{$attr}] unless ref $self->{$attr} eq 'ARRAY';
+        } else {
+            $self->{$attr} = [];
+        }
     }
 
     return $self;
@@ -496,40 +546,40 @@ Path to postgres executable?
 my $find_exe = sub  {
     my ($self, $key) = @_;
     my $exe = $key . (WIN32 ? '.exe' : '');
+    my $meth = "search_$key\_names";
 
     # Find executable.
     $self->info("Looking for $key");
 
     unless ($self->{$key}) {
-	my $bin = $self->bin_dir or return;
-	if (my $exe = $u->first_exe($u->catfile($bin, $exe))) {
-	    # We found it. Confirm.
-	    $self->{$key} = $self->confirm(
-		key      => $key,
-		prompt   => "Path to $key executable?",
-		value    => $exe,
-		callback => sub { -x },
-		error    => 'Not an executable'
-	    );
-	} else {
-	    # Handle an unknown value.
-	    $self->{$key} = $self->unknown(
-		key      => $key,
-		prompt   => "Path to $key executable?",
-		callback => sub { -x },
-		error    => 'Not an executable'
-	    );
-	}
+        my $bin = $self->bin_dir or return;
+        if (my $exe = $u->first_cat_exe([$self->$meth, $exe], $bin)) {
+            # We found it. Confirm.
+            $self->{$key} = $self->confirm(
+                key      => $key,
+                prompt   => "Path to $key executable?",
+                value    => $exe,
+                callback => sub { -x },
+                error    => 'Not an executable'
+            );
+        } else {
+            # Handle an unknown value.
+            $self->{$key} = $self->unknown(
+                key      => $key,
+                prompt   => "Path to $key executable?",
+                callback => sub { -x },
+                error    => 'Not an executable'
+            );
+        }
     }
 
     return $self->{$key};
 };
 
-for my $exe (qw(postgres createdb createlang createuser dropdb droplang
-                dropuser initdb pg_dump pg_dumpall pg_restore postmaster
-		vacuumdb psql)) {
+for my $exe (@EXES) {
     no strict 'refs';
     *{$exe} = sub { shift->$find_exe($exe) };
+    *{"search_$exe\_names"} = sub { @{ shift->{"search_$exe\_names"} } }
 }
 
 *executable = \&postgres;
@@ -889,6 +939,8 @@ These methods function just like the C<executable()> method, except that they
 return different executables. PostgreSQL comes with a fair number of them; we
 provide these methods to provide a path to a subset of them. Each method, when
 called, checks for an executable in the directory returned by C<bin_dir()>.
+The name of the executable must be one of the names returned by the
+corresponding C<search_*_names> method.
 
 The available executable methods are:
 
@@ -921,6 +973,40 @@ The available executable methods are:
 =item psql
 
 =item vacuumdb
+
+=back
+
+And the corresponding search names methods are:
+
+=over
+
+=item search_postgres_names
+
+=item search_createdb_names
+
+=item search_createlang_names
+
+=item search_createuser_names
+
+=item search_dropd_names
+
+=item search_droplang_names
+
+=item search_dropuser_names
+
+=item search_initdb_names
+
+=item search_pg_dump_names
+
+=item search_pg_dumpall_names
+
+=item search_pg_restore_names
+
+=item search_postmaster_names
+
+=item search_psql_names
+
+=item search_vacuumdb_names
 
 =back
 

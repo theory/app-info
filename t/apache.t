@@ -17,7 +17,7 @@ my $inc_dir = catdir 't', 'testinc';
 my $httpd_root = $^O eq 'MSWin32' ? $bin_dir : 't';
 my %exes = (
     map { $_ => catfile $bin_dir, "$_$ext" }
-      qw(httpd apxs)
+      qw(httpd myapxs)
 );
 
 my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
@@ -26,11 +26,12 @@ my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
               mod_access mod_auth mod_so mod_setenvif mod_ssl mod_perl);
 
 ok( my $apache = App::Info::HTTPD::Apache->new(
-    search_bin_dirs => $bin_dir,
-    search_exe_names => "httpd$ext"
-    search_conf_dirs => $conf_dir,
-    search_lib_dirs  => $conf_dir,
-    search_inc_dirs  => $inc_dir,
+    search_bin_dirs   => $bin_dir,
+    search_exe_names  => "httpd$ext",
+    search_apxs_names => "myapxs$ext",
+    search_conf_dirs  => $conf_dir,
+    search_lib_dirs   => $conf_dir,
+    search_inc_dirs   => $inc_dir,
 ), "Got Object");
 isa_ok($apache, 'App::Info::HTTPD::Apache');
 isa_ok($apache, 'App::Info');
@@ -53,7 +54,7 @@ is( $apache->lib_dir, $conf_dir, "Test lib dir" );
 is( $apache->bin_dir, $bin_dir, "Test bin dir" );
 is( $apache->executable, $exes{httpd}, "Test executable" );
 is( $apache->httpd, $exes{httpd}, "Test httpd" );
-is( $apache->apxs, $exes{apxs}, "Test apxs" );
+is( $apache->apxs, $exes{myapxs}, "Test apxs" );
 is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
 is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );

@@ -13,12 +13,13 @@ my $bin_dir = catdir 't', 'scripts';
 $bin_dir = catdir 't', 'bin' unless -d $bin_dir;
 my %exes = (
     map { $_ => catfile $bin_dir, "$_$ext" }
-      qw(postgres createdb)
+      qw(postgres mycreatedb)
 );
 
 ok( my $pg = App::Info::RDBMS::PostgreSQL->new(
     search_bin_dirs => $bin_dir,
     search_exe_names => "pg_config$ext",
+    search_createdb_names => "mycreatedb$ext",
 ), "Got Object");
 
 isa_ok($pg, 'App::Info::RDBMS::PostgreSQL');
@@ -34,7 +35,7 @@ is( $pg->patch_version, '0', "Test patch version" );
 is( $pg->lib_dir, 't/testlib', "Test lib dir" );
 is( $pg->executable, $exes{postgres}, "Test executable" );
 is( $pg->postgres, $exes{postgres}, "Test postgres" );
-is( $pg->createdb, $exes{createdb}, "Test createdb" );
+is( $pg->createdb, $exes{mycreatedb}, "Test createdb" );
 is( $pg->bin_dir, $bin_dir, "Test bin dir" );
 is( $pg->so_lib_dir, 't/testlib', "Test so lib dir" );
 is( $pg->inc_dir, "t/testinc", "Test inc dir" );

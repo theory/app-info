@@ -1,6 +1,11 @@
 Revision history for Perl extension App::Info.
 
 0.43
+      - Added "search_*_name" parameters and methods for searching for
+        PostgreSQL and Apache executables other than the main one,
+        which is already handed by "search_exe_names".
+      - Fixed "apache.t", "iconv.t", "postgres.t", and "sqlite3.t" tests
+        on Win32.
 
 0.42  2004-12-07T00:40:53
       - Fixed last Win32 test failure in "apache.t".
@@ -8,7 +13,7 @@ Revision history for Perl extension App::Info.
         library, if there is one.
       - Added other executable methods to App::Info::RDBMS::PostgreSQL,
         including "postgres()", "createdb()", "createuser()", and others.
-      - Added other executable methods to App::Info::RDBMS::PostgreSQL,
+      - Added other executable methods to App::Info::HTTPD::Apache,
         including "ab()", "apachectl()", "apxs()", and others.
       - Changed behavior of App::Info::HTTPD::Apache->bin_dir to just return
         the name of the directory in which the httpd executable is stored,

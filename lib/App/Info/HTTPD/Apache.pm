@@ -48,6 +48,7 @@ $VERSION = '0.43';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
+my @EXES = qw(ab apachectl apxs htdigest htpasswd logresolve rotatelogs);
 
 =head1 INTERFACE
 
@@ -89,6 +90,27 @@ search for the configuration file.
 
 =back
 
+As well as these parameters to specify alternate names for Apache executables
+(other than F<httpd>, which you specify via the C<search_exe_names> parameter):
+
+=over
+
+=item seearch_ab_names
+
+=item seearch_apachectl_names
+
+=item seearch_apxs_names
+
+=item seearch_htdigest_names
+
+=item seearch_htpasswd_names
+
+=item seearch_logresolve_names
+
+=item seearch_rotatelogs_names
+
+=back
+
 B<Events:>
 
 =over 4
@@ -113,11 +135,11 @@ sub new {
     # Construct the object.
     my $self = shift->SUPER::new(@_);
 
-    for (qw(search_conf_dirs search_conf_names)) {
-        if (exists $self->{$_}) {
-            $self->{$_} = [$self->{$_}] unless ref $self->{$_} eq 'ARRAY';
+    for my $exe (qw(search_conf_dirs search_conf_names), map { "search_$_\_names" } @EXES) {
+        if (exists $self->{$exe}) {
+            $self->{$exe} = [$self->{$exe}] unless ref $self->{$exe} eq 'ARRAY';
         } else {
-            $self->{$_} = [];
+            $self->{$exe} = [];
         }
     }
 
@@ -1434,7 +1456,8 @@ sub search_conf_dirs {
 These methods return the complete paths to their like-named executables.
 Apache comes with a fair number of them; we provide these methods to provide a
 path to a subset of them. Each method, when called, checks for an executable
-in the directory returned by C<bin_dir()>.
+in the directory returned by C<bin_dir()>. The name of the executable must be
+one of the names returned by the corresponding C<search_*_names> method.
 
 The available executable methods are:
 
@@ -1453,6 +1476,26 @@ The available executable methods are:
 =item logresolve
 
 =item rotatelogs
+
+=back
+
+And the corresponding search names methods are:
+
+=over
+
+=item seearch_ab_names
+
+=item seearch_apachectl_names
+
+=item seearch_apxs_names
+
+=item seearch_htdigest_names
+
+=item seearch_htpasswd_names
+
+=item seearch_logresolve_names
+
+=item seearch_rotatelogs_names
 
 =back
 
@@ -1479,13 +1522,14 @@ Path to executable?
 my $find_exe = sub  {
     my ($self, $key) = @_;
     my $exe = $key . (WIN32 ? '.exe' : '');
+    my $meth = "search_$key\_names";
 
     # Find executable.
     $self->info("Looking for $key");
 
     unless ($self->{$key}) {
 	my $bin = $self->bin_dir or return;
-	if (my $exe = $u->first_exe($u->catfile($bin, $exe))) {
+        if (my $exe = $u->first_cat_exe([$self->$meth, $exe], $bin)) {
 	    # We found it. Confirm.
 	    $self->{$key} = $self->confirm(
 		key      => $key,
@@ -1508,9 +1552,10 @@ my $find_exe = sub  {
     return $self->{$key};
 };
 
-for my $exe (qw(ab apachectl apxs htdigest htpasswd logresolve rotatelogs)) {
+for my $exe (@EXES) {
     no strict 'refs';
     *{$exe} = sub { shift->$find_exe($exe) };
+    *{"search_$exe\_names"} = sub { @{ shift->{"search_$exe\_names"} } }
 }
 
 *httpd = \&executable;
