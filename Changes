@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.21  
+0.21  Tue Jul  2 19:14:44 2002
       - Fixed bug in Handler::Prompt where the prompt failed to simply
         return when the user accepted the default value (with confirm
         events).
