@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: carp.t,v 1.3 2002/06/08 05:49:38 david Exp $
+# $Id: carp.t,v 1.4 2002/06/11 06:09:45 david Exp $
 
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 26;
 
 our $msg = "Error retrieving version";
 
@@ -18,8 +18,10 @@ sub version { shift->error($msg) }
 
 package main;
 
+BEGIN { use_ok('App::Info::Handler::Carp') }
+
 # Try confess first.
-ok( my $app = App::Info::Category::FooApp->new( error_level => 'confess'),
+ok( my $app = App::Info::Category::FooApp->new( on_error => 'confess'),
     "Set up for confess" );
 eval { $app->version };
 ok( my $err = $@, "Get confess" );
@@ -27,7 +29,7 @@ like( $err, qr/^Error retrieving version/, "Starts with confess message" );
 like( $err, qr/called at t\/error\.t line/, "Confess has stack trace" );
 
 # Now try croak.
-ok( $app = App::Info::Category::FooApp->new( error_level => 'croak'),
+ok( $app = App::Info::Category::FooApp->new( on_error => 'croak'),
     "Set up for croak" );
 eval { $app->version };
 ok( $err = $@, "Get croak" );
@@ -35,7 +37,7 @@ like( $err, qr/^Error retrieving version at.*error\.t/, "Starts with croak messa
 unlike( $err, qr/called at t\/error\.t line/, "Croak has no stack trace" );
 
 # Now die.
-ok( $app = App::Info::Category::FooApp->new( error_level => 'die'),
+ok( $app = App::Info::Category::FooApp->new( on_error => 'die'),
     "Set up for die" );
 eval { $app->version };
 ok( $err = $@, "Get die" );
@@ -46,7 +48,7 @@ unlike( $err, qr/called at t\/error\.t line/, "Die has no stack trace" );
 $SIG{__WARN__} = sub { $err = shift };
 
 # Cluck.
-ok( $app = App::Info::Category::FooApp->new( error_level => 'cluck'),
+ok( $app = App::Info::Category::FooApp->new( on_error => 'cluck'),
     "Set up for cluck" );
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with cluck message" );
@@ -54,7 +56,7 @@ like( $err, qr/called at t\/error\.t line/, "Cluck as stack trace" );
 is( $app->last_error, $msg, "Compare cluck with last_error" );
 
 # Carp.
-ok( $app = App::Info::Category::FooApp->new( error_level => 'carp'),
+ok( $app = App::Info::Category::FooApp->new( on_error => 'carp'),
     "Set up for carp" );
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with carp message" );
@@ -62,22 +64,13 @@ unlike( $err, qr/called at t\/error\.t line/, "Carp has no stack trace" );
 is( $app->last_error, $msg, "Compare carp with last_error" );
 
 # Warn.
-ok( $app = App::Info::Category::FooApp->new( error_level => 'warn'),
+ok( $app = App::Info::Category::FooApp->new( on_error => 'warn'),
     "Set up for warn" );
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with warn message" );
 unlike( $err, qr/called at t\/error\.t line/, "Warn has no stack trace" );
 is( $app->last_error, $msg, "Compare warn with last_error" );
 
-# Silent.
-$err = undef;
-ok( $app = App::Info::Category::FooApp->new( error_level => 'silent'),
-    "Set up for silent" );
-$app->version;
-ok( ! defined $err, "Error not defined" );
-ok( $err = $app->last_error, "Grab last silent error" );
-like( $err, qr/^Error retrieving version/, "Starts with silent message" );
-
 # Dissallow bogus error levels.
-eval { App::Info::Category::FooApp->new( error_level => 'bogus') };
-like( $@, qr/Invalid error_level 'bogus'/, "Check for bogus error level" );
+eval { App::Info::Category::FooApp->new( on_error => 'bogus') };
+like( $@, qr/No such handler 'bogus'/, "Check for bogus error level" );

@@ -1,6 +1,6 @@
 package App::Info::Handler::Carp;
 
-# $Id: Carp.pm,v 1.2 2002/06/10 06:03:06 david Exp $
+# $Id: Carp.pm,v 1.3 2002/06/11 06:09:45 david Exp $
 
 =head1 NAME
 
@@ -13,8 +13,6 @@ App::Info::Handler::Carp - App::Info Carp handler
   use App::Info::Category::FooApp;
 
   my $carp = App::Info::Handler::Carp->new('croak');
-  my $app = App::Info::Category::FooApp->new( on_error => [ $carp ],
-                                              on_null  => [ $carp ] );
 
 =head1 DESCRIPTION
 
@@ -28,10 +26,10 @@ use vars qw($VERSION @ISA);
 $VERSION = '0.01';
 @ISA = qw(App::Info::Handler);
 
-my %levels = ( croak   => sub { Carp::croak(@_) },
-               carp    => sub { Carp::carp(@_) },
-               cluck   => sub { Carp::cluck(@_) },
-               confess => sub { Carp::confess(@_) }
+my %levels = ( croak   => sub { goto &Carp::croak },
+               carp    => sub { goto &Carp::carp },
+               cluck   => sub { goto &Carp::cluck },
+               confess => sub { goto &Carp::confess }
              );
 
 # A couple of aliases.
@@ -39,15 +37,15 @@ $levels{die} = $levels{croak};
 $levels{warn} = $levels{carp};
 
 # Register ourselves.
-for (qw(croak carp cluck confess die warn)) {
-    App::Info->register_handler($_, sub { __PACKAGE__->new($_) } );
+for my $c (qw(croak carp cluck confess die warn)) {
+    App::Info::Handler->register_handler($c, sub { __PACKAGE__->new($c) } );
 }
 
 sub new {
     my ($pkg, $level) = @_;
     my $self = $pkg->SUPER::new;
     if ($level) {
-        Carp::croak("Invalid error_level '$level'")
+        Carp::croak("Invalid error handler '$level'")
           unless $levels{$level};
         $self->{level} = $level;
     } else {
@@ -58,7 +56,10 @@ sub new {
 
 sub handler {
     my ($self, $req) = @_;
-    $levels{level}->($req->error);
+    # Change package to App::Info to trick Carp into issuing the stack trace
+    # from the proper context of the caller.
+    package App::Info;
+    $levels{$self->{level}}->($req->message);
     # Return OK to indicate that we've handled the request.
     return App::Info::Handler::OK;
 }

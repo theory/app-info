@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.3 2002/06/10 23:47:48 david Exp $
+# $Id: Handler.pm,v 1.4 2002/06/11 06:09:45 david Exp $
 
 =head1 NAME
 
@@ -61,6 +61,7 @@ sub new {
     $key ||= 'default';
     if ($class eq __PACKAGE__ && $key ne 'default') {
         # We were called directly! Handle it.
+        Carp::croak("No such handler '$key'") unless $handlers{$key};
         return $handlers{$key}->();
     } else {
         # A subclass called us -- just instantiate and return.

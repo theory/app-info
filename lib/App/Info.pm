@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.22 2002/06/10 23:47:48 david Exp $
+# $Id: Info.pm,v 1.23 2002/06/11 06:09:45 david Exp $
 
 =head1 NAME
 
@@ -234,12 +234,11 @@ sub download_url  { $croak->(shift, 'download_url') }
 1;
 __END__
 
-=head1 CONSTRUTORS
+=head1 CONSTRUTOR
 
 =head2 new
 
-  my $app = App::Info::Category::FooApp->new;
-  my $app = App::Info::Category::FooApp->new( error_level => 'confess' );
+  my $app = App::Info::Category::FooApp->new(@params);
 
 Consructs the FooApp App::Info object and returns it. The C<error_level>
 parameter determines how the object will behave when it encounters an error,

@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: request.t,v 1.2 2002/06/11 03:10:13 david Exp $
+# $Id: request.t,v 1.3 2002/06/11 06:09:45 david Exp $
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 16;
 
 BEGIN { use_ok('App::Info::Request') }
 
