@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.35 2002/06/27 20:23:40 david Exp $
+# $Id: Info.pm,v 1.36 2002/06/28 22:34:54 david Exp $
 
 =head1 NAME
 
@@ -967,7 +967,7 @@ Here's an example:
       if (my $exe = $util->first_exe('/bin/myapp', '/usr/bin/myapp')) {
           # Confirm it.
           $self->{exe} =
-            $self->confirm( key      =>    'binary',
+            $self->confirm( key      => 'binary',
                             prompt   => 'Path to your executable?',
                             value    => $exe,
                             callback => sub { -x },
