@@ -15,7 +15,7 @@ my $executable = catfile $bin_dir, "iconv$ext";
 
 ok( my $iconv = App::Info::Lib::Iconv->new(
     search_lib_dirs => $lib_dir,
-    search_exe_names => [$executable],
+    search_exe_names => ["iconv$ext"],
     search_inc_dirs => $inc_dir,
     search_bin_dirs => $bin_dir,
 ), "Got Object");

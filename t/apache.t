@@ -27,7 +27,7 @@ my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
 
 ok( my $apache = App::Info::HTTPD::Apache->new(
     search_bin_dirs => $bin_dir,
-    search_exe_names => $exes{httpd},
+    search_exe_names => "httpd$ext"
     search_conf_dirs => $conf_dir,
     search_lib_dirs  => $conf_dir,
     search_inc_dirs  => $inc_dir,

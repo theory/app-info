@@ -17,7 +17,7 @@ my $executable = catfile $bin_dir, "sqlite3$ext";
 
 ok( my $sqlite = App::Info::RDBMS::SQLite->new(
     search_bin_dirs  => [$bin_dir],
-    search_exe_names => [$executable],
+    search_exe_names => ["sqlite3$ext"],
     search_lib_dirs  => [$lib_dir],
     search_inc_dirs  => [$inc_dir],
 ), "Got Object");
