@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.31 2002/06/16 06:02:21 david Exp $
+# $Id: Apache.pm,v 1.32 2002/06/16 06:05:48 david Exp $
 
 =head1 NAME
 
@@ -28,6 +28,14 @@ App::Info::HTTPD. Methods that trigger events will trigger them only the first
 time they're called (See L<App::Info|App::Info> for documentation on handling
 events). To start over (after, say, someone has installed Apache) construct a
 new App::Info::HTTPD::Apache object to aggregate new metadata.
+
+Some of the methods document the same events. This is due to cross-calling of
+methods or of functions common to methods. However, any one event should be
+triggered no more than once. For example, although the info event "Executing
+`httpd -v`" is documented for the methods C<name()>, C<version()>,
+C<major_version()>, C<minor_version()>, and C<patch_version()>, resta assured
+that it will only be triggered once, by which ever of those four methods is
+called first.
 
 =cut
 
