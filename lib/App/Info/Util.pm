@@ -147,7 +147,7 @@ sub first_file {
     return;
 }
 
-=item2 first_cat_file
+=head2 first_cat_file
 
   my $file = $util->first_cat_file('ick.txt', @paths);
   $file = $util->first_cat_file(['this.txt', 'that.txt'], @paths);
