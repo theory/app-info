@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.21 2002/06/05 23:07:22 david Exp $
+# $Id: Expat.pm,v 1.22 2002/06/05 23:47:13 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ my $u = App::Info::Util->new;
 
 =head2 new
 
-  my $expat = App::Info::Lib::Expat->new;
+  my $expat = App::Info::Lib::Expat->new(@params);
 
 Returns an App::Info::Lib::Expat object. See L<App::Info|App::Info> for a
 complete description of argument parameters.
@@ -309,7 +309,7 @@ sub so_lib_dir {
         if (my $dir = $u->first_cat_dir($libs, @paths)) {
             $_[0]->{so_lib_dir} = $dir;
         } else {
-            $_[0]->error("Could not find so lib direcory");
+            $_[0]->error("Could not find shared object lib direcory");
             $_[0]->{so_lib_dir} = undef;
         }
     }

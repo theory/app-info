@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.20 2002/06/05 22:43:04 david Exp $
+# $Id: Apache.pm,v 1.21 2002/06/05 23:47:13 david Exp $
 
 =head1 NAME
 
@@ -51,9 +51,9 @@ complete description of argument parameters.
 When called, C<new()> searches the file system for the F<httpd>,
 F<apache-perl>, or F<apache> application. If found, the application (hereafer
 referred to as F<httpd>, regardless of how it was actually found to be named)
-will be called by each of the object methods below to gather the data
-necessary for each. If F<httpd> cannot be found, then Apache is assumed not to
-be installed, and each of the methods will return C<undef>.
+will be called by the object methods below to gather the data necessary for
+each. If F<httpd> cannot be found, then Apache is assumed not to be installed,
+and each of the object methods will return C<undef>.
 
 App::Info::HTTPD::Apache searches for F<httpd> along your path, as defined by
 C<File::Spec->path>. Failing that, it searches the following directories:
@@ -127,8 +127,8 @@ sub new {
 Returns true if Apache is installed, and false if it is not.
 App::Info::HTTPD::Apache determines whether Apache is installed based on the
 presence or absence of the F<httpd> application on the file system, as found
-when C<new()> instantiated the object. If Apache does not appear to be
-installed then all of the other object methods will return empty values.
+when C<new()> constructed the object. If Apache does not appear to be
+installed, then all of the other object methods will return empty values.
 
 =cut
 

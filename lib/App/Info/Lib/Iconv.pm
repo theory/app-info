@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.17 2002/06/05 23:26:47 david Exp $
+# $Id: Iconv.pm,v 1.18 2002/06/05 23:47:13 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ my $u = App::Info::Util->new;
 
 =head2 new
 
-  my $iconv = App::Info::Lib::Iconv->new;
+  my $iconv = App::Info::Lib::Iconv->new(@params);
 
 Returns an App::Info::Lib::Iconv object.
 
