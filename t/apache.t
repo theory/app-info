@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.7 2002/06/05 03:36:37 david Exp $
+# $Id: apache.t,v 1.8 2002/06/05 21:39:35 david Exp $
 
 use strict;
 use Test::More tests => 26;
@@ -31,7 +31,6 @@ if ($apache->installed) {
     ok( $apache->conf_file, "Got Apache conf file" );
     ok( $apache->user, "Got Apache user." );
     ok( $apache->group, "Got Apache group." );
-    ok( $apache->port, "Got Apache port." );
 } else {
     ok( !$apache->installed, "Apache is not installed" );
     ok( !$apache->name, "Don't got name" );
@@ -49,14 +48,14 @@ if ($apache->installed) {
     ok( !$apache->conf_file, "Don't got Apache conf file" );
     ok( !$apache->user, "Don't got Apache user." );
     ok( !$apache->group, "Don't got Apache group." );
-    ok( !$apache->port, "Don't got Apache port." );
 }
 
-# Installation doesn't guarantee lib & inc installation.
+# Installation doesn't guarantee lib & inc installation, or port number.
 $apache->lib_dir; pass("Can call lib_dir");
 $apache->bin_dir, pass("Can call bin_dir");
 $apache->so_lib_dir; pass("Can call so_lib_dir" );
-$apache->inc_dir, pass("Can call inc_dir");
+$apache->inc_dir; pass("Can call inc_dir");
+$apache->port; pass("Can call port.");
 
 ok( $apache->home_url, "Get home URL" );
 ok( $apache->download_url, "Get download URL" );
