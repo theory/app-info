@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.8 2002/06/03 02:37:23 david Exp $
+# $Id: Iconv.pm,v 1.9 2002/06/03 18:11:00 david Exp $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -78,7 +78,7 @@ do {
          /sbin
          /sw/sbin));
 
-    $obj->{iconv_exe} = $u->first_cat_file('iconv', @paths);
+    $obj->{iconv_exe} = $u->first_cat_path('iconv', @paths);
 };
 
 =head1 CONSTRUCTOR
@@ -268,6 +268,12 @@ App::Info::Lib::Iconv searches for these files:
 
 =item libiconv.so.0.0.1
 
+=item libiconv.dylib
+
+=item libiconv.2.dylib
+
+=item libiconv.2.0.4.dylib
+
 =item libiconv.a
 
 =item libiconv.la
@@ -299,6 +305,9 @@ sub lib_dir {
         my @files = qw(libiconv.so
                        libiconv.so.0
                        libiconv.so.0.0.1
+                       libiconv.dylib
+                       libiconv.2.dylib
+                       libiconv.2.0.4.dylib
                        libiconv.a
                        libiconv.la);
 
@@ -322,6 +331,12 @@ object library could be found. App::Info::Lib::Iconv searches for these files:
 =item libiconv.so.0
 
 =item libiconv.so.0.0.1
+
+=item libiconv.dylib
+
+=item libiconv.2.dylib
+
+=item libiconv.2.0.4.dylib
 
 =back
 
@@ -350,7 +365,10 @@ sub so_lib_dir {
         # sos.
         my @files = qw(libiconv.so
                        libiconv.so.0
-                       libiconv.so.0.0.1);
+                       libiconv.so.0.0.1
+                       libiconv.dylib
+                       libiconv.2.dylib
+                       libiconv.2.0.4.dylib);
 
         $_[0]->{so_lib_dir} = $u->first_cat_dir(\@files, @paths);
     }
@@ -392,12 +410,14 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <david@wheeler.net> based on code by Sam Tregar
+<sam@tregar.com>.
 
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::Lib|App::Info::Lib>
+L<App::Info::Lib|App::Info::Lib>,
+L<Text::Iconv|Text::Iconv>
 
 =head1 COPYRIGHT AND LICENSE
 
