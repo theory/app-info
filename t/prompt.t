@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.9 2002/07/03 17:33:18 david Exp $
+# $Id$
 
 use strict;
-use Test::More tests => 32;
+use Test::More tests => 34;
 use File::Spec::Functions qw(:ALL);
 
 ##############################################################################
@@ -74,14 +74,19 @@ package main;
 
 BEGIN { use_ok('App::Info::Handler::Prompt') }
 
-ok( my $p = App::Info::Handler::Prompt->new, "Create prompt" );
-$p->{tty} = 1; # Cheat death.
-ok( my $app = App::Info::Category::FooApp->new( on_unknown => $p),
-    "Set up for unknown" );
-
 # Tie off the file handles.
 my $stdout = tie *STDOUT, 'TieOut' or die "Cannot tie STDOUT: $!\n";
 my $stdin = tie *STDIN, 'TieOut' or die "Cannot tie STDIN: $!\n";
+my $stderr = tie *STDERR, 'TieOut' or die "Cannot tie STDERR: $!\n";
+
+ok( my $app = App::Info::Category::FooApp->new( on_unknown => 'prompt'),
+    "Use keyword to set up for unknown" );
+ok( my $p = App::Info::Handler::Prompt->new, "Create prompt" );
+$p->{tty} = 1; # Cheat death.
+ok( $app = App::Info::Category::FooApp->new( on_unknown => $p),
+    "Set up for unknown" );
+# Make sure there were no warnings.
+is $stderr->read, '', "There should be no warnings";
 
 ##############################################################################
 # Set up a couple of answers.
@@ -207,7 +212,6 @@ $app->patch;
 is( $stdout->read, "Info message\n", "Check info message" );
 
 # And error prints to STDERR.
-my $stderr = tie *STDERR, 'TieOut' or die "Cannot tie STDERR: $!\n";
 ok( $app = App::Info::Category::FooApp->new( on_error => $p),
     "Set up for error" );
 $app->major;

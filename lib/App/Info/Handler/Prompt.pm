@@ -50,7 +50,7 @@ $VERSION = '0.31';
 
 # Register ourselves.
 App::Info::Handler->register_handler
-  ('prompt' => sub { __PACKAGE__->new('prompt') } );
+  ('prompt' => sub { __PACKAGE__->new } );
 
 =head1 INTERFACE
 

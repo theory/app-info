@@ -1,6 +1,8 @@
 Revision history for Perl extension App::Info.
 
 0.31
+      - Eliminated "Odd number of elements in hash assignment" warning when
+        creating an App::Info::Handler::Prompt object.
 
 0.30  2004-11-20T19:10:55
       - Fixed number of tests to skip in "sqlite_info.t" for systems that
