@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: iconv_info.t,v 1.1 2002/06/21 06:06:47 david Exp $
+# $Id: iconv_info.t,v 1.2 2002/06/27 19:57:35 david Exp $
 
 use strict;
 use Test::More tests => 19;
@@ -53,7 +53,7 @@ SKIP: {
 
     # Check minor version.
     ok( $iconv = App::Info::Lib::Iconv->new( on_info => $info ),
-        "Got Object 2");
+        "Got Object 3");
     $info->message; # Throw away constructor message.
     $iconv->minor_version;
     is( $info->message, "Searching for 'iconv.h'", "Check minor info" );
@@ -62,7 +62,7 @@ SKIP: {
 
     # Check dir methods.
     ok( $iconv = App::Info::Lib::Iconv->new( on_info => $info ),
-        "Got Object 3");
+        "Got Object 4");
     $info->message; # Throw away constructor message.
     $iconv->bin_dir;
     is( $info->message, "Searching for bin directory", "Check bin info" );
