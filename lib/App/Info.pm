@@ -1,10 +1,10 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.4 2002/06/01 21:48:16 david Exp $
+# $Id: Info.pm,v 1.5 2002/06/01 21:54:43 david Exp $
 
 =head1 NAME
 
-App::Info - Information about software packages on your system
+App::Info - Information about software packages on a system
 
 =head1 SYNOPSIS
 
