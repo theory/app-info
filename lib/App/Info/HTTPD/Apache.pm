@@ -1,7 +1,6 @@
 package App::Info::HTTPD::Apache;
 
 use strict;
-use File::Spec::Functions ();
 use App::Info::Util;
 use Carp ();
 use vars qw(@ISA $VERSION);
@@ -13,13 +12,15 @@ my $u = App::Info::Util->new;
 
 do {
     # Find Apache executable.
-    my @paths = (File::Spec::Functions::path(),
+    my @paths = ($u->path,
       qw(/usr/local/apache/bin
          /usr/local/bin
          /usr/local/sbin
          /usr/bin
          /usr/sbin
-         /bin));
+         /bin
+         /sw/bin
+         /sw/sbin));
 
     my @exes = qw(httpd apache-perl apache);
 

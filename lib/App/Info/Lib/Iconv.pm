@@ -1,7 +1,6 @@
 package App::Info::Lib::Iconv;
 
 use strict;
-use File::Spec::Functions ();
 use File::Basename ();
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
@@ -13,13 +12,15 @@ my $u = App::Info::Util->new;
 
 do {
     # Find iconv.
-    my @paths = (File::Spec::Functions::path(),
+    my @paths = ($u->path,
       qw(/usr/local/bin
          /usr/bin
          /bin
+         /sw/bin
          /usr/local/sbin
          /usr/sbin/
-         /sbin));
+         /sbin
+         /sw/sbin));
 
     $obj->{iconv_exe} = $u->first_cat_file('iconv', @paths);
 };

@@ -1,7 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
 use strict;
-use File::Spec::Functions ();
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
@@ -12,7 +11,7 @@ my $u = App::Info::Util->new;
 
 do {
     # Find pg_config.
-    my @paths = (File::Spec::Functions::path(),
+    my @paths = ($u->path,
       qw(/usr/local/pgsql/bin/pg_config
          /usr/local/postgres/bin/pg_config
          /opt/pgsql/bin/pg_config
