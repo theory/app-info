@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.7 2002/06/05 20:34:41 david Exp $
+# $Id: util.t,v 1.8 2002/06/08 16:06:49 david Exp $
 
 use strict;
 use Test::More tests => 20;
@@ -19,15 +19,18 @@ ok( $util->first_dir("C:\\foo", "C:\\bar", $root), "Test first_dir" );
 # test first_path(). This is actually platform-dependent -- corrections
 # welcome.
 if ($^O eq 'MSWin32' or $^O eq 'os2') {
-    is( $util->first_path("C:\\foo;C:\\bar;$root"), $root, "Test first_path");
+    is( $util->first_path("C:\\foo3424823;C:\\bar4294334834;$root"), $root,
+        "Test first_path");
 } elsif ($^O eq 'MacOS') {
-    is( $util->first_path(":foo,:bar,$root"), $root, "Test first_path");
+    is( $util->first_path(":fooeijifjei:bareiojfiejfie:$root"), $root,
+        "Test first_path");
 } elsif ($^O eq 'VMS' or $^O eq 'epoc') {
     ok( ! defined $util->first_path,
         "first_path() returns undef on this platform" );
 } else {
     # Assume unix.
-    is( $util->first_path("/foo:/bar:$root"), $root, "Test first_path");
+    is( $util->first_path("/foo28384844:/bar949492393:$root"), $root,
+        "Test first_path");
 }
 
 # Test first_file(). First, create a file to find.
@@ -38,15 +41,15 @@ print F "King of the who?\nWell, I didn't vote for ya.";
 close F;
 
 # Now find the file.
-is( $util->first_file("this.foo", "that.foo", "C:\\foo.tst", $tmp_file),
-    $tmp_file, "Test first_file" );
+is( $util->first_file("this32432.foo", "that234324.foo", "C:\\foo434324.tst",
+                      $tmp_file), $tmp_file, "Test first_file" );
 
 # Now find the same file with first_cat_path().
 is( $util->first_cat_path('app-info.tst', $util->path, $tmpdir),
     $tmp_file, "Test first_cat_path" );
 
 # And test it again using an array.
-is( $util->first_cat_path(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
+is( $util->first_cat_path(['foo334.foo', 'bar224.foo', 'app-info.tst', 'ick'],
                           $util->path, $tmpdir, "C:\\mytemp"),
     $tmp_file, "Test first_cat_path with array" );
 
@@ -55,8 +58,8 @@ is( $util->first_cat_dir('app-info.tst', $util->path, $tmpdir),
     $tmpdir, "Test first_cat_path" );
 
 # And test it again using an array.
-is( $util->first_cat_dir(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
-                          $util->path, $tmpdir, "C:\\mytemp"),
+is( $util->first_cat_dir(['foo24342434.foo', 'bar4323423.foo', 'app-info.tst',
+                          'ick'], $util->path, $tmpdir, "C:\\mytemp"),
     $tmpdir, "Test first_cat_path with array" );
 
 SKIP: {
@@ -72,7 +75,7 @@ SKIP: {
         "Test first_cat_exe" );
 
     # Test it again with an array.
-    is( $util->first_cat_exe(['foo.foo', 'bar.foo', 'sh', 'ick'],
+    is( $util->first_cat_exe(['foowerwe.foo', 'barwere.foo', 'sh', 'ickrs34'],
                           $util->path, $tmpdir, "C:\\mytemp"),
     '/bin/sh', "Test first_cat_exe with array" );
 }
@@ -107,5 +110,3 @@ is_deeply([$util->multi_search_file($tmp_file, qr/(of\sthe)\s+(who\?)/,
 
 # Don't forget to delete our temporary file.
 rmtree $tmp_file;
-
-
