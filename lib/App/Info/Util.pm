@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.7 2002/06/02 00:15:00 david Exp $
+# $Id: Util.pm,v 1.8 2002/06/03 01:31:09 david Exp $
 
 =head1 NAME
 
@@ -226,6 +226,163 @@ sub first_cat_dir {
         }
     }
     return;
+}
+
+=head2 search_file
+
+  my $file = 'foo.txt';
+  my $regex = qr/(text\s+to\s+find)/;
+  my $value = $util->search_file($file, $regex);
+
+Opens C<$file> and executes the C<$regex> regular expression against each line
+in the file. Once the line matches and one or more values is returned by the
+match, the file is closed and the value or values returned.
+
+For example, say F<foo.txt> contains the line "Version 6.5, patch level 8",
+and you need to grab each of the three version parts. All three parts can
+be grabbed like this:
+
+  my $regex = qr/Version\s+(\d+)\.(\d+),[^\d]*(\d+)/;
+  my @nums = $util->search_file($file, $regex);
+
+Now version will contain the values C<(6, 5, 8)>. Note that in a scalar
+context, the above search would yeild an array reference:
+
+  my $regex = qr/Version\s+(\d+)\.(\d+),[^\d]*(\d+)/;
+  my $nums = $util->search_file($file, $regex);
+
+So now C<$nums> contains C<[6, 5, 8]>. The same does not hold true if the
+match returns only one value, however. Say F<foo.txt> contains the line
+"king of the who?", and you wish to know who the king is king of. Either
+of the following two calls would get you the data you need:
+
+  my $minions = $util->search_file($file, qr/King\s+of\s+(.*)/);
+  my @minions = $util->search_file($file, qr/King\s+of\s+(.*)/);
+
+In the first case, because the regular expression contains only one set of
+parentheses, C<search_file()> will simply return that value; C<$minions>
+contains the string "the who?". In the latter case, C<@minions> of course
+contains a single element: C<("the who?")>.
+
+Note that a regular expression without parentheses -- that is, one that
+doesn't grab values and put them into $1, $2, etc., will never successfully
+match a line in this file. You must include something to parentetically match.
+If you just want to know if something has matched, parentesize the whole thing
+and if the value returns, you have a match. Also, if you need to match
+patterns across lines, try using multiple regular expressions with
+C<multi_search_file()>, instead.
+
+=cut
+
+sub search_file {
+    my ($self, $file, $regex) = @_;
+    return unless $file && $regex;
+    open F, "<$file" or Carp::croak "Cannot open $file: $!\n";
+    my @ret;
+    while (<F>) {
+        # If we find a match, we're done.
+        (@ret) = /$regex/ and last;
+    }
+    close F;
+    # If the match returned an more than one value, always return the full
+    # array. Otherwise, return just the first value in a scalar context.
+    return wantarray ? @ret : $#ret <= 0 ? $ret[0] : \@ret;
+}
+
+=head2 multi_search_file
+
+  my @regexen = (qr/(one)/, qr/(two)\s+(three)/);
+  my @matches = $util->multi_search_file($file, @regexen);
+
+Like C<search_file()>, this mehod opens C<$file> and parses it for regular
+expresion matches. This method, however, can take a list of regular
+expressions to look for, and will return the values found for all of them.
+Regular expressions that match and return multiple values will be returned as
+array referernces, while those that match and return a single value will
+return just that single value.
+
+For example, say you are parsing a file with lines like the following:
+
+  #define XML_MAJOR_VERSION 1
+  #define XML_MINOR_VERSION 95
+  #define XML_MICRO_VERSION 2
+
+You need to get each of these numbers, but calling C<search_file()> for each
+of them would be wasteful, as each call to C<search_file()> opens the file and
+parses it. With C<multi_search_file()>, the file will be opened only once,
+and, once all of the regular expressions has returned matches, the file will
+be closed and the matches returned.
+
+Thus the above values can be collected like this:
+
+  my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
+                  qr/XML_MINOR_VERSION\s+(\d+)$/,
+                  qr/XML_MICRO_VERSION\s+(\d+)$/ );
+
+  my @nums = $file->multi_search_file($file, @regexen);
+
+The result will be that @nums contains C<(1, 95, 2)>. Note that
+C<multi_file_search()> tries to do the right thing by only parsing the file
+until all of the regular expressions have been matched. Thus, a large file
+with the values you need near the top can be parsed versy quickly.
+
+As with C<search_file()>, C<multi_search_file()> can take regular expressions
+that match multiple values. These will be returned as array references. For
+example, say the file you're parsing has files like this:
+
+  FooApp Version 4
+  Subversion 2, Microversion 6
+
+To get all of the version numbers, you can either use three regular
+expressions, as in the previous example:
+
+  my @regexen = ( qr/FooApp\s+Version\s+(\d+)$/,
+                  qr/Subversion\s+(\d+),/,
+                  qr/Microversion\s+(\d$)$/ );
+
+  my @nums = $file->multi_search_file($file, @regexen);
+
+In which case C<@nums> will contain C<(4, 2, 6)>. Or, you can use just two
+regular expressions:
+
+  my @regexen = ( qr/FooApp\s+Version\s+(\d+)$/,
+                  qr/Subversion\s+(\d+),\s+Microversion\s+(\d$)$/ );
+
+  my @nums = $file->multi_search_file($file, @regexen);
+
+In which case C<@nums> will contain C<(4, [2, 6])>. Note that the two
+parentheses that return values in the second regular expression cause the
+matches to be returned as an array reference.
+
+=cut
+
+sub multi_search_file {
+    my ($self, $file, @regexen) = @_;
+    return unless $file && @regexen;
+    my @each = @regexen;
+    open F, "<$file" or Carp::croak "Cannot open $file: $!\n";
+    my %ret;
+    while (my $line = <F>) {
+        my @splice;
+        # Process each of the regular expresssions.
+        for (my $i = 0; $i < @each; $i++) {
+            if ((my @ret) = $line =~ /$each[$i]/) {
+                # We have a match! If there's one match returned, just grab
+                # it. If there's more than one, keep it as an array ref.
+                $ret{$each[$i]} = $#ret > 0 ? \@ret : $ret[0];
+                # We got values for this regex, so not its place in the @each
+                # array.
+                push @splice, $i;
+            }
+        }
+        # Remove any regexen that have already found a match.
+        for (@splice) { splice @each, $_, 1 }
+        # If there are no more regexes, we're done -- no need to keep
+        # processing lines in the file!
+        last unless @each;
+    }
+    close F;
+    return wantarray ? @ret{@regexen} : \@ret{@regexen};
 }
 
 1;

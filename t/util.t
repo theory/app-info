@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.4 2002/06/02 23:45:12 david Exp $
+# $Id: util.t,v 1.5 2002/06/03 01:31:09 david Exp $
 
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 17;
 use File::Spec::Functions;
 use File::Path;
 
@@ -33,7 +33,7 @@ if ($^O eq 'MSWin32' or $^O eq 'os2') {
 # Test first_file(). First, create a file to find.
 my $tmp_file = $util->catfile($util->tmpdir, 'app-info.tst');
 open F, ">$tmp_file" or die "Cannot open $tmp_file: $!\n";
-print F "King of the who?";
+print F "King of the who?\nWell, I didn't vote for ya.";
 close F;
 
 # Now find the file.
@@ -58,7 +58,33 @@ is( $util->first_cat_dir(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
                           $util->path, $util->tmpdir, "C:\\mytemp"),
     $util->tmpdir, "Test first_cat_file with array" );
 
+# Look for stuff in the file.
+is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
+    "Find 'of the who?'" );
 
+# Look for a couple of things at once.
+is_deeply( [$util->search_file($tmp_file, qr/(of\sthe)\s+(who\?)/)],
+           ['of the', 'who?'], "Find 'of the' and 'who?'" );
+
+ok( ! defined  $util->search_file($tmp_file, qr/(ick)/),
+    "Find nothing" );
+
+# Look for a couple of things.
+is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(di.*e)/)],
+          ['of the who?', "didn't vote"], "Find a couple" );
+
+# Look for a couple of things on the same line.
+is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(Ki[mn]g)/)],
+          ['of the who?', "King"], "Find a couple on one line" );
+
+# Look for a couple of things, but have one be undef.
+is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(ick)/)],
+          ['of the who?', undef], "Find one but not the other" );
+
+# And finally, find a couple of things where one is an array.
+is_deeply([$util->multi_search_file($tmp_file, qr/(of\sthe)\s+(who\?)/,
+                                    qr/(Ki[mn]g)/)],
+          [['of the', 'who?'], 'King'], "Find one an array ref and a scalar" );
 
 # Don't forget to delete our temporary file.
 rmtree $tmp_file;
