@@ -13,8 +13,6 @@ my $bin_dir = catdir 't', 'scripts';
 $bin_dir = catdir 't', 'bin' unless -d $bin_dir;
 my $conf_dir = catdir 't', 'testlib';
 my $inc_dir = catdir 't', 'testinc';
-my $test_bin = catdir 't', 'bin';
-my $result_bin = $test_bin;
 # Win32 Thinks the bin directory is the root.
 my $httpd_root = $^O eq 'MSWin32' ? $bin_dir : 't';
 
@@ -48,7 +46,7 @@ is( $apache->group, "nobody", "Test group" );
 is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
     "Check error log from compile_option()" );
 is( $apache->lib_dir, $conf_dir, "Test lib dir" );
-is( $apache->bin_dir, $result_bin, "Test bin dir" );
+is( $apache->bin_dir, $bin_dir, "Test bin dir" );
 is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
 is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
