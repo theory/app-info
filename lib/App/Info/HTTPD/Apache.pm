@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.17 2002/06/04 01:09:18 david Exp $
+# $Id: Apache.pm,v 1.18 2002/06/04 01:10:33 david Exp $
 
 =head1 NAME
 
@@ -34,7 +34,7 @@ below. If none of the applications can be found, then Apache is assumed not to
 be installed, and each of the methods will return C<undef>.
 
 App::Info::HTTPD::Apache searches for F<httpd> along your path, as defined by
-File::Spec->path. Failing that, it searches the following directories:
+C<File::Spec->path>. Failing that, it searches the following directories:
 
 =over 4
 
