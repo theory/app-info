@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: carp.t,v 1.2 2002/06/06 00:30:53 david Exp $
+# $Id: carp.t,v 1.3 2002/06/08 05:49:38 david Exp $
 
 use strict;
 use Test::More tests => 29;
@@ -31,7 +31,7 @@ ok( $app = App::Info::Category::FooApp->new( error_level => 'croak'),
     "Set up for croak" );
 eval { $app->version };
 ok( $err = $@, "Get croak" );
-like( $err, qr/^Error retrieving version/, "Starts with croak message" );
+like( $err, qr/^Error retrieving version at.*error\.t/, "Starts with croak message" );
 unlike( $err, qr/called at t\/error\.t line/, "Croak has no stack trace" );
 
 # Now die.
