@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.32 2002/06/16 00:42:51 david Exp $
+# $Id: Info.pm,v 1.33 2002/06/16 00:50:18 david Exp $
 
 =head1 NAME
 
@@ -681,7 +681,7 @@ of the above arguments:
 =cut
 
 sub unknown {
-    my ($self, $key, $prompt, $cb, $err, $sigil) = @_;
+    my ($self, $key, $prompt, $cb, $err) = @_;
     # Just return the value if we've already handled this value. Ideally this
     # shouldn't happen.
     return $self->{__unknown__}{$key} if exists $self->{__unknown__}{$key};
@@ -693,7 +693,6 @@ sub unknown {
     # Prepare the request arguments.
     my $params = { message  => $prompt,
                    error    => $err,
-                   sigil    => $sigil,
                    callback => $cb };
 
     # Execute the handler sequence.
@@ -775,7 +774,7 @@ Here's an example usage demonstrating all of the above arguments:
 =cut
 
 sub confirm {
-    my ($self, $key, $prompt, $val, $cb, $err, $sigil) = @_;
+    my ($self, $key, $prompt, $val, $cb, $err) = @_;
     # Just return the value if we've already confirmed this value.
     return $self->{__confirm__}{$key} if exists $self->{__confirm__}{$key};
 
@@ -787,7 +786,6 @@ sub confirm {
     my $params = { message  => $prompt,
                    error    => $err,
                    value    => $val,
-                   sigil    => $sigil,
                    callback => $cb };
 
     # Execute the handler sequence.

@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.5 2002/06/16 00:42:51 david Exp $
+# $Id: Request.pm,v 1.6 2002/06/16 00:50:18 david Exp $
 
 =head1 NAME
 
@@ -52,29 +52,6 @@ use vars qw($VERSION);
 $VERSION = '0.20';
 
 ##############################################################################
-# This code reference is used to validate and return an array reference.
-my $get_array = sub {
-    Carp::croak("Value '$_[0]' is not an array reference")
-      unless UNIVERSAL::isa($_[0], 'ARRAY');
-    return $_[0];
-};
-
-##############################################################################
-# This code reference is used to validate and return a hash reference.
-my $get_hash = sub {
-    Carp::croak("Value '$_[0]' is not a hash reference")
-      unless UNIVERSAL::isa($_[0], 'HASH');
-    return $_[0];
-};
-
-##############################################################################
-# This hash links different sigils to their validation code references.
-my %sigils = ( '$' => sub { shift },
-               '@' => $get_array,
-               '%' => $get_hash
-             );
-
-##############################################################################
 
 =head1 INTERFACE
 
@@ -84,14 +61,32 @@ The following sections document the App::Info::Request interface.
 
 =head3 new
 
-  my $req = App::Info::Request->new(\%params);
+  my $req = App::Info::Request->new(%params);
 
 This method is used internally by App::Info to construct new
 App::Info::Request objects to pass to event handler objects. Generally, you
 won't need to use it, other than perhaps for testing custom App::Info::Handler
 classes.
 
-The parameters to C<new()> are passed as a hash reference.
+The parameters to C<new()> are passed as a hash of named parameter, which
+correspond to their like-named methods. The supported parameters are:
+
+=over 4
+
+=item type
+
+=item message
+
+=item error
+
+=item value
+
+=item callback
+
+=back
+
+See the object methods documentation below for details on these object
+attributes.
 
 =cut
 
@@ -113,17 +108,6 @@ sub new {
         $params{callback} = sub { 1 };
     }
 
-    # Validate the sigil.
-    if ($params{sigil}) {
-        unless ($sigils{$params{sigil}}) {
-            my @s = keys %sigils;
-            local $" = "', '";
-            Carp::croak("Sigil parameter must be one of '@s'");
-        }
-    } else {
-        $params{sigil} = '$';
-    }
-
     # Validate type parameter.
     if (my $t = $params{type}) {
         Carp::croak("Invalid handler type '$t'")
@@ -139,15 +123,32 @@ sub new {
 
 ##############################################################################
 
+=head2 Object Methods
+
+=head3 message
+
+  my $message = $req->message;
+
+Returns the message stored in the App::Info::Request object. The message is
+typically informational, or an error message, or a prompt message.
+
+=cut
+
 sub message { $_[0]->{message} }
 
 ##############################################################################
 
+=head3 error
+
+  my $error = $req->error;
+
+Returns any error message associated with the App::Info::Request object. The
+error message is typically there to display for users when C<callbac()>
+returns false.
+
+=cut
+
 sub error { $_[0]->{error} }
-
-##############################################################################
-
-sub sigil { $_[0]->{sigil} }
 
 ##############################################################################
 
@@ -168,7 +169,7 @@ sub value {
     my $self = shift;
     if ($#_ >= 0) {
         # grab the value.
-        my $value = $sigils{$self->sigil}->(@_);
+        my $value = shift;
         # Validate the value.
         if ($self->callback($value)) {
             # The value is good. Assign it and return true.
