@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: carp.t,v 1.5 2002/06/13 02:25:52 david Exp $
+# $Id: carp.t,v 1.6 2002/06/13 23:27:14 david Exp $
 
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 23;
 
 our $msg = "Error retrieving version";
 
@@ -53,7 +53,6 @@ ok( $app = App::Info::Category::FooApp->new( on_error => 'cluck'),
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with cluck message" );
 like( $err, qr/called at t\/carp\.t line/, "Cluck as stack trace" );
-is( $app->last_error, $msg, "Compare cluck with last_error" );
 
 # Carp.
 ok( $app = App::Info::Category::FooApp->new( on_error => 'carp'),
@@ -61,7 +60,6 @@ ok( $app = App::Info::Category::FooApp->new( on_error => 'carp'),
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with carp message" );
 unlike( $err, qr/called at t\/carp\.t line/, "Carp has no stack trace" );
-is( $app->last_error, $msg, "Compare carp with last_error" );
 
 # Warn.
 ok( $app = App::Info::Category::FooApp->new( on_error => 'warn'),
@@ -69,7 +67,6 @@ ok( $app = App::Info::Category::FooApp->new( on_error => 'warn'),
 $app->version;
 like( $err, qr/^Error retrieving version/, "Starts with warn message" );
 unlike( $err, qr/called at t\/carp\.t line/, "Warn has no stack trace" );
-is( $app->last_error, $msg, "Compare warn with last_error" );
 
 # Dissallow bogus error levels.
 eval { App::Info::Category::FooApp->new( on_error => 'bogus') };
