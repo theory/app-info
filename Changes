@@ -6,11 +6,11 @@ Revision history for Perl extension App::Info.
         Submitted by Cinly Ooi.
       - Added support for Apache on Windows. Patch from Ron Savage.
 
-0.25  Thu Dec 11 20:50:43 2003
+0.25  Thu Dec 11 20:50:43 2004
       - Fixed parsing of version numbers for new releases of PostgreSQL,
         which don't include the ".0" patch version in their version numbers.
 
-0.24  Tue Aug 26 00:58:55 2003
+0.24  Tue Aug 26 00:58:55 2004
       - Fixed broken link in App::Info::Request documentation.
       - Added PostgreSQL environment variables to the paths to search
         for pg_config in App::Info::RDBMS::PostgreSQL. Patch from
