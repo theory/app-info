@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.24
+0.24  Tue Aug 26 00:58:55 2003
       - Fixed broken link in App::Info::Request documentation.
       - Added PostgreSQL environment variables to the paths to search
         for pg_config in App::Info::RDBMS::PostgreSQL. Patch from
