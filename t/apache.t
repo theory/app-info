@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.3 2002/06/01 21:29:05 david Exp $
+# $Id: apache.t,v 1.4 2002/06/01 21:39:58 david Exp $
 
 use strict;
 use Test::More tests => 21;
@@ -18,10 +18,6 @@ if ($apache->installed) {
     ok( $apache->major_version, "Got major version" );
     ok( $apache->minor_version, "Got minor version" );
     ok( $apache->patch_version, "Got patch version" );
-    ok( $apache->lib_dir, "Got lib dir" );
-    ok( $apache->bin_dir, "Got bin_dir" );
-    ok( $apache->so_lib_dir, "Got so lib dir" );
-    ok( $apache->inc_dir, "Got inc dir" );
     ok( $apache->httpd_root, "Got httpd root" );
     ok( $apache->magic_number, "Got magic number" );
     $apache->mod_so;
@@ -35,10 +31,6 @@ if ($apache->installed) {
     ok( !$apache->major_version, "Don't got major version" );
     ok( !$apache->minor_version, "Don't got minor version" );
     ok( !$apache->patch_version, "Don't got patch version" );
-    ok( !$apache->lib_dir, "Don't got lib dir" );
-    ok( !$apache->bin_dir, "Don't got bin_dir" );
-    ok( !$apache->so_lib_dir, "Don't got so lib dir" );
-    ok( !$apache->inc_dir, "Don't got inc dir" );
     ok( !$apache->httpd_root, "Don't got httpd root" );
     ok( !$apache->magic_number, "Don't got magic number" );
     ok( !$apache->mod_so, "Don't got mod_so" );
@@ -46,6 +38,12 @@ if ($apache->installed) {
     ok( !$apache->compile_option('SERVER_CONFIG_FILE'),
         "Don't got compile option" );
 }
+
+# Installation doesn't guarntee lib & inc installation.
+$apache->lib_dir; pass("Can call lib_dir");
+$apache->bin_dir, pass("Can call bin_dir");
+$apache->so_lib_dir; pass("Can call so_lib_dir" );
+$apache->inc_dir, pass("Can call inc_dir");
 
 ok( $apache->home_url, "Get home URL" );
 ok( $apache->download_url, "Get download URL" );
