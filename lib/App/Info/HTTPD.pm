@@ -1,12 +1,12 @@
 package App::Info::HTTPD;
 
-# $Id: HTTPD.pm,v 1.8 2002/06/30 22:18:41 david Exp $
+# $Id: HTTPD.pm,v 1.9 2002/08/08 19:19:18 david Exp $
 
 use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -51,6 +51,11 @@ App::Info::HTTPD offers the following abstract methods
   my $httpd_root = $app->httpd_root;
 
 The root directory of the HTTPD server.
+
+=head1 BUGS
+
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

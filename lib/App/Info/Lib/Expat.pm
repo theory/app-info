@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.27 2002/06/30 22:18:41 david Exp $
+# $Id: Expat.pm,v 1.28 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my $u = App::Info::Util->new;
 
@@ -638,7 +638,8 @@ and now I don't know where to find the version number. Patches welcome.
 
 =head1 BUGS
 
-Feel free to drop me a line if you discover any bugs. Patches welcome.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

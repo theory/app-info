@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.40 2002/08/07 23:05:08 david Exp $
+# $Id: Info.pm,v 1.41 2002/08/08 19:19:17 david Exp $
 
 =head1 NAME
 
@@ -1097,7 +1097,8 @@ But I get ahead of myself...
 
 =head1 BUGS
 
-Feel free to drop me an email if you discover any bugs. Patches welcome.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.10 2002/06/30 22:18:41 david Exp $
+# $Id: Handler.pm,v 1.11 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -35,7 +35,7 @@ handlers, read on!
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my %handlers;
 
@@ -265,7 +265,8 @@ App::Info::Request object for each event type.
 
 =head1 BUGS
 
-Feel free to drop me an email if you discover any bugs. Patches welcome.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

@@ -1,12 +1,12 @@
 package App::Info::RDBMS;
 
-# $Id: RDBMS.pm,v 1.7 2002/06/30 22:18:41 david Exp $
+# $Id: RDBMS.pm,v 1.8 2002/08/08 19:19:18 david Exp $
 
 use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 1;
 __END__
@@ -27,6 +27,11 @@ implementation.
 
 Currently, App::Info::RDBMS adds no more methods than those from its parent
 class, App::Info.
+
+=head1 BUGS
+
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

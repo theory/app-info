@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.37 2002/06/30 22:18:41 david Exp $
+# $Id: Apache.pm,v 1.38 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::HTTPD;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my $u = App::Info::Util->new;
 
@@ -1271,7 +1271,8 @@ parsed from the F<httpd.conf> file or C<glob>bed from the file system.
 
 =head1 BUGS
 
-Feel free to drop me an email if you discover any bugs. Patches welcome.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.20 2002/06/30 22:18:41 david Exp $
+# $Id: Util.pm,v 1.21 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -48,7 +48,7 @@ use strict;
 use File::Spec ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
@@ -433,8 +433,8 @@ __END__
 
 =head1 BUGS
 
-None. No, really! But if you find you must report them anyway, drop me an
-email.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.9 2002/08/08 19:03:38 david Exp $
+# $Id: Request.pm,v 1.10 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -248,8 +248,8 @@ __END__
 
 =head1 BUGS
 
-I suppose it's possible that there are bugs in this code. Drop me an email if
-you happen to discover any.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.21 2002/06/30 22:18:41 david Exp $
+# $Id: PostgreSQL.pm,v 1.22 2002/08/08 19:19:18 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 my $u = App::Info::Util->new;
 
@@ -700,7 +700,8 @@ __END__
 
 =head1 BUGS
 
-Feel free to drop me a line if you discover any bugs. Patches welcome.
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
 
 =head1 AUTHOR
 
