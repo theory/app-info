@@ -1,7 +1,9 @@
 Revision history for Perl extension App::Info.
 
 0.44
-      - Yet another fix for test failures on Win32.
+      - Yet another fix for test failures on Win32, this time for PostgreSQL.
+      - Fixed print statement in App::Info::Handler::Print to make older
+        Perls happier.
 
 0.43  2004-12-14T19:45:52
       - Added "search_*_name" parameters and methods for searching for

@@ -127,7 +127,11 @@ sub new {
 
 sub handler {
     my ($self, $req) = @_;
-    print {$self->{fh}} $req->message, "\n";
+    # Hrm, Perl doesn't seem to like C<< print $self->{fh} ... >>. I could
+    # use C<< print {$self->{fh}} ... >>, but older Perls don't seem to
+    # like that.
+    my $fh = $self->{fh};
+    print $fh $req->message, "\n";
     # Return true to indicate that we've handled the request.
     return 1;
 }
