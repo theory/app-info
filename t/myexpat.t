@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myexpat.t,v 1.6 2002/07/22 01:32:24 david Exp $
+# $Id: myexpat.t,v 1.7 2003/08/02 02:09:59 david Exp $
 
 use strict;
 use Test::More;
@@ -23,10 +23,10 @@ is( $expat->key_name, 'Expat', "Check key name" );
 
 ok( $expat->installed, "libexpat is installed" );
 is( $expat->name, "Expat", "Get name" );
-is( $expat->version, "1.95.4", "Test Version" );
+is( $expat->version, "1.95.5", "Test Version" );
 is( $expat->major_version, '1', "Test major version" );
 is( $expat->minor_version, '95', "Test minor version" );
-is( $expat->patch_version, '4', "Test patch version" );
+is( $expat->patch_version, '5', "Test patch version" );
 is( $expat->lib_dir, '/usr/local/lib', "Test lib dir" );
 ok( ! defined $expat->bin_dir, "Test bin dir" );
 is( $expat->so_lib_dir, '/usr/local/lib', "Test so lib dir" );

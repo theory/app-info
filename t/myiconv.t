@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myiconv.t,v 1.6 2002/06/17 19:27:14 david Exp $
+# $Id: myiconv.t,v 1.7 2003/08/02 02:09:59 david Exp $
 
 use strict;
 use Test::More;
@@ -23,9 +23,9 @@ is( $iconv->key_name, 'libiconv', "Check key name" );
 
 ok( $iconv->installed, "libiconv is installed" );
 is( $iconv->name, "libiconv", "Get name" );
-is( $iconv->version, "1.7", "Test Version" );
+is( $iconv->version, "1.8", "Test Version" );
 is( $iconv->major_version, '1', "Test major version" );
-is( $iconv->minor_version, '7', "Test minor version" );
+is( $iconv->minor_version, '8', "Test minor version" );
 ok( ! defined $iconv->patch_version, "Test patch version" );
 is( $iconv->lib_dir, '/usr/local/lib', "Test lib dir" );
 is( $iconv->bin_dir, '/usr/local/bin', "Test bin dir" );

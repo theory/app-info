@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: mypostgres.t,v 1.5 2002/06/17 19:27:14 david Exp $
+# $Id: mypostgres.t,v 1.6 2003/08/02 02:09:59 david Exp $
 
 use strict;
 use Test::More;
@@ -23,10 +23,10 @@ is( $pg->key_name, 'PostgreSQL', "Check key name" );
 
 ok( $pg->installed, "PostgreSQL is installed" );
 is( $pg->name, "PostgreSQL", "Get name" );
-is( $pg->version, "7.2.1", "Test Version" );
+is( $pg->version, "7.3.3", "Test Version" );
 is( $pg->major_version, '7', "Test major version" );
-is( $pg->minor_version, '2', "Test minor version" );
-is( $pg->patch_version, '1', "Test patch version" );
+is( $pg->minor_version, '3', "Test minor version" );
+is( $pg->patch_version, '3', "Test patch version" );
 is( $pg->lib_dir, '/usr/local/pgsql/lib', "Test lib dir" );
 is( $pg->bin_dir, '/usr/local/pgsql/bin', "Test bin dir" );
 is( $pg->so_lib_dir, '/usr/local/pgsql/lib', "Test so lib dir" );

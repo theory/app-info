@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.8 2002/07/01 03:46:24 david Exp $
+# $Id: myapache.t,v 1.9 2003/08/02 02:09:59 david Exp $
 
 use strict;
 use Test::More;
@@ -30,10 +30,10 @@ ok( $apache->installed, "Apache is installed" );
 is( $apache->name, "Apache", "Get name" );
 if ($apache->httpd_root eq '/usr') {
     # Apple-installed Apache
-    is( $apache->version, "1.3.26", "Test Version" );
+    is( $apache->version, "1.3.27", "Test Version" );
     is( $apache->major_version, '1', "Test major version" );
     is( $apache->minor_version, '3', "Test minor version" );
-    is( $apache->patch_version, '26', "Test patch version" );
+    is( $apache->patch_version, '27', "Test patch version" );
     is( $apache->httpd_root, "/usr", "Test httpd root" );
     ok( !$apache->mod_perl, "Test mod_perl" );
     is( $apache->conf_file, "/etc/httpd/httpd.conf", "Test conf file" );
