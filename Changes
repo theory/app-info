@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.41
+
 0.40  2004-11-27T19:45:01
       - Eliminated "Odd number of elements in hash assignment" warning when
         creating an App::Info::Handler::Prompt object.
