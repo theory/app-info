@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.9 2002/06/03 16:04:22 david Exp $
+# $Id: Expat.pm,v 1.10 2002/06/03 18:11:21 david Exp $
 
 =head1 NAME
 
@@ -338,12 +338,15 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <david@wheeler.net> based on code by Sam Tregar <sam@tregar.com>
+that Sam, in turn, borrowed from Clark Cooper's L<XML::Parser|XML::Parser>
+module.
 
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::Lib|App::Info::Lib>
+L<App::Info::Lib|App::Info::Lib>,
+L<XML::Parser|XML::Parser>
 
 =head1 COPYRIGHT AND LICENSE
 
