@@ -24,7 +24,6 @@ Revision history for Perl extension App::Info.
         - Added Expat.pm.
         - Many changes to Util.
 
-
 0.01  Fri May 31 07:54:55 2002
         - Original version.
         - Private release.
