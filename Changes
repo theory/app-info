@@ -1,8 +1,9 @@
 Revision history for Perl extension App::Info.
 
 0.23
-      - Fixed tests that check Apache info events so that they ignore the name
-        of the Apache executable. Thanks to Dave Rolsky for the spot.
+      - Fixed tests that check Apache info events so that they're more
+        flexible about the name of the Apache executable. Thanks to Dave
+        Rolsky for the spot.
       - Fixed "NAME" section in App::Info::Request so that it has the right
         name and therefore renders properly on search.cpan.org.
       - Updated or added "BUGS" section of documentation in all modules to
