@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.7 2002/06/16 02:19:25 david Exp $
+# $Id: Prompt.pm,v 1.8 2002/06/16 04:12:50 david Exp $
 
 =head1 NAME
 
@@ -24,7 +24,7 @@ messages to C<STDOUT> and then accepting a new value from C<STDIN>. The new
 value is validated by any callback supplied by the App::Info concrete subclass
 that triggered the event. If the value is valid, App::Info::Handler::Prompt
 assigns the new value to the event request. If it isn't it prints the error
-message associated with the event request, and then propmts for the data
+message associated with the event request, and then prompts for the data
 again.
 
 Although designed with unknown and confirm events in mind,
@@ -35,7 +35,7 @@ L<App::Info::Handler::Print|App::Info::Handler::Print> and
 L<App::Info::Handler::Carp|App::Info::Handler::Carp>.
 
 Upon loading, App::Info::Handler::Print registers itself with
-App::Info::Handler, setting up a single string, "propmt", that can be passed
+App::Info::Handler, setting up a single string, "prompt", that can be passed
 to an App::Info concrete subclass constructor. This string is a shortcut that
 tells App::Info how to create an App::Info::Handler::Print object for handling
 events.
@@ -45,7 +45,7 @@ events.
 use strict;
 use App::Info::Handler;
 use vars qw($VERSION @ISA);
-$VERSION = '0.01';
+$VERSION = '0.20';
 @ISA = qw(App::Info::Handler);
 
 # Register ourselves.

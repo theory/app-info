@@ -1,6 +1,6 @@
 package App::Info::Handler::Print;
 
-# $Id: Print.pm,v 1.4 2002/06/16 02:09:31 david Exp $
+# $Id: Print.pm,v 1.5 2002/06/16 04:12:50 david Exp $
 
 =head1 NAME
 
@@ -54,13 +54,13 @@ print event messages to different filehandle.
 use strict;
 use App::Info::Handler;
 use vars qw($VERSION @ISA);
-$VERSION = '0.01';
+$VERSION = '0.20';
 @ISA = qw(App::Info::Handler);
 
 # Register ourselves.
 for my $c (qw(stderr stdout)) {
     App::Info::Handler->register_handler
-      ($c, sub { __PACKAGE__->new( fh => $c ) } );
+      ($c => sub { __PACKAGE__->new( fh => $c ) } );
 }
 
 =head1 INTERFACE
