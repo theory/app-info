@@ -1,9 +1,10 @@
 #!/usr/bin/perl -w
 
-# $Id: request.t,v 1.5 2002/06/13 22:09:09 david Exp $
+# $Id: request.t,v 1.6 2002/06/14 19:02:34 david Exp $
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 20;
+use File::Spec::Functions qw(tmpdir);
 
 BEGIN { use_ok('App::Info::Request') }
 
@@ -42,3 +43,9 @@ ok( $@, "Fail sigil check" );
 ok( ! $req->value({ val => 0 }), "Fail value" );
 ok( $req->value($val), "Succeed value" );
 is( $req->value, $val, "Check value" );
+
+# Try changing the callback to use $_.
+$args{callback} = sub { -d };
+ok( $req = App::Info::Request->new( \%args ), "Another custom request" );
+ok( $req->callback(tmpdir), 'Try $_ callback');
+ok( !$req->callback('foo234234'),  'Fail $_ callback' );

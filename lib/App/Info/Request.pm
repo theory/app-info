@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.3 2002/06/13 22:09:09 david Exp $
+# $Id: Request.pm,v 1.4 2002/06/14 19:02:34 david Exp $
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ To be written.
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.20';
 
 my $get_array = sub {
     Carp::croak("Value '$_[0]' is not an array reference")
@@ -109,6 +109,7 @@ sub type { $_[0]->{type} }
 sub callback {
     my $self = shift;
     my $code = $self->{callback};
+    local $_ = $_[0];
     $code->(@_);
 }
 
