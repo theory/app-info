@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.32 2002/06/16 06:05:48 david Exp $
+# $Id: Apache.pm,v 1.33 2002/06/17 17:24:05 david Exp $
 
 =head1 NAME
 
@@ -253,7 +253,6 @@ sub name {
     return unless $self->{exe};
 
     # Load data.
-    # Load data.
     $get_version->($self) unless exists $self->{-v};
 
     # Handle an unknown name.
@@ -306,8 +305,7 @@ sub version {
         # Create a validation code reference.
         my $chk_version = sub {
             # Try to get the version number parts.
-            my ($x, $y, $z) =
-              /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+            my ($x, $y, $z) = /^(\d+)\.(\d+).(\d+)$/;
             # Return false if we didn't get all three.
             return unless $x and defined $y and defined $z;
             # Save all three parts.
@@ -361,6 +359,7 @@ my $is_int = sub { /^\d+$/ };
 
 sub major_version {
     my $self = shift;
+    return unless $self->{exe};
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
@@ -404,6 +403,7 @@ Enter a valid Apache minor version number
 
 sub minor_version {
     my $self = shift;
+    return unless $self->{exe};
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
@@ -446,6 +446,7 @@ Enter a valid Apache patch version number
 
 sub patch_version {
     my $self = shift;
+    return unless $self->{exe};
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
@@ -568,6 +569,7 @@ Enter a valid magic number
 
 sub magic_number {
     my $self = shift;
+    return unless $self->{exe};
     # Get the compile settings.
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
@@ -619,6 +621,7 @@ Enter a valid option
 
 sub compile_option {
     my $self = shift;
+    return unless $self->{exe};
     # Get the compile settings.
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
@@ -967,6 +970,7 @@ Enter a valid Apache include directory
 
 sub inc_dir {
     my $self = shift;
+    return unless $self->{exe};
     unless (exists $self->{inc_dir}) {{
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for include directory");
@@ -1019,6 +1023,7 @@ Enter a valid Apache library directory
 
 sub lib_dir {
     my $self = shift;
+    return unless $self->{exe};
     unless (exists $self->{lib_dir}) {{
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for library directory");
@@ -1162,6 +1167,7 @@ Unable to extract needed data from `httpd -l`
 
 sub mod_so {
     my $self = shift;
+    return unless $self->{exe};
     $get_static_mods->($self) unless exists $self->{static_mods};
     return $self->{mod_so};
 }
@@ -1192,6 +1198,7 @@ Unable to extract needed data from `httpd -l`
 
 sub mod_perl {
     my $self = shift;
+    return unless $self->{exe};
     $get_static_mods->($self) unless exists $self->{static_mods};
     return $self->{mod_perl};
 }

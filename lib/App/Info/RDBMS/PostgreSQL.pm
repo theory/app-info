@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.15 2002/06/05 23:46:52 david Exp $
+# $Id: PostgreSQL.pm,v 1.16 2002/06/17 17:24:05 david Exp $
 
 =head1 NAME
 
@@ -36,13 +36,15 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.06';
+$VERSION = '0.20';
 
 my $u = App::Info::Util->new;
 
-=head1 CONSTRUCTOR
+=head1 INTERFACE
 
-=head2 new
+=head2 Constructor
+
+=head3 new
 
   my $pg = App::Info::RDBMS::PostgreSQL->new(@params);
 
@@ -79,6 +81,24 @@ directories:
 
 =back
 
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for pg_config
+
+=item confirm
+
+Path to pg_config?
+
+=item unknown
+
+Path to pg_config?
+
+=back
+
 =cut
 
 sub new {
@@ -86,6 +106,7 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Find pg_config.
+    $self->info("Looking for pg_config");
     my @paths = ($u->path,
       qw(/usr/local/pgsql/bin
          /usr/local/postgres/bin
@@ -96,22 +117,52 @@ sub new {
          /usr/sbin
          /bin));
 
-    $self->{pg_config} = $u->first_cat_exe('pg_config', @paths);
+    if (my $cfg = $u->first_cat_exe('pg_config', @paths)) {
+        # We found it. Confirm.
+        $self->{pg_config} = $self->confirm('pg_config',
+                                            'Path to pg_config?',
+                                            $cfg, sub { -x },
+                                            'Not an executable');
+    } else {
+        # Handle an unknown value.
+        $self->{pg_config} = $self->unknown('pg_config',
+                                            'Path to pg_config?',
+                                            sub { -x },
+                                            'Not an executable');
+    }
+
     return $self;
 }
 
 # We'll use this code reference as a common way of collecting data.
-
 my $get_data = sub {
     return unless $_[0]->{pg_config};
+    $_[0]->info("Executing `$_[0]->{pg_config} $_[1]`");
     my $info = `$_[0]->{pg_config} $_[1]`;
     chomp $info;
     return $info;
 };
 
-=head1 OBJECT METHODS
+##############################################################################
 
-=head2 installed
+=head2 Class Method
+
+=head3 key_name
+
+  my $key_name = App::Info::RDBMS::PostgreSQL->key_name;
+
+Returns the unique key name that describes this class. The value returned is
+the string "PostgreSQL".
+
+=cut
+
+sub key_name { 'PostgreSQL' }
+
+##############################################################################
+
+=head2 Object Methods
+
+=head3 installed
 
   print "PostgreSQL is ", ($pg->installed ? '' : 'not '), "installed.\n";
 
@@ -126,207 +177,487 @@ values.
 
 sub installed { return $_[0]->{pg_config} ? 1 : undef }
 
-=head2 name
+##############################################################################
+
+=head3 name
 
   my $name = $pg->name;
 
 Returns the name of the application. App::Info::RDBMS::PostgreSQL parses the
-name from the system call C<`pg_config --version`>. Throws an error if
-PostgreSQL is installed but the version number or name could not be parsed.
+name from the system call C<`pg_config --version`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --version`
+
+=item error
+
+Failed to find PostgreSQL version with `pg_config --version`
+
+Unable to parse name from string
+
+Unable to parse version from string
+
+Failed to parse PostgreSQL version parts from string
+
+=item unknown
+
+Enter a valid PostgreSQL name
+
+=back
 
 =cut
+
+# This code reference is used by name(), version(), major_version(),
+# minor_version(), and patch_version() to aggregate the data they need.
+my $get_version = sub {
+    my $self = shift;
+    $self->{'--version'} = 1;
+    my $data = $get_data->($self, '--version');
+    unless ($data) {
+        $self->error("Failed to find PostgreSQL version with ".
+                     "`$self->{pg_config} --version");
+            return;
+    }
+
+    chomp $data;
+    my ($name, $version) =  split /\s+/, $data, 2;
+
+    # Check for and assign the name.
+    $name ?
+      $self->{name} = $name :
+      $self->error("Unable to parse name from string '$data'");
+
+    # Parse the version number.
+    if ($version) {
+        my ($x, $y, $z) = $version =~ /(\d+)\.(\d+).(\d+)/;
+        if (defined $x and defined $y and defined $z) {
+            @{$self}{qw(version major minor patch)} =
+              ($version, $x, $y, $z);
+        } else {
+            $self->error("Failed to parse PostgreSQL version parts from " .
+                         "string '$version'");
+        }
+    } else {
+        $self->error("Unable to parse version from string '$data'");
+    }
+};
 
 sub name {
     my $self = shift;
     return unless $self->{pg_config};
-    unless (exists $self->{name}) {
-        $self->{name} = undef;
-        my $data = $get_data->($self, '--version');
-        unless ($data) {
-            $self->error("Failed to find PostgreSQL version with ".
-                         "`$self->{pg_config} --version");
-            return;
-        }
 
-        chomp $data;
-        my ($name, $version) =  split /\s+/, $data, 2;
+    # Load data.
+    $get_version->($self) unless $self->{'--version'};
 
-        # Check for and assign the name.
-        $name ?
-          $self->{name} = $name :
-          $self->error("Unable to parse name from string '$data'");
+    # Handle an unknown name.
+    $self->{name} = $self->unknown('name') unless $self->{name};
 
-        # Parse the version number.
-        if ($version) {
-            my ($x, $y, $z) = $version =~ /(\d+)\.(\d+).(\d+)/;
-            if (defined $x and defined $y and defined $z) {
-                @{$self}{qw(version major minor patch)} =
-                  ($version, $x, $y, $z);
-            } else {
-                $self->error("Failed to parse PostgreSQL version parts from " .
-                             "string '$version'");
-            }
-        } else {
-            $self->error("Unable to parse version from string '$data'");
-        }
-    }
+    # Return the name.
     return $self->{name};
 }
 
-=head2 version
+##############################################################################
+
+=head3 version
 
   my $version = $pg->version;
 
 Returns the PostgreSQL version number. App::Info::RDBMS::PostgreSQL parses the
-version number from the system call C<`pg_config --version`>. See the
-L<name|"name"> method for a list of possible errors.
+version number from the system call C<`pg_config --version`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --version`
+
+=error
+
+Failed to find PostgreSQL version with `pg_config --version`
+
+Unable to parse name from string
+
+Unable to parse version from string
+
+Failed to parse PostgreSQL version parts from string
+
+=item unknown
+
+Enter a valid PostgreSQL version number
+
+=back
 
 =cut
 
 sub version {
-    $_[0]->name unless $_[0]->{version};
-    return $_[0]->{version};
+    my $self = shift;
+    return unless $self->{pg_config};
+
+    # Load data.
+    $get_version->($self) unless $self->{'--version'};
+
+    # Handle an unknown value.
+    unless ($self->{version}) {
+        # Create a validation code reference.
+        my $chk_version = sub {
+            # Try to get the version number parts.
+            my ($x, $y, $z) = /^(\d+)\.(\d+).(\d+)$/;
+            # Return false if we didn't get all three.
+            return unless $x and defined $y and defined $z;
+            # Save all three parts.
+            @{$self}{qw(major minor patch)} = ($x, $y, $z);
+            # Return true.
+            return 1;
+        };
+        $self->{version} =
+          $self->unknown('version number', undef, $chk_version);
+    }
+
+    return $self->{version};
 }
 
-=head2 major version
+##############################################################################
+
+=head3 major version
 
   my $major_version = $pg->major_version;
 
 Returns the PostgreSQL major version number. App::Info::RDBMS::PostgreSQL
 parses the major version number from the system call C<`pg_config --version`>.
-For example, C<version()> returns "7.1.2", then this method returns "7". See
-the L<name|"name"> method for a list of possible errors.
+For example, C<version()> returns "7.1.2", then this method returns "7".
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --version`
+
+=error
+
+Failed to find PostgreSQL version with `pg_config --version`
+
+Unable to parse name from string
+
+Unable to parse version from string
+
+Failed to parse PostgreSQL version parts from string
+
+=item unknown
+
+Enter a valid PostgreSQL major version number
+
+=back
 
 =cut
 
+# This code reference is used by major_version(), minor_version(), and
+# patch_version() to validate a version number entered by a user.
+my $is_int = sub { /^\d+$/ };
+
 sub major_version {
-    $_[0]->name unless $_[0]->{version};
-    return $_[0]->{major};
+    my $self = shift;
+    return unless $self->{pg_config};
+    # Load data.
+    $get_version->($self) unless exists $self->{'--version'};
+    # Handle an unknown value.
+    $self->{major} = $self->unknown('major version number', undef, $is_int)
+      unless $self->{major};
+    return $self->{major};
 }
 
-=head2 minor version
+##############################################################################
+
+=head3 minor version
 
   my $minor_version = $pg->minor_version;
 
 Returns the PostgreSQL minor version number. App::Info::RDBMS::PostgreSQL
 parses the minor version number from the system call C<`pg_config --version`>.
 For example, if C<version()> returns "7.1.2", then this method returns "2".
-See the L<name|"name"> method for a list of possible errors.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --version`
+
+=error
+
+Failed to find PostgreSQL version with `pg_config --version`
+
+Unable to parse name from string
+
+Unable to parse version from string
+
+Failed to parse PostgreSQL version parts from string
+
+=item unknown
+
+Enter a valid PostgreSQL minor version number
+
+=back
 
 =cut
 
 sub minor_version {
-    $_[0]->name unless $_[0]->{version};
-    return $_[0]->{minor};
+    my $self = shift;
+    return unless $self->{pg_config};
+    # Load data.
+    $get_version->($self) unless exists $self->{'--version'};
+    # Handle an unknown value.
+    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
+      unless defined $self->{minor};
+    return $self->{minor};
 }
 
-=head2 patch version
+##############################################################################
+
+=head3 patch version
 
   my $patch_version = $pg->patch_version;
 
 Returns the PostgreSQL patch version number. App::Info::RDBMS::PostgreSQL
 parses the patch version number from the system call C<`pg_config --version`>.
 For example, if C<version()> returns "7.1.2", then this method returns "1".
-See the L<name|"name"> method for a list of possible errors.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --version`
+
+=error
+
+Failed to find PostgreSQL version with `pg_config --version`
+
+Unable to parse name from string
+
+Unable to parse version from string
+
+Failed to parse PostgreSQL version parts from string
+
+=item unknown
+
+Enter a valid PostgreSQL minor version number
+
+=back
 
 =cut
 
 sub patch_version {
-    $_[0]->name unless $_[0]->{version};
-    return $_[0]->{patch};
+    my $self = shift;
+    return unless $self->{pg_config};
+    # Load data.
+    $get_version->($self) unless exists $self->{'--version'};
+    # Handle an unknown value.
+    $self->{patch} = $self->unknown('patch version number', undef, $is_int)
+      unless defined $self->{patch};
+    return $self->{patch};
 }
 
-=head2 bin_dir
+##############################################################################
+
+=head3 bin_dir
 
   my $bin_dir = $pg->bin_dir;
 
 Returns the PostgreSQL binary directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --bindir`>. Throws an error
-if the binary directory path cannot be determined.
+gathers the path from the system call C<`pg_config --bindir`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --bindir`
+
+=item error
+
+Could not find bin directory
+
+=item unknown
+
+Enter a valid PostgreSQL bin directory
+
+=back
 
 =cut
 
+# This code reference is used by bin_dir(), lib_dir(), and so_lib_dir() to
+# validate a directory entered by the user.
+my $is_dir = sub { -d };
+
 sub bin_dir {
-    unless (exists $_[0]->{bin_dir} ) {
-        if (my $dir = $get_data->($_[0], '--bindir')) {
-            $_[0]->{bin_dir} = $dir;
+    my $self = shift;
+    return unless $self->{pg_config};
+    unless (exists $self->{bin_dir} ) {
+        if (my $dir = $get_data->($self, '--bindir')) {
+            $self->{bin_dir} = $dir;
         } else {
-            $_[0]->error("Could not find bin directory");
-            $_[0]->{bin_dir} = undef;
+            # Handle an unknown value.
+            $self->error("Could not find bin directory");
+            $self->{bin_dir} = $self->unknown('bin directory', undef, $is_dir)
         }
     }
-    return $_[0]->{bin_dir};
+
+    return $self->{bin_dir};
 }
 
-=head2 inc_dir
+##############################################################################
+
+=head3 inc_dir
 
   my $inc_dir = $pg->inc_dir;
 
 Returns the PostgreSQL include directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --includedir`>. Throws an
-error if the include directory path cannot be determined.
+gathers the path from the system call C<`pg_config --includedir`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --includedir`
+
+=item error
+
+Could not find include directory
+
+=item unknown
+
+Enter a valid PostgreSQL include directory
+
+=back
 
 =cut
 
 sub inc_dir {
-    unless (exists $_[0]->{inc_dir} ) {
-        if (my $dir = $get_data->($_[0], '--includedir')) {
-            $_[0]->{inc_dir} = $dir;
+    my $self = shift;
+    return unless $self->{pg_config};
+    unless (exists $self->{inc_dir} ) {
+        if (my $dir = $get_data->($self, '--includedir')) {
+            $self->{inc_dir} = $dir;
         } else {
-            $_[0]->error("Could not find bin directory");
-            $_[0]->{inc_dir} = undef;
+            # Handle an unknown value.
+            $self->error("Could not find include directory");
+            $self->{inc_dir} = $self->unknown('include directory', undef, $is_dir)
         }
     }
-    return $_[0]->{inc_dir};
+
+    return $self->{inc_dir};
 }
 
-=head2 lib_dir
+##############################################################################
+
+=head3 lib_dir
 
   my $lib_dir = $pg->lib_dir;
 
 Returns the PostgreSQL library directory path. App::Info::RDBMS::PostgreSQL
-gathers the path from the system call C<`pg_config --libdir`>. Throws an error
-if the library directory path cannot be determined.
+gathers the path from the system call C<`pg_config --libdir`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --includedir`
+
+=item error
+
+Could not find library directory
+
+=item unknown
+
+Enter a valid PostgreSQL library directory
+
+=back
 
 =cut
 
 sub lib_dir {
-    unless (exists $_[0]->{lib_dir} ) {
-        if (my $dir = $get_data->($_[0], '--libdir')) {
-            $_[0]->{lib_dir} = $dir;
+    my $self = shift;
+    return unless $self->{pg_config};
+    unless (exists $self->{lib_dir} ) {
+        if (my $dir = $get_data->($self, '--libdir')) {
+            $self->{lib_dir} = $dir;
         } else {
-            $_[0]->error("Could not find bin directory");
-            $_[0]->{lib_dir} = undef;
+            # Handle an unknown value.
+            $self->error("Could not find library directory");
+            $self->{lib_dir} = $self->unknown('library directory', undef, $is_dir)
         }
     }
-    return $_[0]->{lib_dir};
+
+    return $self->{lib_dir};
 }
 
-=head2 so_lib_dir
+##############################################################################
+
+=head3 so_lib_dir
 
   my $so_lib_dir = $pg->so_lib_dir;
 
 Returns the PostgreSQL shared object library directory path.
 App::Info::RDBMS::PostgreSQL gathers the path from the system call
-C<`pg_config --pkglibdir`>. Throws an error if the shared object library
-directory path cannot be determined.
+C<`pg_config --pkglibdir`>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Executing `pg_config --includedir`
+
+=item error
+
+Could not find shared object library directory
+
+=item unknown
+
+Enter a valid PostgreSQL shared object library directory
+
+=back
 
 =cut
 
 # Location of dynamically loadable modules.
 sub so_lib_dir {
-    unless (exists $_[0]->{so_lib_dir} ) {
-        if (my $dir = $get_data->($_[0], '--pkglibdir')) {
-            $_[0]->{so_lib_dir} = $dir;
+    my $self = shift;
+    return unless $self->{pg_config};
+    unless (exists $self->{so_lib_dir} ) {
+        if (my $dir = $get_data->($self, '--pkglibdir')) {
+            $self->{so_lib_dir} = $dir;
         } else {
-            $_[0]->error("Could not find bin directory");
-            $_[0]->{so_lib_dir} = undef;
+            # Handle an unknown value.
+            $self->error("Could not find shared object library directory");
+            $self->{so_lib_dir} =
+              $self->unknown('shared object library directory', undef, $is_dir)
         }
     }
-    return $_[0]->{so_lib_dir};
+
+    return $self->{so_lib_dir};
 }
 
-=head2 home_url
+##############################################################################
+
+=head3 home_url
 
   my $home_url = $pg->home_url;
 
@@ -336,7 +667,9 @@ Returns the PostgreSQL home page URL.
 
 sub home_url { "http://www.postgresql.org/" }
 
-=head2 download_url
+##############################################################################
+
+=head3 download_url
 
   my $download_url = $pg->download_url;
 
