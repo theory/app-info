@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.9 2002/06/30 22:18:41 david Exp $
+# $Id: Prompt.pm,v 1.10 2002/07/01 03:31:32 david Exp $
 
 =head1 NAME
 
@@ -92,7 +92,7 @@ my $get_ans = sub {
     } else {
         print "$def\n" if defined $def;
     }
-    return !defined $ans || $ans eq '' ? $def : $ans;
+    return $ans;
 };
 
 sub handler {
@@ -108,12 +108,16 @@ sub handler {
 
         # Get the answer.
         $ans = $get_ans->($msg, $self->{tty}, $def);
+        # Just return if they entered an empty string or we couldnt' get an
+        # answer.
+        return 1 unless defined $ans && $ans ne '';
 
         # Validate the answer.
         my $err = $req->error;
-        while (!$req->callback($ans)) {
+        while (!$req->value($ans)) {
             print "$err: '$ans'\n";
-            $ans = $get_ans->($msg, $self->{tty});
+            $ans = $get_ans->($msg, $self->{tty}, $def);
+            return 1 unless defined $ans && $ans ne '';
         }
 
     } elsif ($type eq 'info') {
@@ -126,9 +130,6 @@ sub handler {
         # This shouldn't happen.
         Carp::croak("Invalid request type '$type'");
     }
-
-    # Save the answer.
-    $req->value($ans);
 
     # Return true to indicate that we've handled the request.
     return 1;
