@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.11 2002/06/03 23:53:41 david Exp $
+# $Id: PostgreSQL.pm,v 1.12 2002/06/04 01:12:15 david Exp $
 
 =head1 NAME
 
@@ -26,14 +26,14 @@ App::Info::RDBMS::PostgreSQL supplies information about the PostgreSQL
 database server installed on the local system. It implements all of the
 methods defined by App::Info::RDBMS.
 
-When it loads, App::Info::RDBMS::PostgreSQL searches the local file system for
-the F<pg_config> application. If found, F<pg_config> will be called to gather
-the data necessary for each of the methods below. If F<pg_config> cannot be
-found, then PostgreSQL is assumed not to be installed, and each of the methods
-will return C<undef>.
+When it loads, App::Info::RDBMS::PostgreSQL searches the file system for the
+F<pg_config> application. If found, F<pg_config> will be called to gather the
+data necessary for each of the methods below. If F<pg_config> cannot be found,
+then PostgreSQL is assumed not to be installed, and each of the methods will
+return C<undef>.
 
 App::Info::RDBMS::PostgreSQL searches for F<pg_config> along your path, as
-defined by File::Spec->path. Failing that, it searches the following
+defined by C<File::Spec->path>. Failing that, it searches the following
 directories:
 
 =over 4
