@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.8 2002/06/02 20:40:12 david Exp $
+# $Id: Apache.pm,v 1.9 2002/06/02 20:50:14 david Exp $
 
 =head1 NAME
 
@@ -127,7 +127,7 @@ name from the system call C<`httpd -v`>.
 
 sub name {
     $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{major};
+    return $_[0]->{name};
 }
 
 =head2 version
