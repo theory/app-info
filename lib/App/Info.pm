@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.10 2002/06/03 19:27:41 david Exp $
+# $Id: Info.pm,v 1.11 2002/06/04 00:40:20 david Exp $
 
 =head1 NAME
 
@@ -23,10 +23,10 @@ App::Info - Information about software packages on a system
 =head1 DESCRIPTION
 
 App::Info is an abstract base class designed to provide a generalized
-interface for subclasses that provide meta data about software packages
+interface for subclasses that provide metadata about software packages
 installed on a system. The idea is that these classes can be used in Perl
 application installers in order to determine whether software dependencies
-have been fulfilled, and to get necessary meta data about those software
+have been fulfilled, and to get necessary metadata about those software
 packages.
 
 A few L<sample subclasses|"SEE ALSO"> are provided with the distribution, but
@@ -37,7 +37,7 @@ L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
 encouraged to, at a minimum, implement the methods defined here and in the
 category abstract base classes (e.g. L<App::Info::HTTPD|App::Info::HTTPD> and
 L<App::Info::Lib|App::Info::Lib>. See L<"NOTES ON SUBCLASSING"> for more
-information on adding new sofware package subclasses.
+information on implementing new subclasses.
 
 =cut
 
@@ -96,7 +96,7 @@ Consructs the FooApp App::Info object.
       print "App is not installed.\n"
   }
 
-Returns a true value of the application is installed, and a false value if it
+Returns a true value if the application is installed, and a false value if it
 is not.
 
 =head2 name
@@ -171,18 +171,18 @@ The URL for the software's download page.
 
 =head1 NOTES ON SUBCLASSING
 
-The organizational idea behind App::Info is to name subclasses by broad
-software categories. This allows the categories to function as abstract base
-classes that extend App::Info, so that they can specify more methods for all
-of their base classes to implement. For example, L<App::Info::HTTPD> has
-specified the C<httpd_root()> abstract method that its subclasses must
-implement. So as you get ready to implement your own subclass, think about
-what category of software you're gathering information about. New categories
-can be added as needed.
+wThe organizational idea behind App::Info is to name subclasses by broad
+software categories. This approach allows the categories to function as
+abstract base classes that extend App::Info, so that they can specify more
+methods for all of their base classes to implement. For example,
+L<App::Info::HTTPD> has specified the C<httpd_root()> abstract method that its
+subclasses must implement. So as you get ready to implement your own subclass,
+think about what category of software you're gathering information about. New
+categories can be added as needed.
 
 Feel free to use the subclasses included in this distribution as examples to
 follow when creating your own subclasses. I've tried to encapsulate common
-functionality in L<App::Info::Util|App::Info::Util> to make the job easiser. I
+functionality in L<App::Info::Util|App::Info::Util> to make the job easier. I
 found that most of what I was doing repetitively was looking for files and
 directories, and searching through files. Thus, App::Info::Util subclasses
 L<File::Spec|File::Spec> in order to offer easy access to commonly-used
@@ -197,22 +197,22 @@ To save resources as much as possible, I recommend implementing the App::Info
 subclasses as singleton objects. The reason for this is that the information
 about a software package is unlikely to change during the execution of a
 program. More likely, if the relevant information about software packages
-cannot be found or does not meet immediate needs, and program using App:Info
+cannot be found or does not meet immediate needs, a program using App:Info
 will tell the user to install or upgrade the software and then exit. Once the
 software has been installed or upgraded, the program will be run again. This
-makes sense given App::Info's target of assisting insallation programs to
+makes sense given App::Info's target of assisting installation programs to
 determine dependencies; they only need to verify those dependencies once.
 
 Please also be sure to implement B<all> of the abstract methods defined by
-your abstract base class -- even if they don't do anythin. Doing so ensures
+your abstract base class -- even if they don't do anything. Doing so ensures
 that all App::Info subclasses share a common interface, and can, if necessary,
 be used without regard to subclass. Any method not implemented but called on
 an object will generate an exception.
 
-Otherwise, have fun! There are a lot of software packages out that for which
-relevant information might be collected and aggregated into an App::Info
-subclass (witness all of the Automake macros in the world!), and folks who are
-knowledgable about particular software packages or categories of software are
+Otherwise, have fun! There are a lot of software packages for which relevant
+information might be collected and aggregated into an App::Info subclass
+(witness all of the Automake macros in the world!), and folks who are
+knowledgeable about particular software packages or categories of software are
 warmly invited to contribute. As more subclasses are implemented, it will make
 sense, I think, to create separate distributions based on category -- or even,
 when necessary, on a single software package. Broader categories can then be
