@@ -1,10 +1,10 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.8 2002/06/30 22:18:41 david Exp $
+# $Id: Request.pm,v 1.9 2002/08/08 19:03:38 david Exp $
 
 =head1 NAME
 
-App::Info::Handler - App::Info event handler request object
+App::Info::Request - App::Info event handler request object
 
 =head1 SYNOPSIS
 
@@ -44,7 +44,7 @@ to handle the request appropriately.
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 ##############################################################################
 
