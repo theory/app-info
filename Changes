@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.43
+
 0.42  2004-12-07T00:40:53
       - Fixed last Win32 test failure in "apache.t".
       - Added "executable()" method to return the main executable of an app or
