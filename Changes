@@ -1,29 +1,29 @@
 Revision history for Perl extension App::Info.
 
 0.04  Tue Jun  4 01:03:58 2002
-        - Wrote documentation on subclassing App::Info.
-        - Added httpd_root() abstract method to App::Info::HTTPD abstract
-          base class.
-        - Added httpd_conf(), user(), group(), and port() methods to
-          App::Info::HTTPD::Apche.
-        - Added and corrected documentation in App::Info::HTTPD,
-          App::Info::RDBMS, and App::Info::Lib.
-        - Made minor documentation fixes to other classes.
-        - Fixed methods in App::Info::Util to return undef in a scalar context
-          if there were no regular expression matches.
+      - Wrote documentation on subclassing App::Info.
+      - Added httpd_root() abstract method to App::Info::HTTPD abstract
+        base class.
+      - Added httpd_conf(), user(), group(), and port() methods to
+        App::Info::HTTPD::Apche.
+      - Added and corrected documentation in App::Info::HTTPD,
+        App::Info::RDBMS, and App::Info::Lib.
+      - Made minor documentation fixes to other classes.
+      - Fixed methods in App::Info::Util to return undef in a scalar context
+        if there were no regular expression matches.
 
 0.03  Mon Jun  3 18:37:50 2002
-        - Private release.
-        - Changed first_cat_file() to first_cat_path() in App::Info::Util.
-        - Added internal tests for various subclasses.
-        - Fixed a bunch of bugs.
-        - Added better support for Fink-installed libraries on Darwin.
+      - Private release.
+      - Changed first_cat_file() to first_cat_path() in App::Info::Util.
+      - Added internal tests for various subclasses.
+      - Fixed a bunch of bugs.
+      - Added better support for Fink-installed libraries on Darwin.
 
 0.02  Mon Jun  3 04:38:24 2002
-        - Private release.
-        - Added Expat.pm.
-        - Many changes to Util.
+      - Private release.
+      - Added Expat.pm.
+      - Many changes to Util.
 
 0.01  Fri May 31 07:54:55 2002
-        - Original version.
-        - Private release.
+      - Original version.
+      - Private release.
