@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.20  Thu Jun 27 19:58:53 2002
+0.20  Thu Jun 27 20:28:34 2002
       - Major upgrade. Some backwards compatibility broken. Namely, the
         error parameter no longer exists. See event handling instead.
       - Added App::Info::Handler. Classes derived from this class handle
