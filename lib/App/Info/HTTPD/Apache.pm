@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.9 2002/06/02 20:50:14 david Exp $
+# $Id: Apache.pm,v 1.10 2002/06/02 23:42:47 david Exp $
 
 =head1 NAME
 
@@ -154,7 +154,7 @@ sub version {
 
         chomp $version;
         my ($n, $x, $y, $z) = $version =~
-          /server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/i;
+          /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
         unless ($n and defined $x and defined $y and defined $z) {
             Carp::carp("Failed to parse Apache name and version from string ".
                        "'$version'");
