@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.6 2002/06/01 23:19:30 david Exp $
+# $Id: PostgreSQL.pm,v 1.7 2002/06/01 23:44:45 david Exp $
 
 =head1 NAME
 
@@ -115,8 +115,8 @@ my $get_data = sub {
 
 Returns true if PostgreSQL is installed, and false if it is not.
 App::Info::RDBMS::PostgreSQL determines whether PostgreSQL is installed based
-on the prence of the presence or absence of the F<pg_config> application on
-the file system.
+on the presence or absence of the F<pg_config> application on the file
+system.
 
 =cut
 

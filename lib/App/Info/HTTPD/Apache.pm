@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.5 2002/06/01 23:19:30 david Exp $
+# $Id: Apache.pm,v 1.6 2002/06/01 23:44:45 david Exp $
 
 =head1 NAME
 
@@ -110,8 +110,7 @@ sub new { bless $obj, ref $_[0] || $_[0] }
 
 Returns true if Apache is installed, and false if it is not.
 App::Info::HTTPD::Apache determines whether Apache is installed based on the
-prence of the presence or absence of the F<httpd> application on the file
-system.
+presence or absence of the F<httpd> application on the file system.
 
 =cut
 
