@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.30
+0.30  2004-11-20T19:10:55
       - Fixed number of tests to skip in "sqlite_info.t" for systems that
         don't have SQLite installed. Reported by numerous CPAN testers.
       - Fixed carp.t to be compatable with older Perls.
