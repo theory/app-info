@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.16 2002/06/05 00:17:49 david Exp $
+# $Id: Expat.pm,v 1.17 2002/06/05 14:39:09 david Exp $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -144,13 +144,14 @@ sub version {
                         qr/XML_MICRO_VERSION\s+(\d+)$/ );
 
         my ($x, $y, $z) = $u->multi_search_file($header, @regexen);
-        unless (defined $x and defined $y and defined $z) {
+        if (defined $x and defined $y and defined $z) {
+            # Assemble the version number and store it.
+            my $v = "$x.$y.$z";
+            @{$_[0]}{qw(version major minor patch)} = ($v, $x, $y, $z);
+        } else {
             # Warn them if we couldn't get them all.
             Carp::carp("Failed to parse Expat version from file '$header'");
         }
-        # But go ahead and keep them all, anyway -- some may be there.
-        my $v = ($x || '') . '.' . ($y || '') . '.' . ($z || '');
-        @{$_[0]}{qw(version major minor patch)} = ($v, $x, $y, $z);
     }
     return $_[0]->{version};
 }
