@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.6 2002/06/15 00:49:55 david Exp $
+# $Id: Handler.pm,v 1.7 2002/06/15 01:47:41 david Exp $
 
 =head1 NAME
 
@@ -41,7 +41,7 @@ my %handlers;
 
 =head1 INTERFACE
 
-This section documents the public interface of App::Info.
+This section documents the public interface of App::Info::Handler.
 
 =head2 Class Method
 
@@ -58,32 +58,6 @@ App::Info::Handler subclasses so that many subclasses can be loaded and used
 separately. If the C<$key> is already registered, C<register_handler()> will
 throw an exception. The values are code references that, when executed, return
 the appropriate App::Info::Handler subclass object.
-
-For example, say we're creating a handler subclass FooHandler. It has two
-modes, a default "foo" mode and an advanced "bar" mode. To allow both to be
-constructed by stringified shortcuts, the FooHandler class implementation
-might start like this:
-
-  package FooHandler;
-
-  use strict;
-  use App::Info::Handler;
-  use vars qw(@ISA);
-  @ISA = qw(App::Info::Handler);
-
-  App::Info::Handler->register_handler('foo' => sub { __PACKAGE__->new } );
-  App::Info::Handler->register_handler('bar' =>
-                                       sub { __PACKAGE__->new('bar') } );
-
-These strings can then be used by clients as shortcuts to have App::Info
-objects automatically create and use handlers for certain events. For example,
-if a client wanted to use a "bar" event handler for its info events, it might
-do this:
-
-  use App::Info::Category::FooApp;
-  use FooHandler;
-
-  my $app = App::Info::Category::FooApp->new(on_info => ['bar']);
 
 =cut
 
@@ -185,13 +159,108 @@ you do in your implementation is to call the super constructor:
   }
 
 Although the default C<new()> constructor currently doesn't do much, that may
-change in the future, so this call will keep you covered. Then simply process
-whatever arguments you've defined for your class and return the new object.
+change in the future, so this call will keep you covered. What it does do is
+take the parameterized arguments and assign them to the App::Info::Handler
+object. Thus if you've specified a "mode" argument, where clients can
+construct objects of you class like this:
+
+  my $handler = FooHandler->new( mode => 'foo' );
+
+You can access the mode parameter directly from the object, like so:
+
+  sub new {
+      my $pkg = shift;
+      my $self = $pkg->SUPER::new(@_);
+      if ($self->{mode} eq 'foo') {
+          # ...
+      }
+      return $self;
+  }
+
+Just be sure not to use a parameter key name required by App::Info::Handler
+itself. At the moment, the only parameter accepted by App::Info::Handler is
+"key", so in general you'll be pretty safe.
 
 Next, I recommend that you take advantage of the C<register_handler()> method
-to create some shortcuts for creating handlers of your class. The code for
-this is covered in the L<register_handler|"register_handler"> section, but
-I'll provide a more detailed example here.
+to create some shortcuts for creating handlers of your class. For example, say
+we're creating a handler subclass FooHandler. It has two modes, a default
+"foo" mode and an advanced "bar" mode. To allow both to be constructed by
+stringified shortcuts, the FooHandler class implementation might start like
+this:
+
+  package FooHandler;
+
+  use strict;
+  use App::Info::Handler;
+  use vars qw(@ISA);
+  @ISA = qw(App::Info::Handler);
+
+  foreach my $c (qw(foo bar)) {
+      App::Info::Handler->register_handler
+        ( $c => sub { __PACKAGE__->new( mode => $c) } );
+  }
+
+The strings "foo" and "bar" can then be used by clients as shortcuts to have
+App::Info objects automatically create and use handlers for certain events.
+For example, if a client wanted to use a "bar" event handler for its info
+events, it might do this:
+
+  use App::Info::Category::FooApp;
+  use FooHandler;
+
+  my $app = App::Info::Category::FooApp->new(on_info => ['bar']);
+
+Take a look at App::Info::Handler::Print and App::Info::Handler::Carp to see
+concrete examples of C<register_handler()> usage.
+
+The final step in creating a new App::Info event handler is to implement the
+C<handler()> method itself. This method takes a single argument, an
+App::Info::Request object, and is expected to return true if it handled the
+request, and false if it did not. The App::Info::Request object contains all
+the metadata relevant to a request, including the type of event that triggered
+it; see L<App::Info::Request|App::Info::Request> for its documentation.
+
+Use the App::Info::Request object however you like to handle the request
+however you like. You are, however, expected to abide by a a few guidelines:
+
+=over 4
+
+=item *
+
+For error and info events, you are expected (but not required) to somehow
+display the info or error message for the user. How your handler chooses to do
+so is up to you and the handler.
+
+=item *
+
+For unknown and confirm events, you are expected to prompt the user for a
+value. If it's a confirm event, offer the known value (found in
+C<$req-E<gt>value>) as a default.
+
+=item *
+
+For unknown and confirm events, you are expected to call C<$req-E<gt>callback>
+and pass in the new value. If C<$req-E<gt>callback> returns a false value, you
+are expected to display the error message in C<$req-E<gt>error> and prompt the
+user again. Note that C<$req-E<gt>value> calls C<$req-E<gt>callback>
+internally, and thus assigns the value and returns true if
+C<$req-E<gt>callback> returns true, and does not assign the value and returns
+false if C<$req-E<gt>callback> returns false.
+
+=item *
+
+For unknown and confirm events, if you've collected a new value and
+C<$req-E<gt>callback> returns true for that value, you are expected to assign
+the value by passing it to C<$req-E<gt>value>. This allows App::Info to give
+the value back to the calling App::Info concrete subclass.
+
+=back
+
+Probably the easiest way to get started creating new App::Info event handlers
+is to check out the simple handlers provided with the distribution and follow
+their logical examples. Consult the App::Info documentation of the L<event
+methods|App::Info/"Events"> for details on how App::Info constructs the
+App::Info::Request object for each event type.
 
 =head1 BUGS
 
@@ -203,11 +272,26 @@ David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>,
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>,
-L<App::Info::Lib|App::Info::Lib::Expat>,
-L<App::Info::Lib|App::Info::Lib::Iconv>
+L<App::Info|App::Info> thoroughly documents the client interface for setting
+event handlers, as well as the event triggering interface for App::Info
+concrete subclasses.
+
+L<App::Info::Request|App::Info::Request> documents the interface for the
+request objects passed to App::Info::Handler C<handler()> methods.
+
+The following App::Info::Handler subclasses offer examples for event handler
+authors, and, of course, provide actual event handling functionality for
+App::Info clients.
+
+=over 4
+
+=item L<App::Info::Handler::Carp|App::Info::Handler::Carp>
+
+=item L<App::Info::Handler::Print|App::Info::Handler::Print>
+
+=item L<App::Info::Handler::Prompt|App::Info::Handler::Prompt>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
