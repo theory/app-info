@@ -27,10 +27,10 @@ is( $expat->version, "1.95.8", "Test Version" );
 is( $expat->major_version, '1', "Test major version" );
 is( $expat->minor_version, '95', "Test minor version" );
 is( $expat->patch_version, '8', "Test patch version" );
-is( $expat->lib_dir, 't/testlib', "Test lib dir" );
+is( $expat->lib_dir, $lib_dir, "Test lib dir" );
 ok( ! defined $expat->bin_dir, "Test bin dir" );
-is( $expat->so_lib_dir, 't/testlib', "Test so lib dir" );
-is( $expat->inc_dir, "t/testinc", "Test inc dir" );
+is( $expat->so_lib_dir, $lib_dir, "Test so lib dir" );
+is( $expat->inc_dir, $inc_dir, "Test inc dir" );
 is( $expat->home_url, 'http://expat.sourceforge.net/', "Get home URL" );
 is( $expat->download_url, 'http://sourceforge.net/projects/expat/',
     "Get download URL" );

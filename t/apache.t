@@ -13,6 +13,7 @@ my $bin_dir = catdir 't', 'scripts';
 $bin_dir = catdir 't', 'bin' unless -d $bin_dir;
 my $conf_dir = catdir 't', 'testlib';
 my $inc_dir = catdir 't', 'testinc';
+my $test_bin = catdir 't', 'bin';
 
 my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
               mod_status mod_include mod_autoindex mod_dir mod_cgi mod_asis
@@ -44,9 +45,9 @@ is( $apache->group, "nobody", "Test group" );
 is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
     "Check error log from compile_option()" );
 is( $apache->lib_dir, $conf_dir, "Test lib dir" );
-is( $apache->bin_dir, 't/bin', "Test bin dir" );
+is( $apache->bin_dir, $test_bin, "Test bin dir" );
 is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
-is( $apache->inc_dir, "t/testinc", "Test inc dir" );
+is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
 is( $apache->magic_number, '19990320:16', "Test magic number" );
 is( $apache->port, '80', "Test port" );

@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: App-Info
-version: 0.30
+version: 0.40
 author:
   - David Wheeler <david@justatheory.com>
 abstract: Information about software packages on a system
@@ -12,47 +12,47 @@ build_requires:
 provides:
   App::Info:
     file: lib/App/Info.pm
-    version: 0.30
+    version: 0.40
   App::Info::HTTPD:
     file: lib/App/Info/HTTPD.pm
-    version: 0.30
+    version: 0.40
   App::Info::HTTPD::Apache:
     file: lib/App/Info/HTTPD/Apache.pm
-    version: 0.30
+    version: 0.40
   App::Info::Handler:
     file: lib/App/Info/Handler.pm
-    version: 0.30
+    version: 0.40
   App::Info::Handler::Carp:
     file: lib/App/Info/Handler/Carp.pm
-    version: 0.30
+    version: 0.40
   App::Info::Handler::Print:
     file: lib/App/Info/Handler/Print.pm
-    version: 0.30
+    version: 0.40
   App::Info::Handler::Prompt:
     file: lib/App/Info/Handler/Prompt.pm
-    version: 0.30
+    version: 0.40
   App::Info::Lib:
     file: lib/App/Info/Lib.pm
-    version: 0.30
+    version: 0.40
   App::Info::Lib::Expat:
     file: lib/App/Info/Lib/Expat.pm
-    version: 0.30
+    version: 0.40
   App::Info::Lib::Iconv:
     file: lib/App/Info/Lib/Iconv.pm
-    version: 0.30
+    version: 0.40
   App::Info::RDBMS:
     file: lib/App/Info/RDBMS.pm
-    version: 0.30
+    version: 0.40
   App::Info::RDBMS::PostgreSQL:
     file: lib/App/Info/RDBMS/PostgreSQL.pm
-    version: 0.30
+    version: 0.40
   App::Info::RDBMS::SQLite:
     file: lib/App/Info/RDBMS/SQLite.pm
-    version: 0.30
+    version: 0.40
   App::Info::Request:
     file: lib/App/Info/Request.pm
-    version: 0.30
+    version: 0.40
   App::Info::Util:
     file: lib/App/Info/Util.pm
-    version: 0.30
-generated_by: Module::Build version 0.2604
+    version: 0.40
+generated_by: Module::Build version 0.26
