@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: confirm.t,v 1.2 2002/07/01 03:42:54 david Exp $
+# $Id: confirm.t,v 1.3 2002/07/03 17:33:18 david Exp $
 
 use strict;
 use File::Spec::Functions qw(tmpdir);
@@ -27,6 +27,7 @@ BEGIN { use_ok('App::Info::Lib::Expat') }
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 BEGIN { use_ok('App::Info::Handler::Prompt') }
 ok( my $p = App::Info::Handler::Prompt->new, "Create prompt" );
+$p->{tty} = 1; # Cheat death.
 
 ##############################################################################
 # Tie STDOUT and STDIN so I can read them.

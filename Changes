@@ -1,5 +1,9 @@
 Revision history for Perl extension App::Info.
 
+0.22  Wed Jul  3 17:31:53 2002
+      - Fixed tests that use Handler::Prompt so that they fake it into
+        always thinking there's a TTY.
+
 0.21  Tue Jul  2 19:14:44 2002
       - Fixed bug in Handler::Prompt where the prompt failed to simply
         return when the user accepted the default value (with confirm

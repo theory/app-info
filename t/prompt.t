@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.8 2002/07/01 03:32:49 david Exp $
+# $Id: prompt.t,v 1.9 2002/07/03 17:33:18 david Exp $
 
 use strict;
 use Test::More tests => 32;
@@ -75,6 +75,7 @@ package main;
 BEGIN { use_ok('App::Info::Handler::Prompt') }
 
 ok( my $p = App::Info::Handler::Prompt->new, "Create prompt" );
+$p->{tty} = 1; # Cheat death.
 ok( my $app = App::Info::Category::FooApp->new( on_unknown => $p),
     "Set up for unknown" );
 
