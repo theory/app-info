@@ -26,7 +26,7 @@ sub httpd_root { $croak->(shift, 'httpd_root') }
 1;
 __END__
 
-# $Id: HTTPD.pm,v 1.4 2002/06/03 18:57:08 david Exp $
+# $Id: HTTPD.pm,v 1.5 2002/06/03 19:11:04 david Exp $
 
 =head1 NAME
 
@@ -34,11 +34,24 @@ App::Info::HTTPD - Information about web servers on a system
 
 =head1 DESCRIPTION
 
-This class is an abstract base class for App::Info subclasses that provide
-information about databases. Its subclasses are required to implement its
-interface. See L<App::Info|App::Info> for a complete description and
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL> for an example
+This subclass of App::Info is an abstract base class for subclasses that
+provide information about web servers. Its subclasses are required to
+implement its interface. See L<App::Info|App::Info> for a complete description
+and L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example
 implementation.
+
+=head1 INTERFACE
+
+In addition to the methods outlined by its App::Info parent class,
+App::Info::HTTPD offers the following abstract methods
+
+=head1 OBJECT METHODS
+
+=head2 httpd_root
+
+  my $httpd_root = $app->httpd_root;
+
+The root directory of the HTTPD server.
 
 =head1 AUTHOR
 
@@ -47,7 +60,7 @@ David Wheeler <david@wheeler.net>
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>
+L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>
 
 =head1 COPYRIGHT AND LICENSE
 
