@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.5 2002/06/03 01:46:14 david Exp $
+# $Id: Expat.pm,v 1.6 2002/06/03 01:55:45 david Exp $
 
 =head1 NAME
 
@@ -116,16 +116,19 @@ sub name { 'Expat' }
 
 =head2 version
 
-Returns the full version number for Expat. This number is parsed from the
-expat.h file if it exists. Returns undef if Expat is not installed or if the
-version number could not be found.
+Returns the full version number for Expat. App::Info::Lib::Expat parses the
+version number from the expat.h file, if it exists. Returns undef if Expat is
+not installed. Emits a warning if Expat is installed but the version number
+could not be parsed.
 
 =cut
 
 sub version {
     return unless $_[0]->{libexpat};
     unless (exists $_[0]->{version}) {
-        my $inc = $_[0]->inc_dir || return;
+        my $inc = $_[0]->inc_dir
+          or Carp::carp("Cannot get Expat version because file 'expat.h' " .
+                        "does not exist");
         my $header = $u->catfile($inc, 'expat.h');
         my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
                         qr/XML_MINOR_VERSION\s+(\d+)$/,
@@ -146,7 +149,11 @@ sub version {
 
   my $major_version = $expat->major_version;
 
-Unimplemented. Patches welcome.
+Returns the Expat major version number. App::Info::Lib::Expat parses the
+version number from the expat.h file, if it exists. If C<version()> returns
+"1.95.2", then this method returns "1". Returns undef if Expat is not
+installed. Emits a warning if Expat is installed but the version number could
+not be parsed.
 
 =cut
 
@@ -159,7 +166,11 @@ sub major_version {
 
   my $minor_version = $expat->minor_version;
 
-Unimplemented. Patches welcome.
+Returns the Expat minor version number. App::Info::Lib::Expat parses the
+version number from the expat.h file, if it exists. If C<version()> returns
+"1.95.2", then this method returns "95". Returns undef if Expat is not
+installed. Emits a warning if Expat is installed but the version number could
+not be parsed.
 
 =cut
 
@@ -172,7 +183,11 @@ sub minor_version {
 
   my $patch_version = $expat->patch_version;
 
-Unimplemented. Patches welcome.
+Returns the Expat patch version number. App::Info::Lib::Expat parses the
+version number from the expat.h file, if it exists. If C<version()> returns
+"1.95.2", then this method returns "2". Returns undef if Expat is not
+installed. Emits a warning if Expat is installed but the version number could
+not be parsed.
 
 =cut
 
