@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: expat.t,v 1.3 2002/06/05 00:01:47 david Exp $
+# $Id: expat.t,v 1.4 2002/06/05 03:36:37 david Exp $
 
 use strict;
 use Test::More tests => 17;
@@ -20,8 +20,8 @@ if ($expat->installed) {
         # number. Meanwhile, this should allow all of the tests to pass.
         ok( $expat->version, "Got version" );
         ok( $expat->major_version, "Got major version" );
-        ok( $expat->minor_version, "Got minor version" );
-        ok( $expat->patch_version, "Got patch version" );
+        ok( defined $expat->minor_version, "Got minor version" );
+        ok( defined $expat->patch_version, "Got patch version" );
     } else {
         ok( !$expat->version, "Don't got version" );
         ok( !$expat->major_version, "Don't got major version" );

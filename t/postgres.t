@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: postgres.t,v 1.3 2002/06/01 21:29:05 david Exp $
+# $Id: postgres.t,v 1.4 2002/06/05 03:36:38 david Exp $
 
 use strict;
 use Test::More tests => 16;
@@ -16,8 +16,8 @@ if ($pg->installed) {
     ok( $pg->name, "Got name" );
     ok( $pg->version, "Got version" );
     ok( $pg->major_version, "Got major version" );
-    ok( $pg->minor_version, "Got minor version" );
-    ok( $pg->patch_version, "Got patch version" );
+    ok( defined $pg->minor_version, "Got minor version" );
+    ok( defined $pg->patch_version, "Got patch version" );
     ok( $pg->lib_dir, "Got lib dir" );
     ok( $pg->bin_dir, "Got bin_dir" );
     ok( $pg->so_lib_dir, "Got so lib dir" );

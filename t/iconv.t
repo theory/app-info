@@ -17,7 +17,7 @@ if ($iconv->installed) {
         # number. Meanwhile, this should allow all of the tests to pass.
         ok( $iconv->version, "Got version" );
         ok( $iconv->major_version, "Got major version" );
-        ok( $iconv->minor_version, "Got minor version" );
+        ok( defined $iconv->minor_version, "Got minor version" );
     } else {
         ok( !$iconv->version, "Don't got version" );
         ok( !$iconv->major_version, "Don't got major version" );

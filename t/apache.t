@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.6 2002/06/03 23:49:18 david Exp $
+# $Id: apache.t,v 1.7 2002/06/05 03:36:37 david Exp $
 
 use strict;
 use Test::More tests => 26;
@@ -16,8 +16,8 @@ if ($apache->installed) {
     ok( $apache->name, "Got name" );
     ok( $apache->version, "Got version" );
     ok( $apache->major_version, "Got major version" );
-    ok( $apache->minor_version, "Got minor version" );
-    ok( $apache->patch_version, "Got patch version" );
+    ok( defined $apache->minor_version, "Got minor version" );
+    ok( defined $apache->patch_version, "Got patch version" );
     ok( $apache->httpd_root, "Got httpd root" );
     ok( $apache->magic_number, "Got magic number" );
     $apache->mod_so;
