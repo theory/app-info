@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.9 2003/08/02 02:09:59 david Exp $
+# $Id: myapache.t,v 1.10 2003/12/11 20:47:22 david Exp $
 
 use strict;
 use Test::More;
@@ -30,10 +30,10 @@ ok( $apache->installed, "Apache is installed" );
 is( $apache->name, "Apache", "Get name" );
 if ($apache->httpd_root eq '/usr') {
     # Apple-installed Apache
-    is( $apache->version, "1.3.27", "Test Version" );
+    is( $apache->version, "1.3.28", "Test Version" );
     is( $apache->major_version, '1', "Test major version" );
     is( $apache->minor_version, '3', "Test minor version" );
-    is( $apache->patch_version, '27', "Test patch version" );
+    is( $apache->patch_version, '28', "Test patch version" );
     is( $apache->httpd_root, "/usr", "Test httpd root" );
     ok( !$apache->mod_perl, "Test mod_perl" );
     is( $apache->conf_file, "/etc/httpd/httpd.conf", "Test conf file" );
@@ -47,7 +47,7 @@ if ($apache->httpd_root eq '/usr') {
     is( $apache->inc_dir, "/usr/include", "Test inc dir" );
     ok( eq_set( [ $apache->static_mods ], [qw(http_core mod_so)], ),
         "Check static mods" );
-    is( $apache->magic_number, '19990320:13', "Test magic number" );
+    is( $apache->magic_number, '19990320:15', "Test magic number" );
 } else {
     is( $apache->version, "1.3.23", "Test Version" );
     is( $apache->major_version, '1', "Test major version" );
