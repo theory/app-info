@@ -7,6 +7,11 @@ Revision history for Perl extension App::Info.
         last_error() is for client code to access the last error in non-fatal
         error modes. See App::Info for complete documentation. This is the major
         change the triggered the (mild) version number jump.
+      - Reworked all application subclasses to use the new error() method.
+      - Changed all application subclasses so that they're no longer singleton
+        classes. Each new object construction looks for application metatdata
+        all over again.
+      - Updated documentation on subclassing to reflect changes.
       - Added first_exe() and first_cat_exe() to App::Info::Util. Changed
         RDBMS::PostgreSQL, HTTP::Apache, and Lib::Iconv to use them.
       - Added more directories in which to search for the Apache server
