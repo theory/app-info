@@ -18,13 +18,12 @@ if ($iconv->installed) {
         ok( $iconv->version, "Got version" );
         ok( $iconv->major_version, "Got major version" );
         ok( $iconv->minor_version, "Got minor version" );
-        ok( !$iconv->patch_version, "There is no patch version" );
     } else {
         ok( !$iconv->version, "Don't got version" );
         ok( !$iconv->major_version, "Don't got major version" );
         ok( !$iconv->minor_version, "Don't got minor version" );
-        ok( !$iconv->patch_version, "Don't got patch version" );
     }
+    ok( !$iconv->patch_version, "There is no patch version" );
 } else {
     ok( !$iconv->installed, "libiconv is not installed" );
     ok( !$iconv->version, "Don't got version" );
