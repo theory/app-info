@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.1 2002/06/08 07:22:06 david Exp $
+# $Id: Handler.pm,v 1.2 2002/06/10 06:03:06 david Exp $
 
 =head1 NAME
 
@@ -43,10 +43,31 @@ $VERSION = '0.01';
 use constant OK => 1;
 use constant DECLINED => 2;
 
-# Register ourself.
-App::Info->register_handler('default', sub { __PACKAGE__->new } );
+my %handlers;
 
-sub new { bless {}, ref $_[0] || $_[0] }
+sub register_handler {
+    my ($pkg, $key, $code) = @_;
+    Carp::croak("Handler '$key' already exists")
+      if $handlers{$key};
+    $handlers{$key} = $code;
+}
+
+# Register ourself.
+__PACKAGE__->register_handler('default', sub { __PACKAGE__->new } );
+
+sub new {
+    my ($pkg, $key) = @_;
+    my $class = ref $pkg || $pkg;
+    if ($class eq __PACKAGE__) {
+        # We were called directly! Handle it.
+        $key ||= 'default';
+        return $handlers{$key}->();
+    } else {
+        # A subclass called us -- just instantiate and return.
+        return bless {}, $class;
+    }
+}
+
 sub handler { OK }
 
 1;

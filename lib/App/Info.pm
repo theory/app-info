@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.20 2002/06/08 07:22:06 david Exp $
+# $Id: Info.pm,v 1.21 2002/06/10 06:03:06 david Exp $
 
 =head1 NAME
 
@@ -43,18 +43,11 @@ information on implementing new subclasses.
 
 use strict;
 use Carp ();
+use App::Info::Handler;
+use App::Info::Request;
 use vars qw($VERSION);
 
-$VERSION = '0.12';
-
-my %handlers;
-
-sub register_handler {
-    my ($pkg, $key, $code) = @_;
-    Carp::croak("Handler '$key' already exists")
-      if $handlers{$key};
-    $handlers{$key} = $code;
-}
+$VERSION = '0.13';
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -85,18 +78,14 @@ my $set_handlers = sub {
                   unless UNIVERSAL::isa($h, 'App::Info::Handler');
             } else {
                 # Look up the handler.
-                Carp::croak("No such handler '$h'") unless $handlers{$on_key};
-                # $h is an alias, so direct assignment works.
-                $h = $handlers{$h}->();
+                $h = App::Info::Handler->new($h);
             }
         }
         # Return 'em!
         return $on_key;
     } else {
         # Look up the handler.
-        Carp::croak("No such handler '$on_key'")
-          unless $handlers{$on_key};
-        return [ $handlers{$on_key}->() ];
+        return [ App::Info::Handler->new($on_key) ];
     }
 };
 
@@ -106,43 +95,105 @@ sub new {
     # Fail if the method isn't overridden.
     $croak->($pkg, 'new') if $class eq __PACKAGE__;
 
-    # We can dump support for error_level eventually.
-    my $on_err = $p{on_error} || $p{error_level};
-    $p{on_error} = $set_handlers->($on_err);
-    $p{on_null} = $set_handlers->($p{on_null});
+    # Set up handlers.
+    for (qw(on_error on_unknown on_info on_confirm)) {
+        $p{$_} = $set_handlers->($p{$_});
+    }
 
     # Do it!
     return bless \%p, $class;
 }
 
+my $handler = sub {
+    my ($self, $meth, $params) = @_;
+
+    # Sanity check. We really want to keep control over this.
+    Carp::croak("Cannot call protected method $meth()")
+      unless UNIVERSAL::isa($self, scalar caller(1));
+
+    # Create the request object.
+    my $req = App::Info::Request->new($params);
+
+    # Do the deed. The ultimate handling handler may die.
+    foreach my $eh (@{$self->{"on_$meth"}}) {
+        last if $eh->handler($req) eq App::Info::Handler::OK;
+    }
+
+    # Return the requst.
+    return $req;
+};
+
 sub error {
     my $self = shift;
-    # Sanity check. We really want to keep control over this.
-    Carp::croak("Cannot call protected method error()")
-      unless UNIVERSAL::isa($self, __PACKAGE__);
-
-    # Do the deed.
-    foreach my $eh (@{$self->{on_error}}) {
-        last if $eh->handler(@_) eq OK;
-    }
-
+    # Execute the handler sequence.
+    my $req = $handler->($self, 'error', { message => join('', @_) });
     # If we haven't died, save the error.
-    $self->{error} = $_[0]->{error};
+    $self->{error} = $req->message;
 }
 
-sub null {
+sub info {
     my $self = shift;
-    # Sanity check. We really want to keep control over this.
-    Carp::croak("Cannot call protected method error()")
-      unless UNIVERSAL::isa($self, __PACKAGE__);
+    # Execute the handler sequence.
+    my $req = $handler->($self, 'info', { message => join('', @_) });
+    # If we haven't died, save the error.
+    $self->{info} = $req->message;
+}
 
-    # Do the deed.
-    foreach my $eh (@{$self->{on_null}}) {
-        last if $eh->handler(@_) eq OK;
-    }
+sub unknown {
+    my ($self, $key, $cb, $sigil) = @_;
+    # Get the software package key name.
+    my $name = $self->key_name;
+    # Prepare the request arguments.
+    # Note: Add Local::Maketext support here.
+    my $params = { message => "Could not determine $name $key",
+                   prompt  => "Please enter a valid $name $key",
+                   sigil   => $sigil,
+                   callback => $cb };
+
+    # Execute the handler sequence.
+    my $req = $handler->($self, "unknown", $params);
+    # If we haven't died, return the value.
+    return $req->value;
+}
+
+sub confirm {
+    my ($self, $key, $val, $cb, $sigil) = @_;
+    # Just return the value if we've already confirmed this value.
+    return $val if $self->{"_conf_$key"};
+
+    # Get the software package key name.
+    my $name = $self->key_name;
+    # Prepare the request arguments.
+    # Note: Add Local::Maketext support here.
+    my $params = { message => "Found $name $key value '$val'",
+                   prompt  => "Is this correct?",
+                   value   => $val,
+                   sigil   => $sigil,
+                   callback => $cb };
+
+    # Execute the handler sequence.
+    my $req = $handler->($self, "confirm", $params);
+
+    # Mark that we've confirmed this value.
+    $self->{"_conf_$key"} = 1;
+
+    # If we haven't died, return the value.
+    return $req->value;
+}
+
+sub validate {
+    my ($self, $key, $val, $cb, $sigil) = @_;
+    # Sanity check. We really want to keep control over this.
+    Carp::croak("Cannot call protected method validate()")
+      unless UNIVERSAL::isa($self, scalar caller);
+
+    # Make sure we have a value and then confirm it.
+    $val = $self->unknown($key, $cb, $sigil) unless defined $val;
+    return $self->confirm($key, $val, $cb, $sigil);
 }
 
 sub last_error { $_[0]->{error} }
+sub last_info { $_[0]->{info} }
 sub installed { $croak->(shift, 'installed') }
 sub name { $croak->(shift, 'name') }
 sub version { $croak->(shift, 'version') }

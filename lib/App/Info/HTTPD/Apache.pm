@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.22 2002/06/08 07:22:06 david Exp $
+# $Id: Apache.pm,v 1.23 2002/06/10 06:03:06 david Exp $
 
 =head1 NAME
 
@@ -35,7 +35,7 @@ use App::Info::HTTPD;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 my $u = App::Info::Util->new;
 
@@ -95,6 +95,8 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Find Apache executable.
+    $self->info("Looking for Apache binary");
+
     my @paths = ($u->path,
       qw(/usr/local/apache/bin
          /usr/local/bin
@@ -112,9 +114,18 @@ sub new {
 
     my @exes = qw(httpd apache-perl apache);
 
-    $self->{apache_exe} = $u->first_cat_exe(\@exes, @paths);
+    if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
+        # We found httpd. Confirm.
+        $self->{binary} = $self->confirm('binary', $exe, sub { -x $_[0] });
+    } else {
+        # Handle an unknown value.
+        $self->{binary} = $self->unknown('binary', sub { -x $_[0] });
+    }
+
     return $self;
 };
+
+sub key_name { 'Apache' }
 
 =head1 OBJECT METHODS
 
@@ -131,7 +142,7 @@ installed, then all of the other object methods will return empty values.
 
 =cut
 
-sub installed { return $_[0]->{apache_exe} ? 1 : undef }
+sub installed { return $_[0]->{binary} ? 1 : undef }
 
 =head2 name
 
@@ -144,8 +155,17 @@ list of possible errors.
 =cut
 
 sub name {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{name};
+    my $self = shift;
+    return unless $self->{binary};
+
+    # Load data.
+    $self->version unless exists $self->{version};
+
+    # Handle an unknown name.
+    $self->{name} = $self->unknown('name') unless $self->{name};
+
+    # Return the name.
+    return $self->{name};
 }
 
 =head2 version
@@ -160,28 +180,36 @@ installed but the version number or name could not be parsed.
 
 sub version {
     my $self = shift;
-    return unless $self->{apache_exe};
-    unless (exists $self->{version}) {
-        $self->{version} = undef;
-        my $version = `$self->{apache_exe} -v`;
-        unless ($version) {
-            $self->error("Failed to find Apache version with " .
-                         "`$self->{apache_exe} -v`");
-            return;
-        }
+    return unless $self->{binary};
+  CHECK: {
+        unless (exists $self->{version}) {
+            $self->info("Executing `$self->{binary} -v`");
+            my $version = `$self->{binary} -v`;
+            unless ($version) {
+                $self->error("Failed to find Apache version with ",
+                               "`$self->{binary} -v`");
+                last CHECK;
+            }
 
-        chomp $version;
-        my ($n, $x, $y, $z) = $version =~
-          /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
-        unless ($n and defined $x and defined $y and defined $z) {
-            $self->error("Failed to parse Apache name and version from ".
-                         "string '$version'");
-            return;
-        }
+            chomp $version;
+            my ($n, $x, $y, $z) = $version =~
+              /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+            unless ($n and defined $x and defined $y and defined $z) {
+                $self->error("Failed to parse Apache name and ",
+                             "version from string '$version'");
+                last CHECK;
+            }
 
-        @{$self}{qw(name version major minor patch)} =
-          ($n, "$x.$y.$z", $x, $y, $z);
-    }
+            @{$self}{qw(name version major minor patch)} =
+              ($n, "$x.$y.$z", $x, $y, $z);
+        } # unless
+    } # CHECK:
+
+    # Note -- add code here to handle splitting up an entered version into
+    # major, minor, and patch parts.
+    # Handle an unknown value.
+    $self->{version} = $self->unknown('version') unless $self->{version};
+    # Return the version number.
     return $self->{version};
 }
 
@@ -197,8 +225,12 @@ L<version|"version"> method for a list of possible errors.
 =cut
 
 sub major_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{major};
+    my $self = shift;
+    $self->version unless exists $self->{version};
+    # Handle an unknown value.
+    $self->{major} = $self->unknown('major version number')
+      unless $self->{major};
+    return $self->{major};
 }
 
 =head2 minor_version
@@ -213,8 +245,12 @@ L<version|"version"> method for a list of possible errors.
 =cut
 
 sub minor_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{minor};
+    my $self = shift;
+    $self->version unless exists $self->{version};
+    # Handle an unknown value.
+    $self->{minor} = $self->unknown('minor version number')
+      unless defined $self->{minor};
+    return $self->{minor};
 }
 
 =head2 patch_version
@@ -229,8 +265,12 @@ L<version|"version"> method for a list of possible errors.
 =cut
 
 sub patch_version {
-    $_[0]->version unless exists $_[0]->{version};
-    return $_[0]->{patch};
+    my $self = shift;
+    $self->version unless exists $self->{version};
+    # Handle an unknown value.
+    $self->{patch} = $self->unknown('patch version number')
+      unless defined $self->{patch};
+    return $self->{patch};
 }
 
 =head2 httpd_root
@@ -245,14 +285,14 @@ Throws an error if Apache is installed but the HTTPD root could not be parsed.
 
 sub httpd_root {
     my $self = shift;
-    return unless $self->{apache_exe};
+    return unless $self->{binary};
     unless ($self->{-V}) {
         $self->{-V} = 1;
         # Get the compile settings.
-        my $data = `$self->{apache_exe} -V`;
+        my $data = `$self->{binary} -V`;
         unless ($data) {
             $self->error("Unable to extract compile settings from ".
-                         "`$self->{apache_exe} -V`");
+                         "`$self->{binary} -V`");
             return;
         }
 
@@ -272,7 +312,7 @@ sub httpd_root {
         }
         # Issue a warning if no httpd root was found.
         $self->error("Could not parse HTTPD root from " .
-                     "`$self->{apache_exe} -V`") unless $self->{httpd_root};
+                     "`$self->{binary} -V`") unless $self->{httpd_root};
     }
     return $self->{httpd_root};
 }
@@ -346,7 +386,7 @@ Throws an error and returns C<undef> if the file cannot be found.
 
 sub conf_file {
     my $self = shift;
-    return unless $self->{apache_exe};
+    return unless $self->{binary};
     unless (exists $self->{conf_file}) {
         my $root = $self->httpd_root;
         my $conf = $self->compile_option('SERVER_CONFIG_FILE');
@@ -380,7 +420,7 @@ or port number could not be parsed from the configuration file.
 
 sub user {
     my $self = shift;
-    return unless $self->{apache_exe};
+    return unless $self->{binary};
     unless (exists $self->{user}) {
         $self->{user} = undef;
         my $conf = $self->conf_file or return;
@@ -439,7 +479,7 @@ installed or if the bin directory could not be found.
 =cut
 
 sub bin_dir {
-    return unless $_[0]->{apache_exe};
+    return unless $_[0]->{binary};
     unless (exists $_[0]->{bin_dir}) {
         my $root = $_[0]->httpd_root || return;
         if (my $dir = $u->first_cat_path('bin', $root)) {
@@ -530,13 +570,13 @@ or an empty anonymous array in a scalar context.
 
 sub static_mods {
     my $self = shift;
-    return unless $self->{apache_exe};
+    return unless $self->{binary};
     unless (exists $self->{static_mods}) {
         $self->{static_mods} = undef;
-        my $data = `$self->{apache_exe} -l`;
+        my $data = `$self->{binary} -l`;
         unless ($data) {
             $self->error("Unable to extract needed data from ".
-                         "`$self->{apache_exe} =l`");
+                         "`$self->{binary} =l`");
             return;
         }
 

@@ -1,6 +1,6 @@
 package App::Info::Handler::Carp;
 
-# $Id: Carp.pm,v 1.1 2002/06/08 07:22:06 david Exp $
+# $Id: Carp.pm,v 1.2 2002/06/10 06:03:06 david Exp $
 
 =head1 NAME
 
@@ -58,7 +58,7 @@ sub new {
 
 sub handler {
     my ($self, $req) = @_;
-    $levels{$level}->($req->error);
+    $levels{level}->($req->error);
     # Return OK to indicate that we've handled the request.
     return App::Info::Handler::OK;
 }
