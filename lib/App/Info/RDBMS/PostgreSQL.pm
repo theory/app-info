@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.8 2002/06/03 18:03:39 david Exp $
+# $Id: PostgreSQL.pm,v 1.9 2002/06/03 18:03:57 david Exp $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my $obj = {};
 my $u = App::Info::Util->new;
