@@ -1,25 +1,29 @@
 package TieOut;
 
-# This module is swiped from ExtUtils::MakeMaker.
+# This module is swiped and adapted from ExtUtils::MakeMaker.
 
-sub TIEHANDLE {
-    bless( \(my $scalar), $_[0]);
-}
+sub TIEHANDLE { bless [], ref $_[0] || $_[0] }
 
 sub PRINT {
     my $self = shift;
-    $$self .= join('', @_);
+    push @$self, join '', @_;
 }
 
 sub PRINTF {
     my $self = shift;
-    my $fmt  = shift;
-    $$self .= sprintf $fmt, @_;
+    push @$self, sprintf @_;
+}
+
+sub READLINE {
+    my $self = shift;
+    return shift @$self;
 }
 
 sub read {
     my $self = shift;
-    return substr($$self, 0, length($$self), '');
+    my $ret = join '', @$self;
+    @$self = ();
+    return $ret;
 }
 
 1;
