@@ -4,6 +4,9 @@ Revision history for Perl extension App::Info.
       - Fixed last Win32 test failure in "apache.t".
       - Added "executable()" method to return the main executable of an app or
         library, if there is one.
+      - Added other executable methods to App::Info::RDBMS::PostgreSQL,
+        including "postgres()", "createdb()", "createuser()", and others.
+        
 
 0.41  2004-11-28T20:01:57
       - Fixed Apache, SQLite, and Iconv tests to pass under Win32.

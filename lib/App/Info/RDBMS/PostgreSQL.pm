@@ -457,7 +457,9 @@ sub patch_version {
     return $self->{patch};
 }
 
-=head3 new
+##############################################################################
+
+=head3 executable
 
   my $exe = $pg->executable;
 
@@ -468,6 +470,8 @@ F<pg_config> only (in C<new()>).
 
 When it called, C<executable()> checks for an executable named F<postgres> in
 the directory returned by C<bin_dir()>.
+
+Note that C<executable()> is simply an alias for C<postgres()>.
 
 B<Events:>
 
@@ -489,35 +493,46 @@ Path to postgres executable?
 
 =cut
 
-sub executable {
-    my $self = shift;
-    # Find postgres.
-    $self->info("Looking for postgres");
+my $find_exe = sub  {
+    my ($self, $key) = @_;
+    my $exe = $key . (WIN32 ? '.exe' : '');
 
-    unless ($self->{executable}) {
+    # Find executable.
+    $self->info("Looking for $key");
+
+    unless ($self->{$key}) {
 	my $bin = $self->bin_dir or return;
-	if (my $exe = $u->first_exe($u->catfile($bin, 'postgres'))) {
+	if (my $exe = $u->first_exe($u->catfile($bin, $exe))) {
 	    # We found it. Confirm.
-	    $self->{executable} = $self->confirm(
-		key      => 'postgres',
-		prompt   => "Path to postgres executable?",
+	    $self->{$key} = $self->confirm(
+		key      => $key,
+		prompt   => "Path to $key executable?",
 		value    => $exe,
 		callback => sub { -x },
 		error    => 'Not an executable'
 	    );
 	} else {
 	    # Handle an unknown value.
-	    $self->{executable} = $self->unknown(
-		key      => 'postgres',
-		prompt   => "Path to postgres executable?",
+	    $self->{$key} = $self->unknown(
+		key      => $key,
+		prompt   => "Path to $key executable?",
 		callback => sub { -x },
 		error    => 'Not an executable'
 	    );
 	}
     }
 
-    return $self->{executable};
+    return $self->{$key};
+};
+
+for my $exe (qw(postgres createdb createlang createuser dropdb droplang
+                dropuser initdb pg_dump pg_dumpall pg_restore postmaster
+		vacuumdb psql)) {
+    no strict 'refs';
+    *{$exe} = sub { shift->$find_exe($exe) };
 }
+
+*executable = \&postgres;
 
 ##############################################################################
 
@@ -865,6 +880,75 @@ sub search_bin_dirs {
          /bin),
       'C:\Program Files\PostgreSQL\bin';
 }
+
+##############################################################################
+
+=head2 Other Executable Methods
+
+These methods function just like the C<executable()> method, except that they
+return different executables. PostgreSQL comes with a fair number of them; we
+provide these methods to provide a path to a subset of them. Each method, when
+called, checks for an executable in the directory returned by C<bin_dir()>.
+
+The available executable methods are:
+
+for my $exe (qw(postgres createdb createlang createuser dropdb droplang
+                dropuser initdb pg_dump pg_dumpall pg_restore postmaster
+		vacuumdb psql)) {
+
+=over
+
+=item postgres
+
+=item createdb
+
+=item createlang
+
+=item createuser
+
+=item dropdb
+
+=item droplang
+
+=item dropuser
+
+=item initdb
+
+=item pg_dump
+
+=item pg_dumpall
+
+=item pg_restore
+
+=item postmaster
+
+=item psql
+
+=item vacuumdb
+
+=back
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for executable
+
+=item confirm
+
+Path to executable?
+
+=item unknown
+
+Path to executable?
+
+=back
+
+=cut
+
+
 
 1;
 __END__
