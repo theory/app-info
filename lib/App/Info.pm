@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.15 2002/06/05 15:32:15 david Exp $
+# $Id: Info.pm,v 1.16 2002/06/05 21:36:15 david Exp $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ App::Info - Information about software packages on a system
 
   use App::Info::Category::FooApp;
 
-  my $app = App::Info::Category::FooApp->new;
+  my $app = App::Info::Category::FooApp->new( error_level => 'fatal' );
 
   if ($app->installed) {
       print "App name: ", $app->name, "\n";
@@ -44,7 +44,16 @@ information on implementing new subclasses.
 use strict;
 use Carp ();
 
-our $VERSION = '0.06';
+our $VERSION = '0.10';
+my %error_levels = ( croak   => sub { Carp::croak(@_) },
+                     carp    => sub { Carp::carp(@_) },
+                     cluck   => sub { Carp::cluck(@_) },
+                     confess => sub { Carp::confess(@_) },
+                     silent  => sub {} );
+
+# A couple of aliases.
+$error_levels{die} = $error_levels{croak};
+$error_levels{warn} = $error_levels{carp};
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -55,12 +64,35 @@ my $croak = sub {
                     " call non-existent method $meth");
     } else {
         Carp::croak("Class $caller inherited from the abstract base class " .
-                    __PACKAGE__ . "but failed to redefine the $meth method. " .
-                    "Attempt to call non-existent method ${caller}::$meth");
+                    __PACKAGE__ . ", but failed to redefine the $meth() " .
+                    "method. Attempt to call non-existent method " .
+                    "${caller}::$meth");
     }
 };
 
-sub new { $croak->(shift, 'new') }
+sub new {
+    my ($pkg, %p) = @_;
+    my $class = ref $pkg || $pkg;
+    # Fail if the method isn't overridden.
+    $croak->($pkg, 'new') if $class eq __PACKAGE__;
+    # Make sure we have an error level.
+    $p{error_level} ||= 'carp';
+    # Do it!
+    return bless \%p, $class;
+}
+
+sub error {
+    my $self = shift;
+    # Sanity check. We really want to keep control over this.
+    Carp::croak("Cannot call protected method error()")
+      unless UNIVERSAL::isa($self, __PACKAGE__);
+    # Do the deed.
+    $error_levels{$self->{error_level}}->(@_);
+    # If we haven't died, save the error.
+    $self->{error} = $_[0];
+}
+
+sub last_error { $_[0]->{error} }
 sub installed { $croak->(shift, 'installed') }
 sub name { $croak->(shift, 'name') }
 sub version { $croak->(shift, 'version') }
@@ -74,7 +106,6 @@ sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
 sub home_url  { $croak->(shift, 'home_url') }
 sub download_url  { $croak->(shift, 'download_url') }
 
-
 1;
 __END__
 
@@ -82,11 +113,54 @@ __END__
 
 =head2 new
 
-  my $app = App::Info::Category::FooApp;
+  my $app = App::Info::Category::FooApp->new;
+  my $app = App::Info::Category::FooApp->new( error_level => 'confess' );
 
-Consructs the FooApp App::Info object.
+Consructs the FooApp App::Info object and returns it. The C<error_level>
+parameter determines how the object will behave when it encounters an error,
+such as when a specific file can't be found or a value can't be parsed from a
+file. The options are:
 
-=head1 OBJECT METHODS
+=over 4
+
+=item confess
+
+Calls C<Carp::confess()>, causing the application to die and display a
+detailed stack trace, as well as the error message.
+
+=item croak
+
+Calls C<Carp::croak()>, causing the application to die and display the error
+message.
+
+=item die
+
+Alias for "croak"
+
+=item cluck
+
+Calls C<Carp::cluck()>, which prints the error message and a complete stack
+trace as a warning.
+
+=item carp
+
+Calls C<Carp::carp()>, which prints the error message as a warning. This is
+the default error level.
+
+=item warn
+
+Alias for "carp".
+
+=item silent
+
+Ignores the error.
+
+=back
+
+In the cases of "cluck", "carp", "warn", and "silent", the last error can
+always be retrieved via the C<last_error()> method.
+
+=head1 PUBLIC OBJECT METHODS
 
 =head2 installed
 
@@ -169,16 +243,85 @@ The URL for the software's home page.
 
 The URL for the software's download page.
 
+=head2 last_error
+
+  my $err = $app->last_error;
+
+Returns the last error encountered by the object. Useful for instances where
+C<error_level> is set to "silent", though in truth it returns the last
+non-fatal error.
+
+=head1 PROTECTED OBJECT METHODS
+
+=head2 error
+
+  my $version = parse_version();
+  $self->error("Unable to parse version number") unless $version;
+
+The C<error()> method should be considered the sole method for alerting the
+clients of App::Info subclasses that an error was encountered. Think of it as
+a substitute for C<Carp::warn> (serious exceptions can use C<Carp::croak()>,
+instead. Using the C<error()> method allows App::Info subclass clients to
+handle the errors in any of several ways. See the description the L<new|"new">
+method above to see how clients can manage error levels. Do not assume that
+errors will be fatal. See L<Notes on Sublcassing|"NOTES ON SUBCLASSING"> below
+for more on subclassing App::Info. The C<error()> method is a protected
+method and therefore cannot be used by client libraries.
+
 =head1 NOTES ON SUBCLASSING
 
-wThe organizational idea behind App::Info is to name subclasses by broad
+The organizational idea behind App::Info is to name subclasses by broad
 software categories. This approach allows the categories to function as
 abstract base classes that extend App::Info, so that they can specify more
 methods for all of their base classes to implement. For example,
 L<App::Info::HTTPD> has specified the C<httpd_root()> abstract method that its
 subclasses must implement. So as you get ready to implement your own subclass,
-think about what category of software you're gathering information about. New
-categories can be added as needed.
+think about what category of software you're gathering information about.
+
+Here are some guidelines for subclassing App::Info.
+
+=over 4
+
+=item *
+
+Always subclass an App::Info category subclass. This will help to keep the
+App::Info namespace well-organized. New categories can be added as needed.
+
+=item *
+
+When you create the new() constructor, always call SUPER::new(). This ensures
+that the methods handle by the App::Info base classes (e.g., C<error()>) work
+properly.
+
+=item *
+
+Use a package-scoped lexical App::Info::Util object to carry out common tasks.
+If you find you're doing something over and over that's not already addressed
+by an App::Info::Util method, consider submitting a patch to App::Info::Util
+to add the functionality you need. See L<App::Info::Util|App::Info::Util> for
+complete documentation of its interface.
+
+=item *
+
+Use the C<error()> method to report problems to clients of your App::Info
+subclass. Doing so ensures that all problems encountered in interrogating
+software package can be reported to and handled by client users in a uniform
+manner. Furthermore, don't assume that calling C<error()> causes the program
+to exit or to return from method execution. Clients can choose to ignore
+errors by using the "silent" C<error_level>. Of course, fatal problem should
+still be fatal, but non-fatal issues -- such as when an important file cannot
+be found, resulting in less metadata being provided by the App::Info object --
+should be noted by use of the C<error()> method exclusively.
+
+=item *
+
+Be sure to implement B<all> of the abstract methods defined by your category
+abstract base class -- even if they don't do anything. Doing so ensures that
+all App::Info subclasses share a common interface, and can, if necessary, be
+used without regard to subclass. Any method not implemented but called on an
+object will generate a fatal exception.
+
+=back
 
 Feel free to use the subclasses included in this distribution as examples to
 follow when creating your own subclasses. I've tried to encapsulate common
@@ -193,22 +336,6 @@ values found in those files. See L<App::Info::Util|App::Info::Util> for more
 information, and the App::Info subclasses in this distribution for actual
 usage examples.
 
-To save resources as much as possible, I recommend implementing the App::Info
-subclasses as singleton objects. The reason for this is that the information
-about a software package is unlikely to change during the execution of a
-program. More likely, if the relevant information about software packages
-cannot be found or does not meet immediate needs, a program using App:Info
-will tell the user to install or upgrade the software and then exit. Once the
-software has been installed or upgraded, the program will be run again. This
-makes sense given App::Info's target of assisting installation programs to
-determine dependencies; they only need to verify those dependencies once.
-
-Please also be sure to implement B<all> of the abstract methods defined by
-your abstract base class -- even if they don't do anything. Doing so ensures
-that all App::Info subclasses share a common interface, and can, if necessary,
-be used without regard to subclass. Any method not implemented but called on
-an object will generate an exception.
-
 Otherwise, have fun! There are a lot of software packages for which relevant
 information might be collected and aggregated into an App::Info subclass
 (witness all of the Automake macros in the world!), and folks who are
@@ -219,20 +346,6 @@ when necessary, on a single software package. Broader categories can then be
 aggregated in Bundle distributions.
 
 But I get ahead of myself...
-
-=head1 TO DO
-
-=over 4
-
-=item *
-
-Make warnings optional (and off by default).
-
-=item *
-
-Allow warnings to be exceptions, instead.
-
-=back
 
 =head1 BUGS
 
