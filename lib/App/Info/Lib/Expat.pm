@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.7 2002/06/03 01:58:09 david Exp $
+# $Id: Expat.pm,v 1.8 2002/06/03 02:36:43 david Exp $
 
 =head1 NAME
 
@@ -118,8 +118,8 @@ sub name { 'Expat' }
 
 Returns the full version number for Expat. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. Returns undef if Expat is
-not installed. Emits a warning if Expat is installed but the version number
-could not be parsed.
+not installed. Emits a warning if Expat is installed but F<expat.h> could not
+be found or the version number could not be parsed.
 
 =cut
 
@@ -153,8 +153,8 @@ sub version {
 Returns the Expat major version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
 "1.95.2", then this method returns "1". Returns undef if Expat is not
-installed. Emits a warning if Expat is installed but the version number could
-not be parsed.
+installed. Emits a warning if Expat is installed but F<expat.h> could not be
+found or the version number could not be parsed.
 
 =cut
 
@@ -170,8 +170,8 @@ sub major_version {
 Returns the Expat minor version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
 "1.95.2", then this method returns "95". Returns undef if Expat is not
-installed. Emits a warning if Expat is installed but the version number could
-not be parsed.
+installed. Emits a warning if Expat is installed but F<expat.h> could not be
+found or the version number could not be parsed.
 
 =cut
 
@@ -187,8 +187,8 @@ sub minor_version {
 Returns the Expat patch version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
 "1.95.2", then this method returns "2". Returns undef if Expat is not
-installed. Emits a warning if Expat is installed but the version number could
-not be parsed.
+installed. Emits a warning if Expat is installed but F<expat.h> could not be
+found or the version number could not be parsed.
 
 =cut
 
