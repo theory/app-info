@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.16 2002/06/05 21:36:15 david Exp $
+# $Id: Info.pm,v 1.17 2002/06/05 21:36:40 david Exp $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ App::Info - Information about software packages on a system
 
   use App::Info::Category::FooApp;
 
-  my $app = App::Info::Category::FooApp->new( error_level => 'fatal' );
+  my $app = App::Info::Category::FooApp->new( error_level => 'croak' );
 
   if ($app->installed) {
       print "App name: ", $app->name, "\n";
