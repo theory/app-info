@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.22 2002/08/08 19:19:18 david Exp $
+# $Id: PostgreSQL.pm,v 1.23 2003/08/11 23:25:35 david Exp $
 
 =head1 NAME
 
@@ -71,6 +71,10 @@ directories:
 
 =over 4
 
+=item $ENV{POSTGRES_HOME}/bin
+
+=item $ENV{POSTGRES_LIB}/../bin
+
 =item /usr/local/pgsql/bin
 
 =item /usr/local/postgres/bin
@@ -124,6 +128,9 @@ sub new {
          /usr/bin
          /usr/sbin
          /bin));
+
+    unshift @paths, "$ENV{POSTGRES_HOME}/bin" if exists $ENV{POSTGRES_HOME};
+    unshift @paths, "$ENV{POSTGRES_LIB}/../bin" if exists $ENV{POSTGRES_LIB};
 
     if (my $cfg = $u->first_cat_exe('pg_config', @paths)) {
         # We found it. Confirm.
