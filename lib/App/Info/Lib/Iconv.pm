@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.20 2002/06/21 04:38:03 david Exp $
+# $Id: Iconv.pm,v 1.21 2002/06/27 18:46:21 david Exp $
 
 =head1 NAME
 
@@ -124,16 +124,19 @@ sub new {
 
     if (my $exe = $u->first_cat_exe('iconv', @paths)) {
         # We found it. Confirm.
-        $self->{iconv_exe} = $self->confirm('iconv_exe',
-                                            'Path to iconv executable?',
-                                            $exe,  sub { -x },
-                                            'Not an executable');
+        $self->{iconv_exe} =
+          $self->confirm( key      => 'iconv_exe',
+                          prompt   => 'Path to iconv executable?',
+                          value    => $exe,
+                          callback => sub { -x },
+                          error    => 'Not an executable');
     } else {
         # No luck. Ask 'em for it.
-        $self->{iconv_exe} = $self->unknown('iconv_exe',
-                                            'Path to iconv executable?',
-                                            sub { -x },
-                                            'Not an executable');
+        $self->{iconv_exe} =
+          $self->unknown( key      => 'iconv_exe',
+                          prompt   => 'Path to iconv executable?',
+                          callback => sub { -x },
+                          error    => 'Not an executable');
     }
 
     return $self;
@@ -272,8 +275,8 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} =
-          $self->unknown('version number', undef, $chk_version);
+        $self->{version} = $self->unknown( key      => 'version number',
+                                           callback => $chk_version);
     }
 
     return $self->{version};
@@ -329,7 +332,8 @@ sub major_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{major} = $self->unknown('major version number', undef, $is_int)
+    $self->{major} = $self->unknown( key      => 'major version number',
+                                     callback => $is_int)
       unless $self->{major};
 
     return $self->{major};
@@ -381,7 +385,8 @@ sub minor_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
+    $self->{minor} = $self->unknown( key      => 'minor version number',
+                                     callback => $is_int)
       unless $self->{minor};
 
     return $self->{minor};
@@ -443,8 +448,8 @@ sub bin_dir {
             # We found it!
             $self->{bin_dir} = $bin;
         } else {
-            $self->{bin_dir} =
-              $self->unknown('bin directory', undef, $is_dir);
+            $self->{bin_dir} = $self->unknown( key      => 'bin directory',
+                                               callback => $is_dir);
         }
     }
     return $self->{bin_dir};
@@ -503,10 +508,12 @@ sub inc_dir {
             $self->{inc_dir} = $dir;
         } else {
             $self->error("Cannot find include directory");
+            my $cb = sub { $u->first_cat_dir('iconv.h', $_) };
             $self->{inc_dir} =
-              $self->unknown('include directory', undef,
-                             sub { $u->first_cat_dir('iconv.h', $_) },
-                             "File 'iconv.h' not found in directory");
+              $self->unknown( key      => 'include directory',
+                              callback => $cb,
+                              error    => "File 'iconv.h' not found in " .
+                                          "directory");
 
         }
     }
@@ -597,10 +604,12 @@ sub lib_dir {
             $self->{lib_dir} = $dir;
         } else {
             $self->error("Cannot not find library direcory");
+            my $cb = sub { $u->first_cat_dir(\@files, $_) };
             $self->{lib_dir} =
-              $self->unknown('library directory', undef,
-                             sub { $u->first_cat_dir(\@files, $_) },
-                             "Library files not found in directory");
+              $self->unknown( key      => 'library directory',
+                              callback => $cb,
+                              error    => "Library files not found in " .
+                                          "directory");
         }
     }
     return $self->{lib_dir};
@@ -685,10 +694,12 @@ sub so_lib_dir {
             $self->{so_lib_dir} = $dir;
         } else {
             $self->error("Cannot find shared object library directory");
+            my $cb = sub { $u->first_cat_dir(\@files, $_) };
             $self->{so_lib_dir} =
-              $self->unknown('shared object library directory', undef,
-                             sub { $u->first_cat_dir(\@files, $_) },
-                             "Shared object libraries not found in directory");
+              $self->unknown( key      => 'shared object library directory',
+                              callback => $cb,
+                              error    => "Shared object libraries not " .
+                                          "found in directory");
         }
     }
     return $self->{so_lib_dir};

@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.17 2002/06/21 04:38:03 david Exp $
+# $Id: PostgreSQL.pm,v 1.18 2002/06/27 18:46:21 david Exp $
 
 =head1 NAME
 
@@ -127,16 +127,17 @@ sub new {
 
     if (my $cfg = $u->first_cat_exe('pg_config', @paths)) {
         # We found it. Confirm.
-        $self->{pg_config} = $self->confirm('pg_config',
-                                            'Path to pg_config?',
-                                            $cfg, sub { -x },
-                                            'Not an executable');
+        $self->{pg_config} = $self->confirm( key      => 'pg_config',
+                                             prompt   => 'Path to pg_config?',
+                                             value    => $cfg,
+                                             callback => sub { -x },
+                                             error    => 'Not an executable');
     } else {
         # Handle an unknown value.
-        $self->{pg_config} = $self->unknown('pg_config',
-                                            'Path to pg_config?',
-                                            sub { -x },
-                                            'Not an executable');
+        $self->{pg_config} = $self->unknown( key      => 'pg_config',
+                                             prompt   => 'Path to pg_config?',
+                                             callback => sub { -x },
+                                             error    => 'Not an executable');
     }
 
     return $self;
@@ -263,7 +264,7 @@ sub name {
     $get_version->($self) unless $self->{'--version'};
 
     # Handle an unknown name.
-    $self->{name} = $self->unknown('name') unless $self->{name};
+    $self->{name} ||= $self->unknown( key => 'name' );
 
     # Return the name.
     return $self->{name};
@@ -324,8 +325,8 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} =
-          $self->unknown('version number', undef, $chk_version);
+        $self->{version} = $self->unknown( key      => 'version number',
+                                           callback => $chk_version);
     }
 
     return $self->{version};
@@ -377,7 +378,8 @@ sub major_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{major} = $self->unknown('major version number', undef, $is_int)
+    $self->{major} = $self->unknown( key      => 'major version number',
+                                     callback => $is_int)
       unless $self->{major};
     return $self->{major};
 }
@@ -424,7 +426,8 @@ sub minor_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
+    $self->{minor} = $self->unknown( key      => 'minor version number',
+                                     callback => $is_int)
       unless defined $self->{minor};
     return $self->{minor};
 }
@@ -471,7 +474,8 @@ sub patch_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown('patch version number', undef, $is_int)
+    $self->{patch} = $self->unknown( key      => 'patch version number',
+                                     callback => $is_int)
       unless defined $self->{patch};
     return $self->{patch};
 }
@@ -518,7 +522,8 @@ sub bin_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find bin directory");
-            $self->{bin_dir} = $self->unknown('bin directory', undef, $is_dir)
+            $self->{bin_dir} = $self->unknown( key      => 'bin directory',
+                                               callback => $is_dir)
         }
     }
 
@@ -563,7 +568,8 @@ sub inc_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find include directory");
-            $self->{inc_dir} = $self->unknown('include directory', undef, $is_dir)
+            $self->{inc_dir} = $self->unknown( key      => 'include directory',
+                                               callback => $is_dir)
         }
     }
 
@@ -608,7 +614,8 @@ sub lib_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find library directory");
-            $self->{lib_dir} = $self->unknown('library directory', undef, $is_dir)
+            $self->{lib_dir} = $self->unknown( key      => 'library directory',
+                                               callback => $is_dir)
         }
     }
 
@@ -656,7 +663,8 @@ sub so_lib_dir {
             # Handle an unknown value.
             $self->error("Cannot find shared object library directory");
             $self->{so_lib_dir} =
-              $self->unknown('shared object library directory', undef, $is_dir)
+              $self->unknown( key      => 'shared object library directory',
+                              callback => $is_dir)
         }
     }
 
