@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.2 2002/06/12 00:48:43 david Exp $
+# $Id: Request.pm,v 1.3 2002/06/13 22:09:09 david Exp $
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ App::Info::Handler - App::Info error and null value handler base class
           # We got a null value. Handle null calls stack of handlers.
           $self->{exe_loc} = $self->null
             ({ message => "Cannot find exe",
-               prompt => "Where is exe?",
+               error => "Where is exe?",
                sigil  => '$',
                callback => \&is_exe
             });
@@ -102,7 +102,7 @@ sub new {
 }
 
 sub message { $_[0]->{message} }
-sub prompt { $_[0]->{prompt} }
+sub error { $_[0]->{error} }
 sub sigil { $_[0]->{sigil} }
 sub type { $_[0]->{type} }
 

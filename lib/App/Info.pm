@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.25 2002/06/12 18:18:58 david Exp $
+# $Id: Info.pm,v 1.26 2002/06/13 22:09:09 david Exp $
 
 =head1 NAME
 
@@ -159,14 +159,19 @@ sub on_unknown {
 }
 
 sub unknown {
-    my ($self, $key, $cb, $sigil) = @_;
-    # Get the software package key name.
-    my $name = $self->key_name;
+    my ($self, $key, $prompt, $cb, $err, $sigil) = @_;
+
+    # Create a prompt, if necessary.
+    unless ($prompt) {
+        my $name = $self->key_name;
+        $prompt = "Enter a valid $name $key";
+    }
+    $err ||= 'Invalid value';
+
     # Prepare the request arguments.
-    # Note: Add Local::Maketext support here.
-    my $params = { message => "Could not determine $name $key",
-                   prompt  => "Please enter a valid $name $key",
-                   sigil   => $sigil,
+    my $params = { message  => $prompt,
+                   error    => $err,
+                   sigil    => $sigil,
                    callback => $cb };
 
     # Execute the handler sequence.
@@ -181,18 +186,22 @@ sub on_confirm {
 }
 
 sub confirm {
-    my ($self, $key, $val, $cb, $sigil) = @_;
+    my ($self, $key, $prompt, $val, $cb, $err, $sigil) = @_;
     # Just return the value if we've already confirmed this value.
-    return $val if $self->{"_conf_$key"};
+    return $val if $self->{__confirm__}{$key};
 
-    # Get the software package key name.
-    my $name = $self->key_name;
+    # Create a prompt, if necessary.
+    unless ($prompt) {
+        my $name = $self->key_name;
+        $prompt = "Enter a valid $name $key";
+    }
+    $err ||= 'Invalid value';
+
     # Prepare the request arguments.
-    # Note: Add Local::Maketext support here.
-    my $params = { message => "Found $name $key value '$val'",
-                   prompt  => "Is this correct?",
-                   value   => $val,
-                   sigil   => $sigil,
+    my $params = { message  => $prompt,
+                   error    => $err,
+                   value    => $val,
+                   sigil    => $sigil,
                    callback => $cb };
 
     # Execute the handler sequence.

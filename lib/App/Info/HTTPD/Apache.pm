@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.27 2002/06/12 18:18:58 david Exp $
+# $Id: Apache.pm,v 1.28 2002/06/13 22:09:09 david Exp $
 
 =head1 NAME
 
@@ -116,11 +116,13 @@ sub new {
 
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
-        $self->{binary} = $self->confirm('binary', $exe, sub { -x $_[0] });
+        $self->{binary} = $self->confirm('binary', 'Path to your httpd binary?',
+                                         $exe, sub { -x $_[0] },
+                                         'Not an executable');
     } else {
         # Handle an unknown value.
-        $self->{binary} = $self->unknown('binary', sub { -x $_[0] })
-          unless $self->{binary};
+        $self->{binary} = $self->unknown('binary', 'Path to your httpd binary?',
+                                         sub { -x $_[0] });
     }
     return $self;
 };

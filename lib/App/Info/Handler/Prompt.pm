@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.3 2002/06/12 21:17:09 david Exp $
+# $Id: Prompt.pm,v 1.4 2002/06/13 22:09:09 david Exp $
 
 =head1 NAME
 
@@ -64,49 +64,21 @@ sub handler {
     my ($self, $req) = @_;
     my $ans;
     my $type = $req->type;
-    if ($type eq 'unknown') {
+    if ($type eq 'unknown' || $type eq 'confirm') {
         # We'll want to prompt for a new value.
-        my $msg = $req->message;
-        my $prompt = $req->prompt;
-        if ($msg) {
-            $msg .= $prompt ? "\n$prompt " : ' ';
-        } else {
-            $msg = $prompt ? "$prompt " : ' ';
-        }
+        my $val = $req->value;
+        my ($def, $dispdef) = defined $val ? ($val, " [$val] ") : ('', ' ');
+        my $msg = $req->message or Carp::croak("No message in request");
+        $msg .= $dispdef;
+
         # Get the answer.
-        $ans = $get_ans->($msg, $self->{tty});
+        $ans = $get_ans->($msg, $self->{tty}, $def);
 
         # Validate the answer.
+        my $err = $req->error;
         while (!$req->callback($ans)) {
-            print "Invalid value: '$ans'\n";
+            print "$err: '$ans'\n";
             $ans = $get_ans->($msg, $self->{tty});
-        }
-
-    } elsif ($type eq 'confirm') {
-
-        # We'll want to prompt for a new value.
-        my $msg = $req->message;
-        my $prompt = $req->prompt;
-        if ($msg) {
-            $msg .= $prompt ? "\n$prompt " : ' ';
-        } else {
-            $msg = $prompt ? "$prompt " : ' ';
-        }
-        $msg .= '[y] ';
-
-        # Get the answer.
-        my $bool = lc substr $get_ans->($msg, $self->{tty}, 'y'), 0, 1;
-        if ($bool eq 'y') {
-            $ans = $req->value;
-        } else {
-            # Get the answer.
-            $ans = $get_ans->("Enter a new value ", $self->{tty});
-
-            # Validate the answer.
-            while (!$req->callback($ans)) {
-                print "Invalid value: '$ans'\n";
-                $ans = $get_ans->("Enter a new value ", $self->{tty});
-            }
         }
 
     } elsif ($type eq 'info') {

@@ -1,7 +1,12 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.4 2002/06/13 02:32:09 david Exp $
+# $Id: prompt.t,v 1.5 2002/06/13 22:09:09 david Exp $
 
+use strict;
+use Test::More tests => 27;
+use File::Spec::Functions qw(:ALL);
+
+##############################################################################
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
     if( $ENV{PERL_CORE} ) {
@@ -12,26 +17,34 @@ BEGIN {
     }
 }
 chdir 't';
-
-use strict;
-use Test::More tests => 18;
 use TieOut;
-use File::Spec::Functions qw(:ALL);
 
-
+##############################################################################
 # Set up an App::Info subclass to ruin.
 package App::Info::Category::FooApp;
-use App::Info;
 use strict;
+use App::Info;
+use File::Spec::Functions qw(:ALL);
 use vars qw(@ISA);
 @ISA = qw(App::Info);
 sub key_name { 'FooApp' }
+my $tmpdir = tmpdir;
 
-sub inc_dir { shift->unknown('binary', sub { -e $_[0] }) }
-sub lib_dir { shift->confirm('executable', '/bin/sh', sub { -x $_[0] }) }
+sub inc_dir { shift->unknown('bin', 'Path to tmpdir', sub { -d $_[0] },
+                             'Not a valid directory'), }
+sub lib_dir { shift->confirm('bin', 'Path to tmpdir', $tmpdir, sub { -d $_[0] },
+                             'Not a valid directory') }
 sub patch { shift->info("Info message" ) }
 sub major { shift->error("Error message" ) }
+sub minor { shift->unknown('minor version number') }
+sub version { shift->unknown('version number', undef,
+                             sub { $_[0] =~ /^\d+$/ } )}
 
+sub so_lib_dir { shift->confirm('shared object directory', undef, '/foo33') }
+sub name { shift->confirm('name', undef, 'ick', sub { $_[0] !~ /\d/ }) }
+
+##############################################################################
+# Set up the tests.
 package main;
 
 BEGIN { use_ok('App::Info::Handler::Prompt') }
@@ -44,57 +57,108 @@ ok( my $app = App::Info::Category::FooApp->new( on_unknown => $p),
 my $stdout = tie *STDOUT, 'TieOut' or die "Cannot tie STDOUT: $!\n";
 my $stdin = tie *STDIN, 'TieOut' or die "Cannot tie STDIN: $!\n";
 
+##############################################################################
 # Set up a couple of answers.
 print STDIN 'foo3424324';
-print STDIN tmpdir;
+print STDIN $tmpdir;
 # Trigger the unknown handler.
 my $dir = $app->inc_dir;
 
 # Check the result and the output.
-is( $dir, tmpdir, "Got tmpdir" );
-my $expected = qq{Could not determine FooApp binary
-Please enter a valid FooApp binary Invalid value: 'foo3424324'
-Could not determine FooApp binary
-Please enter a valid FooApp binary };
+is( $dir, $tmpdir, "Got tmpdir from inc_dir" );
+my $expected = qq{Path to tmpdir Not a valid directory: 'foo3424324'
+Path to tmpdir };
 is ($stdout->read, $expected, "Check unknown prompt" );
 
+##############################################################################
 # Okay, now we'll test the confirm handler.
 ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
     "Set up for first confirm" );
 
 # Start with an affimative answer.
-print STDIN "yes\n";
-my $sh = $app->lib_dir;
-is($sh, '/bin/sh', "Got /bin/sh" );
-$expected = qq{Found FooApp executable value '/bin/sh'
-Is this correct? [y] };
+print STDIN "\n";
+$dir = $app->lib_dir;
+is($dir, $tmpdir, "Got tmpdir from lib_dir" );
+$expected = qq{Path to tmpdir [$tmpdir] };
 is( $stdout->read, $expected, "Check first confirm prompt" );
 
-# Now try the default answer (which is affirmative).
-ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
-    "Set up for second confirm" );
-print STDIN "\n";
-$sh = $app->lib_dir;
-is($sh, '/bin/sh', "Got /bin/sh" );
-is( $stdout->read, $expected, "Check second confirm prompt" );
-
-# Now try a negative answer.
+##############################################################################
+# Now try an alternate answer.
 ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
     "Set up for second confirm" );
 # Set up the answers.
-print STDIN "no\n";
 print STDIN "foo123123\n";
-print STDIN "/bin/sh\n";
+print STDIN "$tmpdir\n";
 # Set it off.
-$sh = $app->lib_dir;
+$dir = $app->lib_dir;
 # Check the answer.
-is($sh, '/bin/sh', "Got /bin/sh" );
+is($dir, $tmpdir, "Got tmpdir from second confirm" );
 # Check the output.
-$expected = qq{Found FooApp executable value '/bin/sh'
-Is this correct? [y] Enter a new value Invalid value: 'foo123123'
-Enter a new value };
-is( $stdout->read, $expected, "Check third confirm prompt" );
+$expected = qq{Path to tmpdir [$tmpdir] Not a valid directory: 'foo123123'
+Path to tmpdir [$tmpdir] };
+is( $stdout->read, $expected, "Check second confirm prompt" );
 
+##############################################################################
+# Now test just a key argument to unknown
+ok( $app = App::Info::Category::FooApp->new( on_unknown => $p),
+    "Set up for key argument" );
+# Set up the answer.
+print STDIN "$tmpdir\n";
+# Set it off.
+$app->minor;
+# Check the answer.
+is($dir, $tmpdir, "Got tmpdir from key argument" );
+# Check the output.
+$expected = qq{Enter a valid FooApp minor version number };
+is( $stdout->read, $expected, "Check key argument prompt" );
+
+##############################################################################
+# Now test key argument with callback to unknown.
+ok( $app = App::Info::Category::FooApp->new( on_unknown => $p),
+    "Set up for key with callback");
+# Set up the answers.
+print STDIN "foo\n";
+print STDIN "22";
+# Set it off.
+my $ver = $app->version;
+# Check the answer.
+is($ver, 22, "Got 22 from version" );
+# Check the output.
+$expected = qq{Enter a valid FooApp version number Invalid value: 'foo'
+Enter a valid FooApp version number };
+is( $stdout->read, $expected, "Check key with callback prompt" );
+
+##############################################################################
+# Now test just a key argument to confirm
+ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
+    "Set up for key argument" );
+# Set up the answer.
+print STDIN "$tmpdir\n";
+# Set it off.
+$app->so_lib_dir;
+# Check the answer.
+is($dir, $tmpdir, "Got tmpdir from key argument" );
+# Check the output.
+$expected = qq{Enter a valid FooApp shared object directory [/foo33] };
+is( $stdout->read, $expected, "Check confirm key argument prompt" );
+
+##############################################################################
+# Now test key argument with callback to confirm.
+ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
+    "Set up for key with callback");
+# Set up the answers.
+print STDIN "foo22\n";
+print STDIN "foo";
+# Set it off.
+$ver = $app->name;
+# Check the answer.
+is($ver, 'foo', "Got 'foo' from name" );
+# Check the output.
+$expected = qq{Enter a valid FooApp name [ick] Invalid value: 'foo22'
+Enter a valid FooApp name [ick] };
+is( $stdout->read, $expected, "Check confirm key with callback prompt" );
+
+##############################################################################
 # Now check how it handles info and error. These should just print to the
 # relevant file handle. Info prints to STDOUT.
 ok( $app = App::Info::Category::FooApp->new( on_info => $p),
@@ -109,6 +173,8 @@ ok( $app = App::Info::Category::FooApp->new( on_error => $p),
 $app->major;
 is( $stderr->read, "Error message\n", "Check error message" );
 
+##############################################################################
+# Clean up our mess.
 undef $stdout;
 undef $stdin;
 undef $stderr;
@@ -116,6 +182,8 @@ untie *STDOUT;
 untie *STDIN;
 untie *STDERR;
 
+##############################################################################
+# Interactive tests for maintainer.
 if ($ENV{APP_INFO_MAINTAINER} && ! $ENV{HARNESS_ACTIVE}) {
     # Interactive tests for maintainer only.
     $app = App::Info::Category::FooApp->new( on_confirm => $p);
