@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.14 2002/06/05 04:42:33 david Exp $
+# $Id: Info.pm,v 1.15 2002/06/05 15:32:15 david Exp $
 
 =head1 NAME
 
@@ -60,22 +60,7 @@ my $croak = sub {
     }
 };
 
-=begin comment
-
-Define two flags: "prompt" and "verbosity" (find a better word for the
-latter.
-
-For verbosity, there's "die", "warn", and "silent".
-
-For prompt, it's "all", "unknown", "critical", and "none"
-
-=end comment
-
-=cut
-
 sub new { $croak->(shift, 'new') }
-
-
 sub installed { $croak->(shift, 'installed') }
 sub name { $croak->(shift, 'name') }
 sub version { $croak->(shift, 'version') }
