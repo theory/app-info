@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.10 2002/06/03 18:11:21 david Exp $
+# $Id: Expat.pm,v 1.11 2002/06/03 23:55:40 david Exp $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -115,8 +115,8 @@ sub installed { $_[0]->{libexpat} ? 1 : undef }
 
   my $name = $expat->name;
 
-Returns the name of the application. In this case, C<name()> simply returns the
-string "Expat".
+Returns the name of the application. In this case, C<name()> simply returns
+the string "Expat".
 
 =cut
 
@@ -125,9 +125,9 @@ sub name { 'Expat' }
 =head2 version
 
 Returns the full version number for Expat. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. Returns undef if Expat is
-not installed. Emits a warning if Expat is installed but F<expat.h> could not
-be found or the version number could not be parsed.
+version number from the expat.h file, if it exists. Returns F<undef> if Expat
+is not installed. Emits a warning if Expat is installed but F<expat.h> could
+not be found or the version number could not be parsed.
 
 =cut
 
@@ -160,7 +160,7 @@ sub version {
 
 Returns the Expat major version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "1". Returns undef if Expat is not
+"1.95.2", then this method returns "1". Returns F<undef> if Expat is not
 installed. Emits a warning if Expat is installed but F<expat.h> could not be
 found or the version number could not be parsed.
 
@@ -177,7 +177,7 @@ sub major_version {
 
 Returns the Expat minor version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "95". Returns undef if Expat is not
+"1.95.2", then this method returns "95". Returns F<undef> if Expat is not
 installed. Emits a warning if Expat is installed but F<expat.h> could not be
 found or the version number could not be parsed.
 
@@ -194,7 +194,7 @@ sub minor_version {
 
 Returns the Expat patch version number. App::Info::Lib::Expat parses the
 version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "2". Returns undef if Expat is not
+"1.95.2", then this method returns "2". Returns F<undef> if Expat is not
 installed. Emits a warning if Expat is installed but F<expat.h> could not be
 found or the version number could not be parsed.
 
@@ -220,7 +220,7 @@ sub bin_dir { return }
   my $inc_dir = $expat->inc_dir;
 
 Returns the directory path in which the file F<expat.h> was found. Returns
-undef if Expat is not installed, or if F<expat.h> could not be found.
+F<undef> if Expat is not installed, or if F<expat.h> could not be found.
 App::Info::Lib::Expat searches for F<expat.h> in the following directories:
 
 =over 4

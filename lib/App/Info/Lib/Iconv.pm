@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.10 2002/06/03 18:26:57 david Exp $
+# $Id: Iconv.pm,v 1.11 2002/06/03 23:56:38 david Exp $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -127,9 +127,9 @@ sub name { 'libiconv' }
   my $version = $iconv->version;
 
 Returns the full version number for libiconv. App::Info::Lib::Iconv parses the
-version number from the iconv.h file, if it exists. Returns undef if Iconv is
-not installed. Emits a warning if Iconv is installed but F<iconv.h> could not
-be found or the version number could not be parsed.
+version number from the iconv.h file, if it exists. Returns C<undef> if Iconv
+is not installed. Emits a warning if Iconv is installed but F<iconv.h> could
+not be found or the version number could not be parsed.
 
 =cut
 
@@ -162,9 +162,9 @@ sub version {
 
 Returns the Iconv major version number. App::Info::Lib::Iconv parses the
 version number from the iconv.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "1". Returns undef if Iconv is not
-installed. Emits a warning if Iconv is installed but F<iconv.h> could not
-be found or the version number could not be parsed.
+"1.95.2", then this method returns "1". Returns C<undef> if Iconv is not
+installed. Emits a warning if Iconv is installed but F<iconv.h> could not be
+found or the version number could not be parsed.
 
 =cut
 
@@ -179,7 +179,7 @@ sub major_version {
 
 Returns the Iconv minor version number. App::Info::Lib::Iconv parses the
 version number from the iconv.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "95". Returns undef if Iconv is not
+"1.95.2", then this method returns "95". Returns C<undef> if Iconv is not
 installed. Emits a warning if Iconv is installed but F<iconv.h> could not be
 found or the version number could not be parsed.
 
@@ -206,7 +206,7 @@ sub patch_version {}
   my $bin_dir = $iconv->bin_dir;
 
 Returns the path of the directory in which the F<iconv> application was found.
-Returns undef if libiconv is not installed.
+Returns C<undef> if libiconv is not installed.
 
 =cut
 
@@ -223,7 +223,7 @@ sub bin_dir {
   my $inc_dir = $iconv->inc_dir;
 
 Returns the directory path in which the file F<iconv.h> was found. Returns
-undef if libiconv is not installed, or if F<iconv.h> could not be found.
+C<undef> if libiconv is not installed, or if F<iconv.h> could not be found.
 App::Info::Lib::Iconv searches for F<iconv.h> in the following directories:
 
 =over 4
@@ -257,8 +257,8 @@ sub inc_dir {
   my $lib_dir = $iconv->lib_dir;
 
 Returns the directory path in which a libiconv library was found. Returns
-undef if libiconv is not installed, or if no libiconv library could be found.
-App::Info::Lib::Iconv searches for these files:
+C<undef> if libiconv is not installed, or if no libiconv library could be
+found. App::Info::Lib::Iconv searches for these files:
 
 =over 4
 
@@ -321,7 +321,7 @@ sub lib_dir {
   my $so_lib_dir = $iconv->so_lib_dir;
 
 Returns the directory path in which a libiconv shared object library was
-found. Returns undef if libiconv is not installed, or if no libiconv shared
+found. Returns C<undef> if libiconv is not installed, or if no libiconv shared
 object library could be found. App::Info::Lib::Iconv searches for these files:
 
 =over 4
