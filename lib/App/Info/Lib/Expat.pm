@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.8 2002/06/03 02:36:43 david Exp $
+# $Id: Expat.pm,v 1.9 2002/06/03 16:04:22 david Exp $
 
 =head1 NAME
 
@@ -26,9 +26,10 @@ App::Info::Lib::Expat supplies information about the Expat XML parser
 installed on the local system. It implements all of the methods defined by
 App::Info::Lib.
 
-When it loads, App::Info::Lib::Expat searches all of the paths in
-the C<libsdirs> and C<loclibpth> -- as defined by the Perl L<Config|Config>
-module -- for one of the following files:
+When it loads, App::Info::Lib::Expat searches all of the paths in the
+C<libsdirs> and C<loclibpth> -- as defined by the Perl L<Config|Config> module
+-- plus F</sw/lib> (in support of all you Fink users out there) for one of the
+following files:n
 
 =over 4
 
@@ -37,6 +38,12 @@ module -- for one of the following files:
 =item libexpat.so.0
 
 =item libexpat.so.0.0.1
+
+=item libexpat.dylib
+
+=item libexpat.0.dylib
+
+=item libexpat.0.0.1.dylib
 
 =item libexpat.a
 
@@ -54,7 +61,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -63,10 +70,11 @@ do {
     # Find libexpat.
     my @paths = grep { defined and length }
       ( split(' ', $Config{libsdirs}),
-        split(' ', $Config{loclibpth}) );
-    push @paths, '/sw/lib';
+        split(' ', $Config{loclibpth}),
+        '/sw/lib' );
 
     my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
+                "libexpat.dylib", "libexpat.0.dylib", "libexpat.0.0.1.dylib",
                 "libexpat.a", "libexpat.la"];
 
     $obj->{libexpat} = $u->first_cat_dir($libs, @paths);
@@ -258,7 +266,8 @@ sub lib_dir { $_[0]->{libexpat} }
 
 Returns the directory path in which a Expat shared object library was found.
 It searches all of the paths in the C<libsdirs> and C<loclibpth> -- as defined
-by the Perl L<Config|Config> module -- for one of the following files:
+by the Perl L<Config|Config> module -- plus F</sw/lib> (for all you Fink fans)
+for one of the following files:
 
 =over
 
@@ -267,6 +276,12 @@ by the Perl L<Config|Config> module -- for one of the following files:
 =item libexpat.so.0
 
 =item libexpat.so.0.0.1
+
+=item libexpat.dylib
+
+=item libexpat.0.dylib
+
+=item libexpat.0.0.1.dylib
 
 =back
 
@@ -277,8 +292,12 @@ sub so_lib_dir {
     unless (exists $_[0]->{so_lib_dir}) {
         my @paths = grep { defined and length }
           ( split(' ', $Config{libsdirs}),
-            split(' ', $Config{loclibpth}) );
-        my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1"];
+            split(' ', $Config{loclibpth}),
+                  '/sw/lib' );
+        my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
+                    "libexpat.dylib", "libexpat.0.dylib",
+                    "libexpat.0.0.1.dylib"];
+
         $obj->{so_lib_dir} = $u->first_cat_dir($libs, @paths);
     }
     return $_[0]->{so_lib_dir};
