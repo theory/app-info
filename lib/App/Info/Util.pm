@@ -42,3 +42,6 @@ sub first_cat_file {
     }
     return;
 }
+
+1;
+__END__
