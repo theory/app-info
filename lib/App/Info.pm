@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.39 2002/07/31 19:01:12 david Exp $
+# $Id: Info.pm,v 1.40 2002/08/07 23:05:08 david Exp $
 
 =head1 NAME
 
@@ -66,7 +66,7 @@ my $croak = sub {
     my ($caller, $meth) = @_;
     $caller = ref $caller || $caller;
     if ($caller eq __PACKAGE__) {
-        $meth = __PACKAGE__ . '::' . shift;
+        $meth = __PACKAGE__ . '::' . $meth;
         Carp::croak(__PACKAGE__ . " is an abstract base class. Attempt to " .
                     " call non-existent method $meth");
     } else {
