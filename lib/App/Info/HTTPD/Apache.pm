@@ -60,43 +60,32 @@ my $u = App::Info::Util->new;
 Returns an App::Info::HTTPD::Apache object. See L<App::Info|App::Info> for a
 complete description of argument parameters.
 
-When called, C<new()> searches the file system for the F<httpd>,
-F<apache-perl>, or F<apache> application. If found, the application (hereafer
-referred to as F<httpd>, regardless of how it was actually found to be named)
-will be called by the object methods below to gather the data necessary for
-each. If F<httpd> cannot be found, then Apache is assumed not to be installed,
-and each of the object methods will return C<undef>.
+When called, C<new()> searches the the directories returned by
+C<search_bin_dirs()> for an executable with a name returned by
+C<search_exe_names()>. If found, the executable (hereafer referred to as
+F<httpd>, regardless of how it was actually found to be named) will be called
+by the object methods below to gather the data necessary for each. If F<httpd>
+cannot be found, then Apache is assumed not to be installed, and each of the
+object methods will return C<undef>.
 
-App::Info::HTTPD::Apache searches for F<httpd> along your path, as defined by
-C<File::Spec-E<gt>path>. Failing that, it searches the following directories:
+In addition to the parameters supported by the parent classes,
+L<App::Info|App::Info> and L<App::Info::HTTPD|App::Info::HTTPD>,
+this class' C<new()> method also supports:
 
 =over 4
 
-=item /usr/local/apache/bin
+=item search_conf_names
 
-=item /usr/local/bin
+An array reference of possible names for Apache configuration files. These
+will be returned by the C<search_conf_names()> method before the default
+names, and may be used by C<conf_file()> to search for the configuration file.
 
-=item /usr/local/sbin
+=item search_conf_dirs
 
-=item /usr/bin
-
-=item /usr/sbin
-
-=item /bin
-
-=item /opt/apache/bin
-
-=item /etc/httpd/bin
-
-=item /etc/apache/bin
-
-=item /home/httpd/bin
-
-=item /home/apache/bin
-
-=item /sw/bin
-
-=item /sw/sbin
+An array reference of possible directories in which to search for Apache
+configuration files. These will be returned by the C<search_conf_dirs()>
+method before the default directories, and may be used by C<conf_file()> to
+search for the configuration file.
 
 =back
 
@@ -124,26 +113,19 @@ sub new {
     # Construct the object.
     my $self = shift->SUPER::new(@_);
 
+    for (qw(search_conf_dirs search_conf_names)) {
+        if (exists $self->{$_}) {
+            $self->{$_} = [$self->{$_}] unless ref $self->{$_} eq 'ARRAY';
+        } else {
+            $self->{$_} = [];
+        }
+    }
+
     # Find Apache executable.
     $self->info("Looking for Apache executable");
 
-    my @paths = ($u->path,
-      qw(/usr/local/apache/bin
-         /usr/local/bin
-         /usr/local/sbin
-         /usr/bin
-         /usr/sbin
-         /bin
-         /opt/apache/bin
-         /etc/httpd/bin
-         /etc/apache/bin
-         /home/httpd/bin
-         /home/apache/bin
-         /sw/bin
-         /sw/sbin));
-
-    my @exes = qw(httpd apache-perl apache);
-    if (WIN32) { $_ .= ".exe" for @exes }
+    my @paths = $self->search_bin_dirs;
+    my @exes = $self->search_exe_names;
 
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
@@ -657,21 +639,11 @@ for the configuration file in a number of locations and under a number of
 names. First it tries to use the file specifed by the C<SERVER_CONFIG_FILE>
 compile option (as returned by a call to C<compile_option()>) -- and if it's a
 relative file name, it gets appended to the directory returned by
-C<httpd_root()>. If that file isn't found, C<conf_file()> then looks for the
-files F<httpd.conf> and F<httpd.conf.default> in the F<conf> subdirectory of
-the HTTPD root directory. Failing that, it looks for the following:
-
-=over 4
-
-=item /usr/share/doc/apache-perl/examples/httpd.conf
-
-=item /usr/share/doc/apache-perl/examples/httpd.conf.default
-
-=item /etc/httpd/httpd.conf
-
-=item /etc/httpd/httpd.conf.default
-
-=back
+C<httpd_root()>. If that file isn't found, C<conf_file()> then looks for a
+file with one of the names returned by C<search_conf_names()> in the F<conf>
+subdirectory of the HTTPD root directory. Failing that, it searches for them
+in each of the directories returned by C<search_conf_dirs()> until it finds a
+match.
 
 B<Events:>
 
@@ -702,18 +674,17 @@ sub conf_file {
         my $conf = $self->compile_option('SERVER_CONFIG_FILE');
         $conf = $u->file_name_is_absolute($conf) ?
           $conf : $u->catfile($root, $conf) if $conf;
-        # Paths to search.
-        my @paths = ($conf ? ($conf) : (),
-                     $u->catfile($root, 'conf', 'httpd.conf'),
-                     $u->catfile($root, 'conf', 'httpd.conf.default'),
-                     "/usr/share/doc/apache-perl/examples/httpd.conf",
-                     "/usr/share/doc/apache-perl/examples/httpd.conf.default",
-                     "/etc/httpd/httpd.conf",
-                     "/etc/httpd/httpd.conf.default");
+        if ($conf && -f $conf) {
+            $self->{conf_file} = $conf;
+        } else {
+            # Paths to search.
+            my @confs = $self->search_conf_names;
 
-        $self->{conf_file} = $u->first_file(@paths)
-          or $self->error("No Apache config file found");
+            $self->{conf_file} = $u->first_cat_path(\@confs, $self->search_conf_dirs)
+              or $self->error("No Apache config file found");
+        }
     }
+
     # Handle an unknown value.
     $self->{conf_file} =
       $self->unknown( key      => 'conf_file',
@@ -1008,7 +979,7 @@ sub inc_dir {
     unless (exists $self->{inc_dir}) {{
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for include directory");
-        $self->{inc_dir} = $u->first_cat_path(['include', 'inc',], $root)
+        $self->{inc_dir} = $u->first_dir($self->search_inc_dirs)
           or $self->error("Cannot find include directory");
     }}
     # Handle unknown value.
@@ -1059,23 +1030,23 @@ Enter a valid Apache library directory
 sub lib_dir {
     my $self = shift;
     return unless $self->{exe};
-    unless (exists $self->{lib_dir}) {{
-        my $root = $self->httpd_root || last; # Double braces allow this.
-        $self->info("Searching for library directory");
-        if (my $d = $u->first_cat_path([qw(lib modules libexec)], $root)) {
-            # The usual suspects.
-            $self->{lib_dir} = $d;
-        } elsif ($u->first_dir('/usr/lib/apache/1.3')) {
-            # The Debian way.
-            $self->{lib_dir} = '/usr/lib/apache/1.3';
+    unless (exists $self->{lib_dir}) {
+        if ($self->httpd_root) {
+            $self->info("Searching for library directory");
+            if (my $d = $u->first_dir($self->search_lib_dirs)) {
+                $self->{lib_dir} = $d;
+            } else {
+                $self->error("Cannot find library direcory");
+            }
         } else {
-            $self->error("Cannot find library direcory");
+            # Handle unknown value.
+            $self->{lib_dir} = $self->unknown(
+                key      => 'library directory',
+                callback => $is_dir
+            );
         }
-    }}
-    # Handle unknown value.
-    $self->{lib_dir} = $self->unknown( key      => 'library directory',
-                                       callback => $is_dir)
-      unless $self->{lib_dir};
+
+    }
     return $self->{lib_dir};
 }
 
@@ -1262,6 +1233,210 @@ Returns the Apache download URL.
 =cut
 
 sub download_url { "http://www.apache.org/dist/httpd/" }
+
+##############################################################################
+
+=head3 search_exe_names
+
+  my @search_exe_names = $apache->search_exe_names;
+
+Returns a list of possible names for the Apache executable. The names are
+F<httpd>, F<apache-perl>, and F<apache> by default; F<.exe> is appended to
+each on Win32.
+
+=cut
+
+sub search_exe_names {
+    my $self = shift;
+    my @exes = qw(httpd apache-perl apache);
+    if (WIN32) { $_ .= ".exe" for @exes }
+    return ($self->SUPER::search_exe_names, @exes);
+}
+
+##############################################################################
+
+=head3 search_bin_dirs
+
+  my @search_bin_dirs = $apache->search_bin_dirs;
+
+Returns a list of possible directories in which to search an executable. Used
+by the C<new()> constructor to find an executable to execute and collect
+application info. The found directory will also be returned by the C<bin_dir>
+method.
+
+The list of directories by default consists of the path as defined by
+C<< File::Spec->path >>, as well as the following directories:
+
+=over 4
+
+=item /usr/local/apache/bin
+
+=item /usr/local/bin
+
+=item /usr/local/sbin
+
+=item /usr/bin
+
+=item /usr/sbin
+
+=item /bin
+
+=item /opt/apache/bin
+
+=item /etc/httpd/bin
+
+=item /etc/apache/bin
+
+=item /home/httpd/bin
+
+=item /home/apache/bin
+
+=item /sw/bin
+
+=item /sw/sbin
+
+=back
+
+=cut
+
+sub search_bin_dirs {
+    return (
+      shift->SUPER::search_bin_dirs,
+      $u->path,
+      qw(/usr/local/apache/bin
+         /usr/local/bin
+         /usr/local/sbin
+         /usr/bin
+         /usr/sbin
+         /bin
+         /opt/apache/bin
+         /etc/httpd/bin
+         /etc/apache/bin
+         /home/httpd/bin
+         /home/apache/bin
+         /sw/bin
+         /sw/sbin));
+}
+
+##############################################################################
+
+=head3 search_lib_dirs
+
+  my @search_lib_dirs = $apache->search_lib_dirs;
+
+Returns a list of possible directories in which to search for Apache
+libraries. By default, it returns this list of directories, each appended to
+the name of the directory returned by C<httpd_root()>:
+
+=over 4
+
+=item lib
+
+=item modules
+
+=item libexec
+
+=back
+
+=cut
+
+sub search_lib_dirs {
+    my $self = shift;
+    my $root = $self->httpd_root;
+    return (
+      $self->SUPER::search_lib_dirs,
+      ( $root
+        ? map { $u->catdir($root, $_) } qw(lib modules libexec)
+        : ()
+      ),
+      '/usr/lib/apache/1.3'
+    );
+}
+
+##############################################################################
+
+=head3 search_inc_dirs
+
+  my @search_inc_dirs = $apache->search_inc_dirs;
+
+Returns a list of possible directories in which to search for Apache include
+files. By default, it returns this list of directories, each appended to the
+name of the directory returned by C<httpd_root()>:
+
+=over 4
+
+=item include
+
+=item inc
+
+=back
+
+=cut
+
+sub search_inc_dirs {
+    my $self = shift;
+    my $root = $self->httpd_root;
+    return (
+      $self->SUPER::search_inc_dirs,
+      ( $root
+        ? map { $u->catdir($root, $_) } qw(include inc)
+        : ()
+      ),
+    );
+}
+
+##############################################################################
+
+=head3 search_conf_names
+
+  my @search_conf_dirs = $apache->search_conf_dirs;
+
+Returns a list of possible names for Apache configuration files. These will be
+used bye the C<conf_file()> method to search for Apache configuration files.
+By Default, the possible configuration file names are:
+
+=over 4
+
+=item F<httpd.conf>
+
+=item F<httpd.conf.default>
+
+=back
+
+=cut
+
+sub search_conf_names {
+    return (
+      @{ shift->{search_conf_names} },
+      qw(httpd.conf httpd.conf.default)
+    );
+}
+
+##############################################################################
+
+=head3 search_conf_dirs
+
+  my @search_conf_dirs = $apache->search_conf_dirs;
+
+Returns a list of directories in which the C<conf_file()> method will search
+for Apache configuration files.
+
+=over 4
+
+=item /usr/share/doc/apache-perl
+
+=item /etc/httpd
+
+=back
+
+=cut
+
+sub search_conf_dirs {
+    return (
+      @{ shift->{search_conf_dirs} },
+      qw(/usr/share/doc/apache-perl /etc/httpd)
+    );
+}
 
 1;
 __END__

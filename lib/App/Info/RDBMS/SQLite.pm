@@ -661,7 +661,7 @@ sub download_url { "http://www.sqlite.org/download.html" }
 
 =head3 search_exe_names
 
-  my @search_exe_names = $app->search_exe_names;
+  my @search_exe_names = $sqlite->search_exe_names;
 
 Returns a list of possible names for the SQLite executable. The names are
 F<sqlite3> and F<sqlite> by default (F<sqlite3.exe> and F<sqlite.exe> on
@@ -680,7 +680,7 @@ sub search_exe_names {
 
 =head3 search_bin_dirs
 
-  my @search_bin_dirs = $app->search_bin_dirs;
+  my @search_bin_dirs = $sqlite->search_bin_dirs;
 
 Returns a list of possible directories in which to search an executable. Used
 by the C<new()> constructor to find an executable to execute and collect
@@ -796,7 +796,7 @@ sub search_so_lib_names {
 
 =head3 search_lib_dirs
 
-  my @search_lib_dirs = $app->search_lib_dirs;
+  my @search_lib_dirs = $sqlite->search_lib_dirs;
 
 Returns a list of possible directories in which to search for libraries. By
 default, it returns all of the paths in the C<libsdirs> and C<loclibpth>
@@ -811,7 +811,7 @@ sub search_lib_dirs { shift->SUPER::search_lib_dirs, $u->lib_dirs, '/sw/lib' }
 
 =head3 search_inc_names
 
-  my @search_inc_names = $app->search_inc_names;
+  my @search_inc_names = $sqlite->search_inc_names;
 
 Returns a list of include file names to search for. Used by C<inc_dir()> to
 search for an include file. By default, the names are F<sqlite3.h> and
@@ -829,7 +829,7 @@ sub search_inc_names {
 
 =head3 search_inc_dirs
 
-  my @search_inc_dirs = $app->search_inc_dirs;
+  my @search_inc_dirs = $sqlite->search_inc_dirs;
 
 Returns a list of possible directories in which to search for includes
 files. Used by C<inc_dir()> to search for an include file. By default, the

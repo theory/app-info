@@ -1,60 +1,56 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.12 2002/06/17 19:27:14 david Exp $
+# $Id$
 
 use strict;
 use Test::More tests => 27;
+use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
 
-ok( my $apache = App::Info::HTTPD::Apache->new, "Got Object");
+my $ext = $^O eq 'MSWin32' ? '.bat' : '';
+my $bin_dir = catdir 't', 'scripts';
+$bin_dir = catdir 't', 'bin' unless -d $bin_dir;
+my $conf_dir = catdir 't', 'testlib';
+my $inc_dir = catdir 't', 'testinc';
+
+my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
+              mod_status mod_include mod_autoindex mod_dir mod_cgi mod_asis
+              mod_imap mod_actions mod_userdir mod_alias mod_rewrite
+              mod_access mod_auth mod_so mod_setenvif mod_ssl mod_perl);
+
+ok( my $apache = App::Info::HTTPD::Apache->new(
+    search_bin_dirs => $bin_dir,
+    search_exe_names => "httpd$ext",
+    search_conf_dirs => $conf_dir,
+    search_lib_dirs  => $conf_dir,
+    search_inc_dirs  => $inc_dir,
+), "Got Object");
 isa_ok($apache, 'App::Info::HTTPD::Apache');
 isa_ok($apache, 'App::Info');
+
 is( $apache->key_name, 'Apache', "Check key name" );
-
-if ($apache->installed) {
-    ok( $apache->installed, "Apache is installed" );
-    ok( $apache->name, "Got name" );
-    ok( $apache->version, "Got version" );
-    ok( $apache->major_version, "Got major version" );
-    ok( defined $apache->minor_version, "Got minor version" );
-    ok( defined $apache->patch_version, "Got patch version" );
-    ok( $apache->httpd_root, "Got httpd root" );
-    ok( $apache->magic_number, "Got magic number" );
-    $apache->mod_so;
-    pass("Can get mod_so");
-    $apache->mod_perl;
-    pass("Can get mod_perl");
-    is( ref $apache->static_mods, 'ARRAY', "Got static mods" );
-    ok( $apache->compile_option('DEFAULT_ERRORLOG'), "Got compile option" );
-
-    # We should be able to find httpd.conf.
-    ok( $apache->conf_file, "Got Apache conf file" );
-} else {
-    ok( !$apache->installed, "Apache is not installed" );
-    ok( !$apache->name, "Don't got name" );
-    ok( !$apache->version, "Don't got version" );
-    ok( !$apache->major_version, "Don't got major version" );
-    ok( !$apache->minor_version, "Don't got minor version" );
-    ok( !$apache->patch_version, "Don't got patch version" );
-    ok( !$apache->httpd_root, "Don't got httpd root" );
-    ok( !$apache->magic_number, "Don't got magic number" );
-    ok( !$apache->mod_so, "Don't got mod_so" );
-    ok( !$apache->mod_perl, "Don't got mod_perl" );
-    ok( !$apache->static_mods, "Don't got static mods" );
-    ok( !$apache->compile_option('DEFAULT_ERRORLOG'),
-        "Don't got compile option" );
-    ok( !$apache->conf_file, "Don't got Apache conf file" );
-}
-
-# Installation doesn't guarantee lib & inc installation, or port number.
-$apache->lib_dir; pass("Can call lib_dir");
-$apache->bin_dir, pass("Can call bin_dir");
-$apache->so_lib_dir; pass("Can call so_lib_dir" );
-$apache->inc_dir; pass("Can call inc_dir");
-$apache->port; pass("Can call port.");
-$apache->user; pass("Got Apache user.");
-$apache->group; pass("Got Apache group.");
-
-ok( $apache->home_url, "Get home URL" );
-ok( $apache->download_url, "Get download URL" );
+ok( $apache->installed, "Apache is installed" );
+is( $apache->name, "Apache", "Get name" );
+is( $apache->version, "1.3.31", "Test Version" );
+is( $apache->major_version, '1', "Test major version" );
+is( $apache->minor_version, '3', "Test minor version" );
+is( $apache->patch_version, '31', "Test patch version" );
+is( $apache->httpd_root, "t", "Test httpd root" );
+ok( $apache->mod_perl, "Test mod_perl" );
+is( $apache->conf_file, "t/testlib/httpd.conf", "Test conf file" );
+is( $apache->user, "nobody", "Test user" );
+is( $apache->group, "nobody", "Test group" );
+is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
+    "Check error log from compile_option()" );
+is( $apache->lib_dir, $conf_dir, "Test lib dir" );
+is( $apache->bin_dir, 't/bin', "Test bin dir" );
+is( $apache->so_lib_dir, $conf_dir, "Test so lib dir" );
+is( $apache->inc_dir, "t/testinc", "Test inc dir" );
+ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
+is( $apache->magic_number, '19990320:16', "Test magic number" );
+is( $apache->port, '80', "Test port" );
+ok( $apache->mod_so, "Test mod_so" );
+is( $apache->home_url, 'http://httpd.apache.org/', "Get home URL" );
+is( $apache->download_url, 'http://www.apache.org/dist/httpd/',
+    "Get download URL" );
