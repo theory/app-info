@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.28 2002/06/13 22:09:09 david Exp $
+# $Id: Apache.pm,v 1.29 2002/06/14 19:09:34 david Exp $
 
 =head1 NAME
 
@@ -117,12 +117,13 @@ sub new {
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
         $self->{binary} = $self->confirm('binary', 'Path to your httpd binary?',
-                                         $exe, sub { -x $_[0] },
+                                         $exe, sub { -x },
                                          'Not an executable');
     } else {
         # Handle an unknown value.
         $self->{binary} = $self->unknown('binary', 'Path to your httpd binary?',
-                                         sub { -x $_[0] });
+                                         sub { -x },
+                                         'Not an executable');
     }
     return $self;
 };
@@ -442,7 +443,7 @@ sub conf_file {
           or $self->error("No server config file found");
     }
     # Handle an unknown value.
-    $self->{conf_file} = $self->unknown('configuration file', sub { -e $_[0] })
+    $self->{conf_file} = $self->unknown('configuration file', sub { -e })
       unless defined $self->{conf_file};
     return $self->{conf_file};
 }
@@ -488,7 +489,7 @@ sub user {
     return unless $self->{binary};
     $parse_conf_file->($self) unless exists $self->{user};
     # Handle an unknown value.
-    $self->{user} = $self->unknown('user', sub { getpwnam $_[0] })
+    $self->{user} = $self->unknown('user', sub { getpwnam $_ })
       unless $self->{user};
     return $self->{user};
 }
@@ -506,7 +507,7 @@ sub group {
     return unless $self->{binary};
     $parse_conf_file->($self) unless exists $self->{group};
     # Handle an unknown value.
-    $self->{group} = $self->unknown('group', sub { getgrnam $_[0] })
+    $self->{group} = $self->unknown('group', sub { getgrnam $_ })
       unless $self->{group};
     return $self->{group};
 }
@@ -524,7 +525,7 @@ sub port {
     return unless $self->{binary};
     $parse_conf_file->($self) unless exists $self->{port};
     # Handle an unknown value.
-    $self->{port} = $self->unknown('port', sub { $_[0] =~ /^\d+$/ })
+    $self->{port} = $self->unknown('port', sub { /^\d+$/ })
       unless $self->{port};
     return $self->{port};
 }
@@ -551,7 +552,7 @@ sub bin_dir {
     }}
 
     # Handle unknown value.
-    $self->{bin_dir} = $self->unknown('binary directory', sub { -d $_[0] })
+    $self->{bin_dir} = $self->unknown('binary directory', sub { -d })
       unless $self->{bin_dir};
     return $self->{bin_dir};
 }
@@ -576,7 +577,7 @@ sub inc_dir {
           or $self->error("Could not find inc directory");
     }}
     # Handle unknown value.
-    $self->{inc_dir} = $self->unknown('include directory', sub { -d $_[0] })
+    $self->{inc_dir} = $self->unknown('include directory', sub { -d })
       unless $self->{inc_dir};
     return $self->{inc_dir};
 }
@@ -609,7 +610,7 @@ sub lib_dir {
         }
     }}
     # Handle unknown value.
-    $self->{lib_dir} = $self->unknown('library directory', sub { -d $_[0] })
+    $self->{lib_dir} = $self->unknown('library directory', sub { -d })
       unless $self->{lib_dir};
     return $self->{lib_dir};
 }
