@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.19 2002/06/05 23:04:59 david Exp $
+# $Id: Expat.pm,v 1.20 2002/06/05 23:06:32 david Exp $
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.06';
+$VERSION = '0.05';
 
 my $u = App::Info::Util->new;
 
