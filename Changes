@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.06
+0.06  Wed Jun  5 15:36:36 2002
       - Fixed all version tests in test scripts to check for definedness
         rather than truth, so that version numbers that are "0" will be
         ok. Thanks to Andy Lester for the spot.
