@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.3 2002/06/01 21:41:48 david Exp $
+# $Id: Info.pm,v 1.4 2002/06/01 21:48:16 david Exp $
 
 =head1 NAME
 
@@ -33,7 +33,7 @@ others are invited to write their own subclasses and contribute them to the
 CPAN. Contributors are welcome to extend their subclasses to provide more
 information relevant to the application for which data is to be provided (see
 L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
-encouraged to at a minimum implement the methods defined here.
+encouraged to, at a minimum, implement the methods defined here.
 
 =cut
 
