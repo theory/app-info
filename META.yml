@@ -52,4 +52,4 @@ provides:
   App::Info::Util:
     file: lib/App/Info/Util.pm
     version: 0.22
-generated_by: Module::Build version 0.19_05
+generated_by: Module::Build version 0.21
