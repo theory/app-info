@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.43
+0.43  2004-12-14T19:45:52
       - Added "search_*_name" parameters and methods for searching for
         PostgreSQL and Apache executables other than the main one,
         which is already handed by "search_exe_names".
