@@ -6,7 +6,8 @@ Revision history for Perl extension App::Info.
         library, if there is one.
       - Added other executable methods to App::Info::RDBMS::PostgreSQL,
         including "postgres()", "createdb()", "createuser()", and others.
-        
+      - Added other executable methods to App::Info::RDBMS::PostgreSQL,
+        including "ab()", "apachectl()", "apxs()", and others.
 
 0.41  2004-11-28T20:01:57
       - Fixed Apache, SQLite, and Iconv tests to pass under Win32.

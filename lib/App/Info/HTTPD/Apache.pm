@@ -894,6 +894,12 @@ C<new()>, so there are no events for this method.
 
 sub executable { shift->{executable} }
 
+=head3 httpd
+
+  my $httpd = $apache->httpd;
+
+An alias for C<executable()>.
+
 ##############################################################################
 
 =head3 bin_dir
@@ -1457,6 +1463,94 @@ sub search_conf_dirs {
       qw(/usr/share/doc/apache-perl /etc/httpd)
     );
 }
+
+##############################################################################
+
+=head2 Other Executable Methods
+
+These methods return the complete paths to their like-named executables.
+Apache comes with a fair number of them; we provide these methods to provide a
+path to a subset of them. Each method, when called, checks for an executable
+in the directory returned by C<bin_dir()>.
+
+The available executable methods are:
+
+=over
+
+=item ab
+
+=item apachectl
+
+=item apxs
+
+=item htdigest
+
+=item htpasswd
+
+=item logresolve
+
+=item rotatelogs
+
+=back
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for executable
+
+=item confirm
+
+Path to executable?
+
+=item unknown
+
+Path to executable?
+
+=back
+
+=cut
+
+my $find_exe = sub  {
+    my ($self, $key) = @_;
+    my $exe = $key . (WIN32 ? '.exe' : '');
+
+    # Find executable.
+    $self->info("Looking for $key");
+
+    unless ($self->{$key}) {
+	my $bin = $self->bin_dir or return;
+	if (my $exe = $u->first_exe($u->catfile($bin, $exe))) {
+	    # We found it. Confirm.
+	    $self->{$key} = $self->confirm(
+		key      => $key,
+		prompt   => "Path to $key executable?",
+		value    => $exe,
+		callback => sub { -x },
+		error    => 'Not an executable'
+	    );
+	} else {
+	    # Handle an unknown value.
+	    $self->{$key} = $self->unknown(
+		key      => $key,
+		prompt   => "Path to $key executable?",
+		callback => sub { -x },
+		error    => 'Not an executable'
+	    );
+	}
+    }
+
+    return $self->{$key};
+};
+
+for my $exe (qw(ab apachectl apxs htdigest htpasswd logresolve rotatelogs)) {
+    no strict 'refs';
+    *{$exe} = sub { shift->$find_exe($exe) };
+}
+
+*httpd = \&executable;
 
 1;
 __END__

@@ -892,10 +892,6 @@ called, checks for an executable in the directory returned by C<bin_dir()>.
 
 The available executable methods are:
 
-for my $exe (qw(postgres createdb createlang createuser dropdb droplang
-                dropuser initdb pg_dump pg_dumpall pg_restore postmaster
-		vacuumdb psql)) {
-
 =over
 
 =item postgres
@@ -947,8 +943,6 @@ Path to executable?
 =back
 
 =cut
-
-
 
 1;
 __END__
