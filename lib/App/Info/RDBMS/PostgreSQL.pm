@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.7 2002/06/01 23:44:45 david Exp $
+# $Id: PostgreSQL.pm,v 1.8 2002/06/03 18:03:39 david Exp $
 
 =head1 NAME
 
@@ -80,7 +80,7 @@ do {
          /usr/sbin
          /bin));
 
-    $obj->{pg_config} = $u->first_cat_file('pg_config', @paths);
+    $obj->{pg_config} = $u->first_cat_path('pg_config', @paths);
 };
 
 =head1 CONSTRUCTOR
