@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.17 2002/06/05 21:36:40 david Exp $
+# $Id: Info.pm,v 1.18 2002/06/06 00:30:53 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ information on implementing new subclasses.
 use strict;
 use Carp ();
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 my %error_levels = ( croak   => sub { Carp::croak(@_) },
                      carp    => sub { Carp::carp(@_) },
                      cluck   => sub { Carp::cluck(@_) },
@@ -76,7 +76,12 @@ sub new {
     # Fail if the method isn't overridden.
     $croak->($pkg, 'new') if $class eq __PACKAGE__;
     # Make sure we have an error level.
-    $p{error_level} ||= 'carp';
+    if (exists $p{error_level}) {
+        $error_levels{$p{error_level}}
+          or Carp::croak("Invalid error_level '$p{error_level}'");
+    } else {
+        $p{error_level} ||= 'carp';
+    }
     # Do it!
     return bless \%p, $class;
 }

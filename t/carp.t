@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: carp.t,v 1.1 2002/06/05 20:59:47 david Exp $
+# $Id: carp.t,v 1.2 2002/06/06 00:30:53 david Exp $
 
 use strict;
-use Test::More tests => 28;
+use Test::More tests => 29;
 
 our $msg = "Error retrieving version";
 
@@ -78,4 +78,6 @@ ok( ! defined $err, "Error not defined" );
 ok( $err = $app->last_error, "Grab last silent error" );
 like( $err, qr/^Error retrieving version/, "Starts with silent message" );
 
-
+# Dissallow bogus error levels.
+eval { App::Info::Category::FooApp->new( error_level => 'bogus') };
+like( $@, qr/Invalid error_level 'bogus'/, "Check for bogus error level" );

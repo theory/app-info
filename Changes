@@ -1,5 +1,8 @@
 Revision history for Perl extension App::Info.
 
+0.11  
+      - Improved validation for the error_level parameter.
+
 0.10  Wed Jun  5 23:58:54 2002
       - Added new error_level parameter to new(). This tells App::Info objects
         how to handle errors on an object-by-object basis. The new base class
