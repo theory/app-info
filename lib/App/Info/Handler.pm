@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.7 2002/06/15 01:47:41 david Exp $
+# $Id: Handler.pm,v 1.8 2002/06/16 01:18:55 david Exp $
 
 =head1 NAME
 
@@ -11,7 +11,7 @@ App::Info::Handler - App::Info event handler base class
   use App::Info::Category::FooApp;
   use App::Info::Handler;
 
-  my $app = App::Info::Category::FooApp->new(on_info => ['default']);
+  my $app = App::Info::Category::FooApp->new( on_info => ['default'] );
 
 =head1 DESCRIPTION
 
@@ -22,8 +22,8 @@ default they're all handled by a single App::Info::Handler object), and
 App::Info::Handler subclasses may be designed to handle whatever events they
 wish.
 
-If you're interested in using an App::Info event handler, this is probably not
-the class you should look at, since all it does is define a simple handler
+If you're interested in I<using> an App::Info event handler, this is probably
+not the class you should look at, since all it does is define a simple handler
 that does nothing with an event. Look to the L<App::Info::Handler
 subclasses|"SEE ALSO"> included in this distribution to do more interesting
 things with App::Info events.
@@ -47,7 +47,7 @@ This section documents the public interface of App::Info::Handler.
 
 =head3 register_handler
 
-  App::Info::Handler->register_handler($key => $code_ref);
+  App::Info::Handler->register_handler( $key => $code_ref );
 
 This class method may be used by App::Info::Handler subclasses to register
 themselves with App::Info::Handler. Multiple registrations are supported. The
@@ -120,7 +120,7 @@ App::Info will then move on to the next handler in the chain.
 The C<handler()> method implemented in App::Info::Handler itself does nothing
 more than return a true value. It thus acts as a very simple default event
 handler. See the App::Info::Handler subclasses for more interesting handling
-of events, or create youre own!
+of events, or create your own!
 
 =cut
 
@@ -139,7 +139,7 @@ a few examples. The App::Info::Handler class defines the API interface for
 handling these conditions, which App::Info refers to as "events".
 
 There are various types of events defined by App::Info ("info", "error",
-"uknown", and "confirm"), but the App::Info::Handler interface is designed to
+"unknown", and "confirm"), but the App::Info::Handler interface is designed to
 be flexible enough to handle any and all of them. If you're interested in
 creating your own App::Info event handler, this is the place to learn how.
 
