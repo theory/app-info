@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.13 2002/06/04 01:18:19 david Exp $
+# $Id: Expat.pm,v 1.14 2002/06/04 22:06:44 david Exp $
 
 =head1 NAME
 
@@ -61,7 +61,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -149,7 +149,8 @@ sub version {
             Carp::carp("Failed to parse Expat version from file '$header'");
         }
         # But go ahead and keep them all, anyway -- some may be there.
-        @{$_[0]}{qw(version major minor patch)} = ("$x.$y.$z", $x, $y, $z);
+        my $v = $x || '' . '.' . $y || '' . '.' . $z || '';
+        @{$_[0]}{qw(version major minor patch)} = ($v, $x, $y, $z);
     }
     return $_[0]->{version};
 }

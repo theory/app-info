@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.12 2002/06/04 01:20:03 david Exp $
+# $Id: Iconv.pm,v 1.13 2002/06/04 22:06:44 david Exp $
 
 =head1 NAME
 
@@ -60,7 +60,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -143,14 +143,19 @@ sub version {
         # This is the line we're looking for:
         # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
         my $regex = qr/_LIBICONV_VERSION\s+([^\s]+)\s/;
-        # Grab the version number and convert it from hex.
-        my $ver = hex $u->search_file($header, $regex);
-        # Shift 8.
-        my $major = $ver >> 8;
-        # Left shift 8 and subtract from version.
-        my $minor = $ver - ($major << 8);
-        # Store 'em!
-        @{$_[0]}{qw(version major minor)} = ("$major.$minor", $major, $minor);
+        if (my $ver = $u->search_file($header, $regex) {
+            # Convert the version number from hex.
+            $ver = hex $ver;
+            # Shift 8.
+            my $major = $ver >> 8;
+            # Left shift 8 and subtract from version.
+            my $minor = $ver - ($major << 8);
+            # Store 'em!
+            @{$_[0]}{qw(version major minor)} =
+              ("$major.$minor", $major, $minor);
+        } else {
+            Carp::carp("Unable to parse version number from file '$header'");
+        }
     }
     return $_[0]->{version};
 }

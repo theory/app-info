@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.11 2002/06/04 00:40:20 david Exp $
+# $Id: Info.pm,v 1.12 2002/06/04 22:06:44 david Exp $
 
 =head1 NAME
 
@@ -44,7 +44,7 @@ information on implementing new subclasses.
 use strict;
 use Carp ();
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -219,6 +219,20 @@ when necessary, on a single software package. Broader categories can then be
 aggregated in Bundle distributions.
 
 But I get ahead of myself...
+
+=head1 TO DO
+
+=over 4
+
+=item *
+
+Make warnings optional (and off by default).
+
+=item *
+
+Allow warnings to be exceptions, instead.
+
+=back
 
 =head1 BUGS
 

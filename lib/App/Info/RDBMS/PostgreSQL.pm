@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.12 2002/06/04 01:12:15 david Exp $
+# $Id: PostgreSQL.pm,v 1.13 2002/06/04 22:06:44 david Exp $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -101,8 +101,8 @@ sub new { bless $obj, ref $_[0] || $_[0] }
 # We'll use this code reference as a common way of collecting data.
 
 my $get_data = sub {
-    my $pgc = $_[0]->{pg_config} || return;
-    my $info = `$pgc $_[1]`;
+    return unless $_[0]->{pg_config};
+    my $info = `$_[0]->{pg_config} $_[1]`;
     chomp $info;
     return $info;
 };
@@ -133,6 +133,7 @@ the version number could not be parsed.
 =cut
 
 sub name {
+    return unless $_[0]->{pg_config};
     unless ($_[0]->{name}) {
         my $data = $get_data->($_[0], '--version');
         unless ($data) {
