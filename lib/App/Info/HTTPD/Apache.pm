@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.23 2002/06/10 06:03:06 david Exp $
+# $Id: Apache.pm,v 1.24 2002/06/10 23:28:23 david Exp $
 
 =head1 NAME
 
@@ -181,29 +181,27 @@ installed but the version number or name could not be parsed.
 sub version {
     my $self = shift;
     return unless $self->{binary};
-  CHECK: {
-        unless (exists $self->{version}) {
-            $self->info("Executing `$self->{binary} -v`");
-            my $version = `$self->{binary} -v`;
-            unless ($version) {
-                $self->error("Failed to find Apache version with ",
-                               "`$self->{binary} -v`");
-                last CHECK;
-            }
+    unless (exists $self->{version}) {{
+        $self->info("Executing `$self->{binary} -v`");
+        my $version = `$self->{binary} -v`;
+        unless ($version) {
+            $self->error("Failed to find Apache version with ",
+                         "`$self->{binary} -v`");
+            last; # Double braces allow this.
+        }
 
-            chomp $version;
-            my ($n, $x, $y, $z) = $version =~
-              /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
-            unless ($n and defined $x and defined $y and defined $z) {
-                $self->error("Failed to parse Apache name and ",
-                             "version from string '$version'");
-                last CHECK;
-            }
+        chomp $version;
+        my ($n, $x, $y, $z) = $version =~
+          /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+        unless ($n and defined $x and defined $y and defined $z) {
+            $self->error("Failed to parse Apache name and ",
+                         "version from string '$version'");
+            last; # Double braces allow this.
+        }
 
-            @{$self}{qw(name version major minor patch)} =
-              ($n, "$x.$y.$z", $x, $y, $z);
-        } # unless
-    } # CHECK:
+        @{$self}{qw(name version major minor patch)} =
+          ($n, "$x.$y.$z", $x, $y, $z);
+    }} # unless
 
     # Note -- add code here to handle splitting up an entered version into
     # major, minor, and patch parts.
@@ -283,37 +281,48 @@ Throws an error if Apache is installed but the HTTPD root could not be parsed.
 
 =cut
 
+# This code ref takes care of processing the compile settings. It is used by
+# httpd_root(), magic_number(), or compile_option(), whichever is called
+# first.
+my $get_compile_settings = sub {
+    my $self = shift;
+    $self->{-V} = 1;
+    $self->info("Executing `$self->{binary} -V`");
+    # Get the compile settings.
+    my $data = `$self->{binary} -V`;
+    unless ($data) {
+        $self->error("Unable to extract compile settings from ",
+                     "`$self->{binary} -V`");
+        return;
+    }
+
+    # Split out the parts.
+    foreach (split /\s*\n\s*/, $data) {
+        if (/magic\s+number:\s+(.*)$/i) {
+            $self->{magic_number} = $1;
+        } elsif (/=/) {
+            $_ =~ s/^-D\s+//;
+            $_ =~ s/"$//;
+            my ($k, $v) = split /\s*=\s*"/, $_;
+            $self->{lc $k} = $v;
+        } elsif (/-D/) {
+            $_ =~ s/^-D\s+//;
+            $self->{lc $_} = 1;
+        }
+    }
+    # Issue a warning if no httpd root was found.
+    $self->error("Could not parse HTTPD root from ",
+                 "`$self->{binary} -V`") unless $self->{httpd_root};
+};
+
 sub httpd_root {
     my $self = shift;
     return unless $self->{binary};
-    unless ($self->{-V}) {
-        $self->{-V} = 1;
-        # Get the compile settings.
-        my $data = `$self->{binary} -V`;
-        unless ($data) {
-            $self->error("Unable to extract compile settings from ".
-                         "`$self->{binary} -V`");
-            return;
-        }
-
-        # Split out the parts.
-        foreach (split /\s*\n\s*/, $data) {
-            if (/magic\s+number:\s+(.*)$/i) {
-                $self->{magic_number} = $1;
-            } elsif (/=/) {
-                $_ =~ s/^-D\s+//;
-                $_ =~ s/"$//;
-                my ($k, $v) = split /\s*=\s*"/, $_;
-                $self->{lc $k} = $v;
-            } elsif (/-D/) {
-                $_ =~ s/^-D\s+//;
-                $self->{lc $_} = 1;
-            }
-        }
-        # Issue a warning if no httpd root was found.
-        $self->error("Could not parse HTTPD root from " .
-                     "`$self->{binary} -V`") unless $self->{httpd_root};
-    }
+    # Get the compile settings.
+    $get_compile_settings->($self) unless $self->{-V};
+    # Handle an unknown value.
+    $self->{httpd_root} = $self->unknown('httpd root')
+      unless defined $self->{httpd_root};
     return $self->{httpd_root};
 }
 
@@ -329,8 +338,13 @@ errors.
 =cut
 
 sub magic_number {
-    $_[0]->httpd_root unless $_[0]->{-V};
-    return $_[0]->{magic_number};
+    my $self = shift;
+    # Get the compile settings.
+    $get_compile_settings->($self) unless $self->{-V};
+    # Handle an unknown value.
+    $self->{magic_number} = $self->unknown('magic number')
+      unless defined $self->{magic_number};
+    return $self->{magic_number};
 }
 
 =head2 compile_option
@@ -353,8 +367,14 @@ learn about all the possible compile options.
 =cut
 
 sub compile_option {
-    $_[0]->httpd_root unless $_[0]->{-V};
-    return $_[0]->{lc $_[1]};
+    my $self = shift;
+    # Get the compile settings.
+    $get_compile_settings->($self) unless $self->{-V};
+    # Handle an unknown value.
+    my $option = lc $_[0];
+    $self->{$option} = $self->unknown("option $option")
+      unless defined $self->{$option};
+    return $self->{$option};
 }
 
 =head2 conf_file
@@ -388,6 +408,7 @@ sub conf_file {
     my $self = shift;
     return unless $self->{binary};
     unless (exists $self->{conf_file}) {
+        $self->info("Searching for Apache configuration file");
         my $root = $self->httpd_root;
         my $conf = $self->compile_option('SERVER_CONFIG_FILE');
         $conf = $u->file_name_is_absolute($conf) ?
@@ -404,6 +425,9 @@ sub conf_file {
         $self->{conf_file} = $u->first_file(@paths)
           or $self->error("No server config file found");
     }
+    # Handle an unknown value.
+    $self->{conf_file} = $self->unknown('configuration file', sub { -e $_[0] })
+      unless defined $self->{conf_file};
     return $self->{conf_file};
 }
 
@@ -418,26 +442,38 @@ or port number could not be parsed from the configuration file.
 
 =cut
 
+# This code reference parses the Apache configuration file. It is called by
+# user(), group(), or port(), whichever gets called first.
+my $parse_conf_file = sub {
+    my $self = shift;
+    return if exists $self->{user};
+    $self->{user} = undef;
+    # Find the configuration file.
+    my $conf = $self->conf_file or return;
+
+    $self->info("Parsing Apache configuration file");
+
+    # This is the place to add more regexes to collect stuff from the
+    # config file in the future.
+    my @regexen = (qr/^\s*User\s+(.*)$/,
+                   qr/^\s*Group\s+(.*)$/,
+                   qr/^\s*Port\s+(.*)$/ );
+    my ($usr, $grp, $prt) = $u->multi_search_file($conf, @regexen);
+    # Issue a warning if we couldn't find the user and group.
+    $self->error("Could not parse user and group from file '$conf'")
+      unless $usr && $grp;
+    $self->error("Could not parse port from file '$conf'") unless $prt;
+    # Assign them anyway.
+    @{$self}{qw(user group port)} = ($usr, $grp, $prt);
+};
+
 sub user {
     my $self = shift;
     return unless $self->{binary};
-    unless (exists $self->{user}) {
-        $self->{user} = undef;
-        my $conf = $self->conf_file or return;
-
-        # This is the place to add more regexes to collect stuff from the
-        # config file in the future.
-        my @regexen = (qr/^\s*User\s+(.*)$/,
-                       qr/^\s*Group\s+(.*)$/,
-                       qr/^\s*Port\s+(.*)$/ );
-        my ($usr, $grp, $prt) = $u->multi_search_file($conf, @regexen);
-        # Issue a warning if we couldn't find the user and group.
-        $self->error("Could not parse user and group from file '$conf'")
-          unless $usr && $grp;
-        $self->error("Could not parse port from file '$conf'") unless $prt;
-        # Assign them anyway.
-        @{$self}{qw(user group port)} = ($usr, $grp, $prt);
-    }
+    $parse_conf_file->($self) unless exists $self->{user};
+    # Handle an unknown value.
+    $self->{user} = $self->unknown('user', sub { getpwnam $_[0] })
+      unless $self->{user};
     return $self->{user};
 }
 
@@ -450,8 +486,13 @@ L<"user"|user> method for a list of possible errors.
 =cut
 
 sub group {
-    $_[0]->user unless exists $_[0]->{user};
-    return $_[0]->{group};
+    my $self = shift;
+    return unless $self->{binary};
+    $parse_conf_file->($self) unless exists $self->{group};
+    # Handle an unknown value.
+    $self->{group} = $self->unknown('group', sub { getgrnam $_[0] })
+      unless $self->{group};
+    return $self->{group};
 }
 
 =head2 port
@@ -463,8 +504,13 @@ L<"user"|user> method for a list of possible errors.
 =cut
 
 sub port {
-    $_[0]->user unless exists $_[0]->{user};
-    return $_[0]->{port};
+    my $self = shift;
+    return unless $self->{binary};
+    $parse_conf_file->($self) unless exists $self->{port};
+    # Handle an unknown value.
+    $self->{port} = $self->unknown('port', sub { $_[0] =~ /^\d+$/ })
+      unless $self->{port};
+    return $self->{port};
 }
 
 =head2 bin_dir
@@ -479,17 +525,19 @@ installed or if the bin directory could not be found.
 =cut
 
 sub bin_dir {
-    return unless $_[0]->{binary};
-    unless (exists $_[0]->{bin_dir}) {
-        my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_path('bin', $root)) {
-            $_[0]->{bin_dir} = $dir;
-        } else {
-            $_[0]->error("Could not find bin directory");
-            $_[0]->{bin_dir} = undef;
-        }
-    }
-    return $_[0]->{bin_dir};
+    my $self = shift;
+    return unless $self->{binary};
+    unless (exists $self->{bin_dir}) {{
+        my $root = $self->httpd_root || last; # Double braces allow this.
+        $self->info("Searching for binary directory");
+        $self->{bin_dir} = $u->first_cat_path('bin', $root)
+          or $self->error("Could not find bin directory");
+    }}
+
+    # Handle unknown value.
+    $self->{bin_dir} = $self->unknown('binary directory', sub { -d $_[0] })
+      unless $self->{bin_dir};
+    return $self->{bin_dir};
 }
 
 =head2 inc_dir
@@ -504,16 +552,17 @@ if Apache is not installed or if the inc directory could not be found.
 =cut
 
 sub inc_dir {
-    unless (exists $_[0]->{inc_dir}) {
-        my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_path(['include', 'inc',], $root)){
-            $_[0]->{inc_dir} = $dir;
-        } else {
-            $_[0]->error("Could not find inc directory");
-            $_[0]->{inc_dir} = undef;
-        }
-    }
-    return $_[0]->{inc_dir};
+    my $self = shift;
+    unless (exists $self->{inc_dir}) {{
+        my $root = $self->httpd_root || last; # Double braces allow this.
+        $self->info("Searching for include directory");
+        $self->{inc_dir} = $u->first_cat_path(['include', 'inc',], $root)
+          or $self->error("Could not find inc directory");
+    }}
+    # Handle unknown value.
+    $self->{inc_dir} = $self->unknown('include directory', sub { -d $_[0] })
+      unless $self->{inc_dir};
+    return $self->{inc_dir};
 }
 
 =head2 lib_dir
@@ -529,19 +578,24 @@ found.
 =cut
 
 sub lib_dir {
-    unless (exists $_[0]->{lib_dir}) {
-        my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_path(['lib', 'modules', 'libexec'], $root)){
-            $_[0]->{lib_dir} = $dir;
+    my $self = shift;
+    unless (exists $self->{lib_dir}) {{
+        my $root = $self->httpd_root || last; # Double braces allow this.
+        $self->info("Searching for library directory");
+        if (my $d = $u->first_cat_path([qw(lib modules libexec)], $root)) {
+            # The usual suspects.
+            $self->{lib_dir} = $d;
         } elsif ($u->first_dir('/usr/lib/apache/1.3')) {
             # The Debian way.
-            $_[0]->{lib_dir} = '/usr/lib/apache/1.3';
+            $self->{lib_dir} = '/usr/lib/apache/1.3';
         } else {
-            $_[0]->error("Could not find lib direcory");
-            $_[0]->{lib_dir} = undef;
+            $self->error("Could not find lib direcory");
         }
-    }
-    return $_[0]->{lib_dir};
+    }}
+    # Handle unknown value.
+    $self->{lib_dir} = $self->unknown('library directory', sub { -d $_[0] })
+      unless $self->{lib_dir};
+    return $self->{lib_dir};
 }
 
 =head2 so_lib_dir
@@ -568,27 +622,33 @@ or an empty anonymous array in a scalar context.
 
 =cut
 
+# This code reference collects the list of static modules from Apache. Used by
+# static_mods(), mod_perl(), or mod_so(), whichever gets called first.
+my $get_static_mods = sub {
+    my $self = shift;
+    $self->{static_mods} = undef;
+    $self->info("Collecting list of static modules");
+    my $data = `$self->{binary} -l`;
+    unless ($data) {
+        $self->error("Unable to extract needed data from ".
+                     "`$self->{binary} =l`");
+        return;
+    }
+
+    # Parse out the modules.
+    my @mods;
+    while ($data =~ /^\s*(\w+)\.c\s*$/mg) {
+        push @mods, $1;
+        $self->{mod_so} = 1 if $1 eq 'mod_so';
+        $self->{mod_perl} = 1 if $1 eq 'mod_perl';
+    }
+    $self->{static_mods} = \@mods;
+};
+
 sub static_mods {
     my $self = shift;
     return unless $self->{binary};
-    unless (exists $self->{static_mods}) {
-        $self->{static_mods} = undef;
-        my $data = `$self->{binary} -l`;
-        unless ($data) {
-            $self->error("Unable to extract needed data from ".
-                         "`$self->{binary} =l`");
-            return;
-        }
-
-        # Parse out the modules.
-        my @mods;
-        while ($data =~ /^\s*(\w+)\.c\s*$/mg) {
-            push @mods, $1;
-            $self->{mod_so} = 1 if $1 eq 'mod_so';
-            $self->{mod_perl} = 1 if $1 eq 'mod_perl';
-        }
-        $self->{static_mods} = \@mods;
-    }
+    $get_static_mods->($self) unless exists $self->{static_mods};
     return unless $self->{static_mods};
     return wantarray ? @{$self->{static_mods}} : $self->{static_mods};
 }
@@ -603,8 +663,9 @@ a list of possible errors.
 =cut
 
 sub mod_so {
-    $_[0]->static_mods unless $_[0]->{static_mods};
-    return $_[0]->{mod_so};
+    my $self = shift;
+    $get_static_mods->($self) unless exists $self->{static_mods};
+    return $self->{mod_so};
 }
 
 =head2 mod_perl
@@ -617,8 +678,9 @@ L<"static_mods"|static_mods> method for a list of possible errors.
 =cut
 
 sub mod_perl {
-    $_[0]->static_mods unless $_[0]->{static_mods};
-    return $_[0]->{mod_perl};
+    my $self = shift;
+    $get_static_mods->($self) unless exists $self->{static_mods};
+    return $self->{mod_perl};
 }
 
 =head2 home_url
