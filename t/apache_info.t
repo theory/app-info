@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache_info.t,v 1.5 2002/08/08 19:27:02 david Exp $
+# $Id$
 
 use strict;
 use Test::More tests => 83;
@@ -36,7 +36,7 @@ SKIP: {
     ##########################################################################
     # Check name.
     $apache->name;
-    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache)(.exe)? -v`$/,
          "Check name info" );
     $apache->name;
     ok( ! defined $info->message, "No info" );
@@ -49,7 +49,7 @@ SKIP: {
         "Got Object 2");
     $info->message; # Throw away constructor message.
     $apache->version;
-    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache)(.exe)? -v`$/,
         "Check version info" );
 
     $apache->version;

@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.39 2003/08/26 01:50:20 david Exp $
+# $Id$
 
 =head1 NAME
 
@@ -45,6 +45,7 @@ use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
 $VERSION = '0.22';
+use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
 
@@ -142,6 +143,7 @@ sub new {
          /sw/sbin));
 
     my @exes = qw(httpd apache-perl apache);
+    if (WIN32) { $_ .= ".exe" for @exes }
 
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
@@ -516,6 +518,14 @@ my $get_compile_settings = sub {
             $_ =~ s/"$//;
             my ($k, $v) = split /\s*=\s*"/, $_;
             $self->{lc $k} = $v;
+            if (WIN32) {
+                if ($k eq 'SUEXEC_BIN') {
+                    $self->{lc $k} = 0;
+                } elsif ($k eq 'HTTPD_ROOT') {
+                    $self->{lc $k} =
+                      join('\\', (split /\\/, $self->{exe} )[0 .. 1]);
+                 }
+            }
         } elsif (/-D/) {
             $_ =~ s/^-D\s+//;
             $self->{lc $_} = 1;
