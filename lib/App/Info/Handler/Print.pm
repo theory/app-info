@@ -1,6 +1,6 @@
 package App::Info::Handler::Print;
 
-# $Id: Print.pm,v 1.1 2002/06/11 23:56:44 david Exp $
+# $Id: Print.pm,v 1.2 2002/06/13 22:20:20 david Exp $
 
 =head1 NAME
 
@@ -54,8 +54,8 @@ sub new {
 sub handler {
     my ($self, $req) = @_;
     print {$self->{fh}} $req->message, "\n";
-    # Return OK to indicate that we've handled the request.
-    return App::Info::Handler::OK;
+    # Return true to indicate that we've handled the request.
+    return 1;
 }
 
 1;

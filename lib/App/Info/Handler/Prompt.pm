@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.4 2002/06/13 22:09:09 david Exp $
+# $Id: Prompt.pm,v 1.5 2002/06/13 22:20:20 david Exp $
 
 =head1 NAME
 
@@ -95,8 +95,8 @@ sub handler {
     # Save the answer.
     $req->value($ans);
 
-    # Return OK to indicate that we've handled the request.
-    return App::Info::Handler::OK;
+    # Return true to indicate that we've handled the request.
+    return 1;
 }
 
 1;

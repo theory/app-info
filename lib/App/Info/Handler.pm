@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.4 2002/06/11 06:09:45 david Exp $
+# $Id: Handler.pm,v 1.5 2002/06/13 22:20:20 david Exp $
 
 =head1 NAME
 
@@ -40,9 +40,6 @@ use strict;
 use vars qw($VERSION);
 $VERSION = '0.01';
 
-use constant OK => 1;
-use constant DECLINED => 2;
-
 my %handlers;
 
 sub register_handler {
@@ -69,7 +66,7 @@ sub new {
     }
 }
 
-sub handler { OK }
+sub handler { 1 }
 
 1;
 __END__

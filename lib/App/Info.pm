@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.26 2002/06/13 22:09:09 david Exp $
+# $Id: Info.pm,v 1.27 2002/06/13 22:20:20 david Exp $
 
 =head1 NAME
 
@@ -10,7 +10,7 @@ App::Info - Information about software packages on a system
 
   use App::Info::Category::FooApp;
 
-  my $app = App::Info::Category::FooApp->new( error_level => 'croak' );
+  my $app = App::Info::Category::FooApp->new;
 
   if ($app->installed) {
       print "App name: ", $app->name, "\n";
@@ -34,10 +34,10 @@ others are invited to write their own subclasses and contribute them to the
 CPAN. Contributors are welcome to extend their subclasses to provide more
 information relevant to the application for which data is to be provided (see
 L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
-encouraged to, at a minimum, implement the methods defined here and in the
-category abstract base classes (e.g. L<App::Info::HTTPD|App::Info::HTTPD> and
-L<App::Info::Lib|App::Info::Lib>. See L<"NOTES ON SUBCLASSING"> for more
-information on implementing new subclasses.
+encouraged to, at a minimum, implement the abstract methods defined here and
+in the category abstract base classes (e.g.
+L<App::Info::HTTPD|App::Info::HTTPD> and L<App::Info::Lib|App::Info::Lib>. See
+L<"NOTES ON SUBCLASSING"> for more information on implementing new subclasses.
 
 =cut
 
@@ -89,6 +89,28 @@ my $set_handlers = sub {
     }
 };
 
+=head1 CONSTRUTOR
+
+=head2 new
+
+  my $app = App::Info::Category::FooApp->new(@params);
+
+Consructs the FooApp App::Info object and returns it. The @params arguments
+define how the App::Info object will respond to certain events. Events can be
+handled one more more subclasses of L<App::Info::Handler|App::Info::Handler>
+-- the first to return a true value will be the last to execute.
+
+=over 4
+
+=item on_info
+
+
+
+=back
+
+
+=cut
+
 sub new {
     my ($pkg, %p) = @_;
     my $class = ref $pkg || $pkg;
@@ -117,7 +139,7 @@ my $handler = sub {
 
     # Do the deed. The ultimate handling handler may die.
     foreach my $eh (@{$self->{"on_$meth"}}) {
-        last if $eh->handler($req) eq App::Info::Handler::OK;
+        last if $eh->handler($req);
     }
 
     # Return the requst.
@@ -241,56 +263,6 @@ sub download_url  { $croak->(shift, 'download_url') }
 
 1;
 __END__
-
-=head1 CONSTRUTOR
-
-=head2 new
-
-  my $app = App::Info::Category::FooApp->new(@params);
-
-Consructs the FooApp App::Info object and returns it. The C<error_level>
-parameter determines how the object will behave when it encounters an error,
-such as when a specific file can't be found or a value can't be parsed from a
-file. The options are:
-
-=over 4
-
-=item confess
-
-Calls C<Carp::confess()>, causing the application to die and display a
-detailed stack trace, as well as the error message.
-
-=item croak
-
-Calls C<Carp::croak()>, causing the application to die and display the error
-message.
-
-=item die
-
-Alias for "croak"
-
-=item cluck
-
-Calls C<Carp::cluck()>, which prints the error message and a complete stack
-trace as a warning.
-
-=item carp
-
-Calls C<Carp::carp()>, which prints the error message as a warning. This is
-the default error level.
-
-=item warn
-
-Alias for "carp".
-
-=item silent
-
-Ignores the error.
-
-=back
-
-In the cases of "cluck", "carp", "warn", and "silent", the last error can
-always be retrieved via the C<last_error()> method.
 
 =head1 OBJECT METHODS
 

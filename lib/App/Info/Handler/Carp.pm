@@ -1,6 +1,6 @@
 package App::Info::Handler::Carp;
 
-# $Id: Carp.pm,v 1.3 2002/06/11 06:09:45 david Exp $
+# $Id: Carp.pm,v 1.4 2002/06/13 22:20:20 david Exp $
 
 =head1 NAME
 
@@ -60,8 +60,8 @@ sub handler {
     # from the proper context of the caller.
     package App::Info;
     $levels{$self->{level}}->($req->message);
-    # Return OK to indicate that we've handled the request.
-    return App::Info::Handler::OK;
+    # Return true to indicate that we've handled the request.
+    return 1;
 }
 
 1;
