@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.7 2002/06/03 16:16:26 david Exp $
+# $Id: Info.pm,v 1.8 2002/06/03 18:37:15 david Exp $
 
 =head1 NAME
 
@@ -26,14 +26,17 @@ App::Info is an abstract base class designed to provide a generalized
 interface for subclasses that provide meta data about software packages
 installed on a system. The idea is that these classes can be used in Perl
 application installers in order to determine whether software dependencies
-have been fulfilled.
+have been fulfilled, and to get necessary meta data about those software
+packages.
 
 A few L<sample subclasses|"SEE ALSO"> are provided with the distribution, but
 others are invited to write their own subclasses and contribute them to the
 CPAN. Contributors are welcome to extend their subclasses to provide more
 information relevant to the application for which data is to be provided (see
 L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
-encouraged to, at a minimum, implement the methods defined here.
+encouraged to, at a minimum, implement the methods defined here and in the
+category abstract base classes (e.g. L<App::Info::HTTPD|App::Info::HTTPD>
+and L<App::Info::Lib|App::Info::Lib>.
 
 =cut
 
