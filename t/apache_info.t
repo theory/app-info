@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 
-# $Id: apache_info.t,v 1.2 2002/06/27 20:05:26 david Exp $
+# $Id: apache_info.t,v 1.3 2002/06/27 20:28:21 david Exp $
 
 use strict;
-use Test::More tests => 84;
-use constant SKIP => 80;
+use Test::More tests => 83;
+use constant SKIP => 79;
 
 ##############################################################################
 # Make sure that we can use the stuff that's in our local lib directory.
