@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.18 2002/06/27 18:46:21 david Exp $
+# $Id: PostgreSQL.pm,v 1.19 2002/06/27 19:22:12 david Exp $
 
 =head1 NAME
 
@@ -591,7 +591,7 @@ B<Events:>
 
 =item info
 
-Executing `pg_config --includedir`
+Executing `pg_config --libdir`
 
 =item error
 
@@ -638,7 +638,7 @@ B<Events:>
 
 =item info
 
-Executing `pg_config --includedir`
+Executing `pg_config --pkglibdir`
 
 =item error
 
