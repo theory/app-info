@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.13 2002/06/04 22:06:44 david Exp $
+# $Id: PostgreSQL.pm,v 1.14 2002/06/05 20:37:44 david Exp $
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -80,7 +80,7 @@ do {
          /usr/sbin
          /bin));
 
-    $obj->{pg_config} = $u->first_cat_path('pg_config', @paths);
+    $obj->{pg_config} = $u->first_cat_exe('pg_config', @paths);
 };
 
 =head1 CONSTRUCTOR

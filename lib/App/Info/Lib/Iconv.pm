@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.14 2002/06/05 00:06:12 david Exp $
+# $Id: Iconv.pm,v 1.15 2002/06/05 20:37:20 david Exp $
 
 =head1 NAME
 
@@ -60,7 +60,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 my $obj = {};
 my $u = App::Info::Util->new;
@@ -77,7 +77,7 @@ do {
          /sbin
          /sw/sbin));
 
-    $obj->{iconv_exe} = $u->first_cat_path('iconv', @paths);
+    $obj->{iconv_exe} = $u->first_cat_exe('iconv', @paths);
 };
 
 =head1 CONSTRUCTOR
