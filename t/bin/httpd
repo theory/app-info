@@ -20,7 +20,7 @@ Server compiled with....
  -D DYNAMIC_MODULE_LIMIT=64
  -D HARD_SERVER_LIMIT=256
  -D HTTPD_ROOT="t"
- -D SUEXEC_BIN="/usr/local/apache/bin/suexec"
+ -D SUEXEC_BIN="t/bin"
  -D DEFAULT_PIDLOG="logs/httpd.pid"
  -D DEFAULT_SCOREBOARD="logs/httpd.scoreboard"
  -D DEFAULT_LOCKFILE="logs/httpd.lock"
@@ -55,6 +55,6 @@ Compiled-in modules:
   mod_setenvif.c
   mod_ssl.c
   mod_perl.c
-suexec: disabled; invalid wrapper /usr/local/apache/bin/suexec
+suexec: disabled; invalid wrapper t/bin
 EOF
 }
