@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.35 2002/06/27 18:46:21 david Exp $
+# $Id: Apache.pm,v 1.36 2002/06/27 19:56:52 david Exp $
 
 =head1 NAME
 
@@ -215,7 +215,7 @@ Executing `httpd -v`
 
 =item error
 
-Failed to find Apache version data with `httpd-v`
+Failed to find Apache version data with `httpd -v`
 
 Failed to parse Apache name and version from string
 
@@ -284,7 +284,7 @@ Executing `httpd -v`
 
 =item error
 
-Failed to find Apache version data with `httpd-v`
+Failed to find Apache version data with `httpd -v`
 
 Failed to parse Apache name and version from string
 
@@ -344,7 +344,7 @@ Executing `httpd -v`
 
 =item error
 
-Failed to find Apache version data with `httpd-v`
+Failed to find Apache version data with `httpd -v`
 
 Failed to parse Apache name and version from string
 
@@ -393,7 +393,7 @@ Executing `httpd -v`
 
 =item error
 
-Failed to find Apache version data with `httpd-v`
+Failed to find Apache version data with `httpd -v`
 
 Failed to parse Apache name and version from string
 
@@ -437,7 +437,7 @@ Executing `httpd -v`
 
 =item error
 
-Failed to find Apache version data with `httpd-v`
+Failed to find Apache version data with `httpd -v`
 
 Failed to parse Apache name and version from string
 
@@ -731,6 +731,8 @@ B<Events:>
 
 Searching for Apache configuration file
 
+Executing `httpd -V`
+
 Parsing Apache configuration file
 
 =item error
@@ -806,6 +808,8 @@ B<Events:>
 
 Searching for Apache configuration file
 
+Executing `httpd -V`
+
 Parsing Apache configuration file
 
 =item error
@@ -856,6 +860,8 @@ B<Events:>
 =item info
 
 Searching for Apache configuration file
+
+Executing `httpd -V`
 
 Parsing Apache configuration file
 
