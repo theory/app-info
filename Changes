@@ -1,5 +1,11 @@
 Revision history for Perl extension App::Info.
 
+0.21  
+      - Fixed bug in Handler::Prompt where the prompt failed to simply
+        return when the user accepted the default value (with confirm
+        events).
+      - Changed email address in AUTHOR section so that it's a link.
+
 0.20  Thu Jun 27 20:28:34 2002
       - Major upgrade. Some backwards compatibility broken. Namely, the
         error parameter no longer exists. See event handling instead.
