@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.3 2002/06/12 21:17:09 david Exp $
+# $Id: prompt.t,v 1.4 2002/06/13 02:32:09 david Exp $
 
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
@@ -116,7 +116,7 @@ untie *STDOUT;
 untie *STDIN;
 untie *STDERR;
 
-if ($ENV{APP_INFO_MAINTAINER}) {
+if ($ENV{APP_INFO_MAINTAINER} && ! $ENV{HARNESS_ACTIVE}) {
     # Interactive tests for maintainer only.
     $app = App::Info::Category::FooApp->new( on_confirm => $p);
     $app->inc_dir;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.5 2002/06/10 23:47:48 david Exp $
+# $Id: myapache.t,v 1.6 2002/06/13 02:32:09 david Exp $
 
 use strict;
 use Test::More;
@@ -12,6 +12,7 @@ if (exists $ENV{APP_INFO_MAINTAINER}) {
 }
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
+BEGIN { use_ok('App::Info::Handler::Carp') }
 
 my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
               mod_status mod_include mod_autoindex mod_dir mod_cgi mod_asis
