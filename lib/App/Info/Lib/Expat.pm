@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.12 2002/06/04 01:15:41 david Exp $
+# $Id: Expat.pm,v 1.13 2002/06/04 01:18:19 david Exp $
 
 =head1 NAME
 
@@ -159,10 +159,10 @@ sub version {
   my $major_version = $expat->major_version;
 
 Returns the Expat major version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "1". Returns F<undef> if Expat is not
-installed. Emits a warning if Expat is installed but F<expat.h> could not be
-found or the version number could not be parsed.
+version number from the expat.h file, if it exists. For example, if
+C<version()> returns "1.95.2", then this method returns "1". Returns F<undef>
+if Expat is not installed. Emits a warning if Expat is installed but
+F<expat.h> could not be found or the version number could not be parsed.
 
 =cut
 
@@ -176,10 +176,10 @@ sub major_version {
   my $minor_version = $expat->minor_version;
 
 Returns the Expat minor version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "95". Returns F<undef> if Expat is not
-installed. Emits a warning if Expat is installed but F<expat.h> could not be
-found or the version number could not be parsed.
+version number from the expat.h file, if it exists. For example, if
+C<version()> returns "1.95.2", then this method returns "95". Returns F<undef>
+if Expat is not installed. Emits a warning if Expat is installed but
+F<expat.h> could not be found or the version number could not be parsed.
 
 =cut
 
@@ -193,10 +193,10 @@ sub minor_version {
   my $patch_version = $expat->patch_version;
 
 Returns the Expat patch version number. App::Info::Lib::Expat parses the
-version number from the expat.h file, if it exists. If C<version()> returns
-"1.95.2", then this method returns "2". Returns F<undef> if Expat is not
-installed. Emits a warning if Expat is installed but F<expat.h> could not be
-found or the version number could not be parsed.
+version number from the expat.h file, if it exists. For example, if
+C<version()> returns "1.95.2", then this method returns "2". Returns F<undef>
+if Expat is not installed. Emits a warning if Expat is installed but
+F<expat.h> could not be found or the version number could not be parsed.
 
 =cut
 
