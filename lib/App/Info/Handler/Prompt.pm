@@ -1,6 +1,6 @@
 package App::Info::Handler::Prompt;
 
-# $Id: Prompt.pm,v 1.1 2002/06/12 04:16:57 david Exp $
+# $Id: Prompt.pm,v 1.2 2002/06/12 18:18:58 david Exp $
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ sub new {
 }
 
 my $get_ans = sub {
-    my ($prompt, $def, $tty) = @_;
+    my ($prompt, $tty, $def) = @_;
     # Print the message.
     local $| = 1;
     local $\;
@@ -49,44 +49,69 @@ my $get_ans = sub {
     my $ans;
     if ($tty) {
         $ans = <STDIN>;
-        if( defined $ans ) {
+        if (defined $ans ) {
             chomp $ans;
         } else { # user hit ctrl-D
             print "\n";
         }
     } else {
-        print "$def\n";
+        print "$def\n" if defined $def;
     }
-    return $ans;
+    return !defined $ans || $ans eq '' ? $def : $ans;
 };
 
 sub handler {
     my ($self, $req) = @_;
+    my $ans;
     my $type = $req->type;
     if ($type eq 'unknown') {
+        # We'll want to prompt for a new value.
+        my $msg = $req->message;
+        my $prompt = $req->prompt;
+        if ($msg) {
+            $msg .= $prompt ? "\n$prompt " : ' ';
+        } else {
+            $msg = $prompt ? "$prompt " : ' ';
+        }
+        # Get the answer.
+        $ans = $get_ans->($msg, $self->{tty});
+
+        # Validate the answer.
+        while (!$req->callback($ans)) {
+            print "Invalid value: '$ans'\n";
+            $ans = $get_ans->($msg, $self->{tty});
+        }
+
     } elsif ($type eq 'confirm') {
+
+        # We'll want to prompt for a new value.
+        my $msg = $req->message;
+        my $prompt = $req->prompt;
+        if ($msg) {
+            $msg .= $prompt ? "\n$prompt " : ' ';
+        } else {
+            $msg = $prompt ? "$prompt " : ' ';
+        }
+        $msg .= '[y] ';
+
+        # Get the answer.
+        my $bool = lc substr $get_ans->($msg, $self->{tty}, 'y'), 0, 1;
+        if ($bool eq 'y') {
+            $ans = $req->value;
+        } else {
+            # Get the answer.
+            $ans = $get_ans->("Enter a new value ", $self->{tty});
+
+            # Validate the answer.
+            while (!$req->callback($ans)) {
+                print "Invalid value: '$ans'\n";
+                $ans = $get_ans->("Enter a new value ", $self->{tty});
+            }
+        }
+
     } else {
-        # Decline to handle other types of requests.
-        return;
-    }
-
-    # Assemble the prompt message.
-    my $msg = $req->message;
-    my $prompt = $req->prompt;
-    if ($msg) {
-        $msg .= $prompt ? "\n$prompt" : '';
-    } else {
-        $msg = $prompt ? $prompt : '';
-    }
-    $msg .= $showdef;
-
-    # Get the answer.
-    my $ans = $get_ans->($msg, $def, $self->{tty});
-
-    # Validate the answer.
-    while (!$req->callback($ans)) {
-        print "Invalid value: '$ans'\n";
-        $ans = $get_ans->($msg, $def, $self->{tty});
+        # Just print the message.
+        print $req->message, "\n";
     }
 
     # Save the answer.

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: print.t,v 1.2 2002/06/12 04:16:57 david Exp $
+# $Id: print.t,v 1.3 2002/06/12 18:18:58 david Exp $
 
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
         @INC = ('../lib', 'lib');
     }
     else {
-        unshift @INC, 't/lib';
+        unshift @INC, 't/lib', '../t/lib';
     }
 }
 chdir 't';

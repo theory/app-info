@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.24 2002/06/12 04:16:57 david Exp $
+# $Id: Info.pm,v 1.25 2002/06/12 18:18:58 david Exp $
 
 =head1 NAME
 
@@ -171,7 +171,6 @@ sub unknown {
 
     # Execute the handler sequence.
     my $req = $handler->($self, "unknown", $params);
-    # If we haven't died, return the value.
     return $req->value;
 }
 
@@ -202,7 +201,6 @@ sub confirm {
     # Mark that we've confirmed this value.
     $self->{"_conf_$key"} = 1;
 
-    # If we haven't died, return the value.
     return $req->value;
 }
 
