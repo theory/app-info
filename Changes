@@ -1,5 +1,18 @@
 Revision history for Perl extension App::Info.
 
+0.03  Mon Jun  3 18:37:50 2002
+        - Private release.
+        - Changed first_cat_file() to first_cat_path() in App::Info::Util.
+        - Added internal tests for various subclasses.
+        - Fixed a bunch of bugs.
+        - Added better support for Fink-installed libraries on Darwin.
+
+0.02  Mon Jun  3 04:38:24 2002
+        - Private release.
+        - Added Expat.pm.
+        - Many changes to Util.
+
+
 0.01  Fri May 31 07:54:55 2002
-        - original version; created by h2xs 1.21 with options
-          -AXn App::Info
+        - Original version.
+        - Private release.
