@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.5 2002/06/13 22:09:09 david Exp $
+# $Id: prompt.t,v 1.6 2002/06/21 05:43:12 david Exp $
 
 use strict;
 use Test::More tests => 27;
@@ -13,7 +13,7 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = ('../lib', 'lib');
     } else {
-        unshift @INC, 't/lib', '../t/lib';
+        unshift @INC, 't/lib', 'lib';
     }
 }
 chdir 't';
