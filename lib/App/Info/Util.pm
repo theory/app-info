@@ -2,6 +2,9 @@ package App::Info::Util;
 
 use strict;
 use File::Spec::Functions ();
+use vars qw(@ISA $VERSION);
+@ISA = qw(File::Spec);
+$VERSION = '0.01';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
