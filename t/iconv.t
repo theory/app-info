@@ -1,43 +1,36 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 18;
+use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 
-ok( my $iconv = App::Info::Lib::Iconv->new, "Got Object");
+my $lib_dir = catdir 't', 'testlib';
+my $inc_dir = catdir 't', 'testinc';
+my $bin_dir = catdir 't', 'scripts';
+$bin_dir = catdir 't', 'bin' unless -d $bin_dir;
+
+ok( my $iconv = App::Info::Lib::Iconv->new(
+    search_lib_dirs => $lib_dir,
+    search_inc_dirs => $inc_dir,
+    search_bin_dirs => $bin_dir,
+), "Got Object");
 isa_ok($iconv, 'App::Info::Lib::Iconv');
 isa_ok($iconv, 'App::Info');
 is( $iconv->name, 'libiconv', "Check name" );
 is( $iconv->key_name, 'libiconv', "Check key name" );
 
-if ($iconv->installed) {
-    ok( $iconv->installed, "libiconv is installed" );
-    if ($iconv->version) {
-        # I really wish there were a better way to ensure that I had a version
-        # number. Meanwhile, this should allow all of the tests to pass.
-        ok( $iconv->version, "Got version" );
-        ok( $iconv->major_version, "Got major version" );
-        ok( defined $iconv->minor_version, "Got minor version" );
-    } else {
-        ok( !$iconv->version, "Don't got version" );
-        ok( !$iconv->major_version, "Don't got major version" );
-        ok( !$iconv->minor_version, "Don't got minor version" );
-    }
-    ok( !$iconv->patch_version, "There is no patch version" );
-} else {
-    ok( !$iconv->installed, "libiconv is not installed" );
-    ok( !$iconv->version, "Don't got version" );
-    ok( !$iconv->major_version, "Don't got major version" );
-    ok( !$iconv->minor_version, "Don't got minor version" );
-    ok( !$iconv->patch_version, "Don't got patch version" );
-}
-
-# Installation doesn't guarntee lib & inc installation.
-$iconv->lib_dir; pass("Can call lib_dir");
-$iconv->bin_dir, pass("Can call bin_dir");
-$iconv->so_lib_dir; pass("Can call so_lib_dir" );
-$iconv->inc_dir, pass("Can call inc_dir");
-
-ok( $iconv->home_url, "Get home URL" );
-ok( $iconv->download_url, "Get download URL" );
+ok( $iconv->installed, "libiconv is installed" );
+is( $iconv->name, "libiconv", "Get name" );
+is( $iconv->version, "1.9", "Test Version" );
+is( $iconv->major_version, '1', "Test major version" );
+is( $iconv->minor_version, '9', "Test minor version" );
+ok( ! defined $iconv->patch_version, "Test patch version" );
+is( $iconv->lib_dir, 't/testlib', "Test lib dir" );
+is( $iconv->bin_dir, 't/bin', "Test bin dir" );
+is( $iconv->so_lib_dir, 't/testlib', "Test so lib dir" );
+is( $iconv->inc_dir, "t/testinc", "Test inc dir" );
+is( $iconv->home_url, 'http://www.gnu.org/software/libiconv/', "Get home URL" );
+is( $iconv->download_url, 'ftp://ftp.gnu.org/pub/gnu/libiconv/',
+    "Get download URL" );

@@ -45,6 +45,7 @@ use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
 $VERSION = '0.31';
+use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
 
@@ -61,32 +62,11 @@ my $u = App::Info::Util->new;
 Returns an App::Info::Lib::Iconv object. See L<App::Info|App::Info> for a
 complete description of argument parameters.
 
-When called, C<new()> searches the file system for the F<iconv> executable. If
-F<iconv> is found, libiconv will be assumed to be installed. Otherwise, most
-of the object methods will return C<undef>.
-
-App::Info::Lib::Iconv searches for F<iconv> along your path, as defined by
-C<File::Spec-E<gt>path>. Failing that, it searches the following directories:
-
-=over 4
-
-=item /usr/local/bin
-
-=item /usr/bin
-
-=item /bin
-
-=item /sw/bin
-
-=item /usr/local/sbin
-
-=item /usr/sbin/
-
-=item /sbin
-
-=item /sw/sbin
-
-=back
+When called, C<new()> searches the the list of directories returned by the
+C<search_bin_dirs()> method for an executable file with a name returned by the
+C<search_exe_names()> method. If the executable is found, libiconv will be
+assumed to be installed. Otherwise, most of the object methods will return
+C<undef>.
 
 B<Events:>
 
@@ -112,31 +92,25 @@ sub new {
     my $self = shift->SUPER::new(@_);
     # Find iconv.
     $self->info("Searching for iconv");
-    my @paths = ($u->path,
-      qw(/usr/local/bin
-         /usr/bin
-         /bin
-         /sw/bin
-         /usr/local/sbin
-         /usr/sbin/
-         /sbin
-         /sw/sbin));
 
-    if (my $exe = $u->first_cat_exe('iconv', @paths)) {
+    if (my $exe = $u->first_cat_exe([$self->search_exe_names],
+                                    $self->search_bin_dirs)) {
         # We found it. Confirm.
-        $self->{iconv_exe} =
-          $self->confirm( key      => 'iconv_exe',
-                          prompt   => 'Path to iconv executable?',
-                          value    => $exe,
-                          callback => sub { -x },
-                          error    => 'Not an executable');
+        $self->{iconv_exe} = $self->confirm(
+            key      => 'iconv_exe',
+            prompt   => 'Path to iconv executable?',
+            value    => $exe,
+            callback => sub { -x },
+            error    => 'Not an executable'
+        );
     } else {
         # No luck. Ask 'em for it.
-        $self->{iconv_exe} =
-          $self->unknown( key      => 'iconv_exe',
-                          prompt   => 'Path to iconv executable?',
-                          callback => sub { -x },
-                          error    => 'Not an executable');
+        $self->{iconv_exe} = $self->unknown(
+            key      => 'iconv_exe',
+            prompt   => 'Path to iconv executable?',
+            callback => sub { -x },
+            error    => 'Not an executable'
+        );
     }
 
     return $self;
@@ -232,14 +206,17 @@ my $get_version = sub {
     my $self = shift;
     $self->{version} = undef;
     $self->info("Searching for 'iconv.h'");
-    # No point in continuing if there's no include directory.
-    my $inc = $self->inc_dir
-      or ($self->error("Cannot find 'iconv.h'")) && return;
-    my $header = $u->catfile($inc, 'iconv.h');
+    # Let inc_dir() do the work.
+    unless ($self->inc_dir && $self->{inc_file}) {
+        # No point in continuing if there's no include file.
+        $self->error("Cannot find 'iconv.h'");
+        return;
+    }
+
     # This is the line we're looking for:
     # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
     my $regex = qr/_LIBICONV_VERSION\s+([^\s]+)\s/;
-    if (my $ver = $u->search_file($header, $regex)) {
+    if (my $ver = $u->search_file($self->{inc_file}, $regex)) {
         # Convert the version number from hex.
         $ver = hex $ver;
             # Shift 8.
@@ -250,7 +227,7 @@ my $get_version = sub {
             @{$self}{qw(version major minor)} =
               ("$major.$minor", $major, $minor);
     } else {
-        $self->error("Cannot parse version number from file '$header'");
+        $self->error("Cannot parse version number from file '$self->{inc_file}'");
     }
 };
 
@@ -448,8 +425,10 @@ sub bin_dir {
             # We found it!
             $self->{bin_dir} = $bin;
         } else {
-            $self->{bin_dir} = $self->unknown( key      => 'bin directory',
-                                               callback => $is_dir);
+            $self->{bin_dir} = $self->unknown(
+                key      => 'bin directory',
+                callback => $is_dir
+            );
         }
     }
     return $self->{bin_dir};
@@ -499,23 +478,22 @@ sub inc_dir {
     return unless $self->{iconv_exe};
     unless (exists $self->{inc_dir}) {
         $self->info("Searching for include directory");
-        # Should there be more paths than this?
-        my @paths = qw(/usr/local/include
-                       /usr/include
-                       /sw/include);
-
-        if (my $dir = $u->first_cat_dir('iconv.h', @paths)) {
+        my @incs = $self->search_inc_names;
+        if (my $dir = $u->first_cat_dir(\@incs, $self->search_inc_dirs)) {
             $self->{inc_dir} = $dir;
         } else {
             $self->error("Cannot find include directory");
-            my $cb = sub { $u->first_cat_dir('iconv.h', $_) };
+            my $cb = sub { $u->first_cat_dir(\@incs, $_) };
             $self->{inc_dir} =
               $self->unknown( key      => 'include directory',
                               callback => $cb,
-                              error    => "File 'iconv.h' not found in " .
+                              error    => "Iconv include file not found in " .
                                           "directory");
-
         }
+        # So which is the include file? Needed for the version number.
+        $self->{inc_file} = $u->first_file(
+            map { $u->catfile($self->{inc_dir}, $_) } @incs
+        ) if $self->{inc_dir};
     }
     return $self->{inc_dir};
 }
@@ -526,40 +504,9 @@ sub inc_dir {
 
   my $lib_dir = $iconv->lib_dir;
 
-Returns the directory path in which a libiconv library was found.
-App::Info::Lib::Iconv searches for these files:
-
-=over 4
-
-=item libiconv.so
-
-=item libiconv.so.0
-
-=item libiconv.so.0.0.1
-
-=item libiconv.dylib
-
-=item libiconv.2.dylib
-
-=item libiconv.2.0.4.dylib
-
-=item libiconv.a
-
-=item libiconv.la
-
-=back
-
-...in these directories:
-
-=over 4
-
-=item /usr/local/lib
-
-=item /usr/lib
-
-=item /sw/lib
-
-=back
+Returns the directory path in which a libiconv library was found. The search
+looks for a file with a name returned by C<search_lib_names()> in a directory
+returned by C<search_lib_dirs()>.
 
 B<Events:>
 
@@ -586,30 +533,19 @@ sub lib_dir {
     return unless $self->{iconv_exe};
     unless (exists $self->{lib_dir}) {
         $self->info("Searching for library directory");
-        # Should there be more paths than this?
-        my @paths = qw(/usr/local/lib
-                       /usr/lib
-                       /sw/lib);
-        my @files = qw(libiconv.so
-                       libiconv.so.0
-                       libiconv.so.0.0.1
-                       libiconv.dylib
-                       libiconv.2.dylib
-                       libiconv.2.0.4.dylib
-                       libiconv.a
-                       libiconv.la);
+        my @files = $self->search_lib_names;
 
-        if (my $dir = $u->first_cat_dir(\@files, @paths)) {
+        if (my $dir = $u->first_cat_dir(\@files, $self->search_lib_dirs)) {
             # Success!
             $self->{lib_dir} = $dir;
         } else {
             $self->error("Cannot not find library direcory");
             my $cb = sub { $u->first_cat_dir(\@files, $_) };
-            $self->{lib_dir} =
-              $self->unknown( key      => 'library directory',
-                              callback => $cb,
-                              error    => "Library files not found in " .
-                                          "directory");
+            $self->{lib_dir} = $self->unknown(
+                key      => 'library directory',
+                callback => $cb,
+                error    => "Library files not found in directory"
+            );
         }
     }
     return $self->{lib_dir};
@@ -622,35 +558,11 @@ sub lib_dir {
   my $so_lib_dir = $iconv->so_lib_dir;
 
 Returns the directory path in which a libiconv shared object library was
+found. The search looks for a file with a name returned by
+C<search_so_lib_names()> in a directory returned by C<search_lib_dirs()>.
+
+Returns the directory path in which a libiconv shared object library was
 found. App::Info::Lib::Iconv searches for these files:
-
-=over 4
-
-=item libiconv.so
-
-=item libiconv.so.0
-
-=item libiconv.so.0.0.1
-
-=item libiconv.dylib
-
-=item libiconv.2.dylib
-
-=item libiconv.2.0.4.dylib
-
-=back
-
-...in these directories:
-
-=over 4
-
-=item /usr/local/lib
-
-=item /usr/lib
-
-=item /sw/lib
-
-=back
 
 <Events:>
 
@@ -677,20 +589,9 @@ sub so_lib_dir {
     return unless $self->{iconv_exe};
     unless (exists $self->{so_lib_dir}) {
         $self->info("Searching for shared object library directory");
-        # Should there be more paths than this?
-        my @paths = qw(/usr/local/lib
-                       /usr/lib
-                       /sw/lib);
-        # Testing is the same as for lib_dir() except that we only check for
-        # sos.
-        my @files = qw(libiconv.so
-                       libiconv.so.0
-                       libiconv.so.0.0.1
-                       libiconv.dylib
-                       libiconv.2.dylib
-                       libiconv.2.0.4.dylib);
+        my @files = $self->search_so_lib_names;
 
-        if (my $dir = $u->first_cat_dir(\@files, @paths)) {
+        if (my $dir = $u->first_cat_dir(\@files, $self->search_lib_dirs)) {
             $self->{so_lib_dir} = $dir;
         } else {
             $self->error("Cannot find shared object library directory");
@@ -728,6 +629,238 @@ Returns the libiconv download URL.
 =cut
 
 sub download_url { 'ftp://ftp.gnu.org/pub/gnu/libiconv/' }
+
+##############################################################################
+
+=head3 search_exe_names
+
+  my @search_exe_names = $iconv->search_exe_names;
+
+Returns a list of possible names for the Iconv executable. By default, the
+only name returned is F<iconv> (F<iconv.exe> on Win32).
+
+=cut
+
+sub search_exe_names {
+    my $self = shift;
+    my @exes = qw(iconv);
+    if (WIN32) { $_ .= ".exe" for @exes }
+    return ($self->SUPER::search_exe_names, @exes);
+}
+
+##############################################################################
+
+=head3 search_bin_dirs
+
+  my @search_bin_dirs = $iconv->search_bin_dirs;
+
+Returns a list of possible directories in which to search an executable. Used
+by the C<new()> constructor to find an executable to execute and collect
+application info. The found directory will also be returned by the C<bin_dir>
+method. By default, the directories returned are those in your path, followed
+by these:
+
+=over 4
+
+=item F</usr/local/bin>
+
+=item F</usr/bin>
+
+=item F</bin>
+
+=item F</sw/bin>
+
+=item F</usr/local/sbin>
+
+=item F</usr/sbin>
+
+=item F</sbin>
+
+=item F</sw/sbin>
+
+=back
+
+=cut
+
+sub search_bin_dirs {
+    return (
+      shift->SUPER::search_bin_dirs,
+      $u->path,
+      qw(/usr/local/bin
+         /usr/bin
+         /bin
+         /sw/bin
+         /usr/local/sbin
+         /usr/sbin/
+         /sbin
+         /sw/sbin)
+    );
+}
+
+
+##############################################################################
+
+=head3 search_lib_names
+
+  my @seach_lib_names = $self->search_lib_nams
+
+Returns a list of possible names for library files. Used by C<lib_dir()> to
+search for library files. By default, the list is:
+
+=over
+
+=item libiconv3.a
+
+=item libiconv3.la
+
+=item libiconv3.so
+
+=item libiconv3.so.0
+
+=item libiconv3.so.0.0.1
+
+=item libiconv3.dylib
+
+=item libiconv3.0.dylib
+
+=item libiconv3.0.0.1.dylib
+
+=item libiconv.a
+
+=item libiconv.la
+
+=item libiconv.so
+
+=item libiconv.so.0
+
+=item libiconv.so.0.0.1
+
+=item libiconv.dylib
+
+=item libiconv.2.dylib
+
+=item libiconv.2.0.4.dylib
+
+=item libiconv.0.dylib
+
+=item libiconv.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_lib_names {
+    my $self = shift;
+    return $self->SUPER::search_lib_names,
+      map { "libiconv.$_"} qw(a la so so.0 so.0.0.1 dylib 2.dylib 2.0.4.dylib
+                              0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
+=head3 search_so_lib_names
+
+  my @seach_so_lib_names = $self->search_so_lib_nams
+
+Returns a list of possible names for shared object library files. Used by
+C<so_lib_dir()> to search for library files. By default, the list is:
+
+=over
+
+=item libiconv3.so
+
+=item libiconv3.so.0
+
+=item libiconv3.so.0.0.1
+
+=item libiconv3.dylib
+
+=item libiconv3.0.dylib
+
+=item libiconv3.0.0.1.dylib
+
+=item libiconv.so
+
+=item libiconv.so.0
+
+=item libiconv.so.0.0.1
+
+=item libiconv.dylib
+
+=item libiconv.0.dylib
+
+=item libiconv.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_so_lib_names {
+    my $self = shift;
+    return $self->SUPER::search_so_lib_names,
+      map { "libiconv.$_"} qw(so so.0 so.0.0.1 dylib 2.dylib 2.0.4.dylib
+                              0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
+=head3 search_lib_dirs
+
+  my @search_lib_dirs = $iconv->search_lib_dirs;
+
+Returns a list of possible directories in which to search for libraries. By
+default, it returns all of the paths in the C<libsdirs> and C<loclibpth>
+attributes defined by the Perl L<Config|Config> module -- plus F</sw/lib> (in
+support of all you Fink users out there).
+
+=cut
+
+sub search_lib_dirs { shift->SUPER::search_lib_dirs, $u->lib_dirs, '/sw/lib' }
+
+##############################################################################
+
+=head3 search_inc_names
+
+  my @search_inc_names = $iconv->search_inc_names;
+
+Returns a list of include file names to search for. Used by C<inc_dir()> to
+search for an include file. By default, the only name returned is F<iconv.h>.
+
+=cut
+
+sub search_inc_names {
+    my $self = shift;
+    return $self->SUPER::search_inc_names, "iconv.h";
+}
+
+##############################################################################
+
+=head3 search_inc_dirs
+
+  my @search_inc_dirs = $iconv->search_inc_dirs;
+
+Returns a list of possible directories in which to search for include files.
+Used by C<inc_dir()> to search for an include file. By default, the
+directories are:
+
+=over 4
+
+=item /usr/local/include
+
+=item /usr/include
+
+=item /sw/include
+
+=back
+
+=cut
+
+sub search_inc_dirs {
+    shift->SUPER::search_inc_dirs,
+      qw(/usr/local/include
+         /usr/include
+         /sw/include);
+}
 
 1;
 __END__

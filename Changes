@@ -16,6 +16,7 @@ Revision history for Perl extension App::Info.
       - Added "search_conf_names" and "search_conf_dirs" parameters and
         methods to App::Info::HTTPD::Apache to allow users to affect the
         file names paths used to search for Apache configuration files.
+      - Added support for finding iconv on Win32.
 
 0.30  2004-11-20T19:10:55
       - Fixed number of tests to skip in "sqlite_info.t" for systems that
