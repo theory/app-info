@@ -553,7 +553,7 @@ my $find_exe = sub  {
 
     unless ($self->{$key}) {
         my $bin = $self->bin_dir or return;
-        if (my $exe = $u->first_cat_exe([$self->$meth, $exe], $bin)) {
+        if (my $exe = $u->first_cat_exe([$self->$meth(), $exe], $bin)) {
             # We found it. Confirm.
             $self->{$key} = $self->confirm(
                 key      => $key,
