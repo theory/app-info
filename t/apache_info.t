@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: apache_info.t,v 1.1 2002/06/27 19:57:35 david Exp $
+# $Id: apache_info.t,v 1.2 2002/06/27 20:05:26 david Exp $
 
 use strict;
-use Test::More tests => 83;
+use Test::More tests => 84;
 use constant SKIP => 80;
 
 ##############################################################################
