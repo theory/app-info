@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.14 2002/06/03 23:49:18 david Exp $
+# $Id: Apache.pm,v 1.15 2002/06/03 23:50:59 david Exp $
 
 =head1 NAME
 
@@ -584,6 +584,11 @@ It's likely that a lot more can be done to collect data about Apache. The
 methodology for determining the lib, inc, bin, and so_lib directories in
 particular may be considered rather weak. Patches from those who know a great
 deal more about interrogating Apache will be most welcome.
+
+=head1 TO DO
+
+Add method to return the names of available DSOs. These should either be
+parsed from the F<httpd.conf> file or C<glob>bed from the file system.
 
 =head1 BUGS
 
