@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.13 2002/06/04 22:06:44 david Exp $
+# $Id: Iconv.pm,v 1.14 2002/06/05 00:06:12 david Exp $
 
 =head1 NAME
 
@@ -143,7 +143,7 @@ sub version {
         # This is the line we're looking for:
         # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
         my $regex = qr/_LIBICONV_VERSION\s+([^\s]+)\s/;
-        if (my $ver = $u->search_file($header, $regex) {
+        if (my $ver = $u->search_file($header, $regex)) {
             # Convert the version number from hex.
             $ver = hex $ver;
             # Shift 8.
