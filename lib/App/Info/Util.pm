@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.6 2002/06/01 21:29:05 david Exp $
+# $Id: Util.pm,v 1.7 2002/06/02 00:15:00 david Exp $
 
 =head1 NAME
 
@@ -200,6 +200,29 @@ sub first_cat_file {
         foreach (@_) {
             my $path = File::Spec::Functions::catfile($_, $exe);
             return $path if -f $path;
+        }
+    }
+    return;
+}
+
+=head2 first_cat_dir
+
+  my $dir = $util->first_cat_file('ick.txt', @paths);
+  $dir = $util->first_cat_file(['this.txt', 'that.txt'], @paths);
+
+Funtionally identical to C<first_cat_file()>, except that it returns
+the directory in which the first file was found, rather than the full
+path name to the file.
+
+=cut
+
+sub first_cat_dir {
+    my $self = shift;
+    my $file = shift;
+    foreach my $exe (ref $file ? @$file : ($file)) {
+        foreach (@_) {
+            my $path = File::Spec::Functions::catfile($_, $exe);
+            return $_ if -f $path;
         }
     }
     return;
