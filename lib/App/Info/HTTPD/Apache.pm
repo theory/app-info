@@ -924,8 +924,14 @@ sub bin_dir {
     unless (exists $self->{bin_dir}) {{
         my $root = $self->httpd_root || last; # Double braces allow this.
         $self->info("Searching for bin directory");
-        $self->{bin_dir} = $u->first_cat_path('bin', $root)
-          or $self->error("Cannot find bin directory");
+        if (WIN32) {
+            # Windows thinks that the bin directory is the same as the root.
+            $self->{bin_dir} = $root;
+        } else {
+            # Other platforms have a "bin" director under the root.
+            $self->{bin_dir} = $u->first_cat_path('bin', $root)
+              or $self->error("Cannot find bin directory");
+        }
     }}
 
     # Handle unknown value.

@@ -6,6 +6,7 @@ use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 
+my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 my $lib_dir = catdir 't', 'testlib';
 my $inc_dir = catdir 't', 'testinc';
 my $bin_dir = catdir 't', 'scripts';
@@ -13,6 +14,7 @@ $bin_dir = catdir 't', 'bin' unless -d $bin_dir;
 
 ok( my $iconv = App::Info::Lib::Iconv->new(
     search_lib_dirs => $lib_dir,
+    search_exe_names => ["iconv$ext"],
     search_inc_dirs => $inc_dir,
     search_bin_dirs => $bin_dir,
 ), "Got Object");

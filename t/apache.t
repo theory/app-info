@@ -14,6 +14,9 @@ $bin_dir = catdir 't', 'bin' unless -d $bin_dir;
 my $conf_dir = catdir 't', 'testlib';
 my $inc_dir = catdir 't', 'testinc';
 my $test_bin = catdir 't', 'bin';
+my $result_bin = $test_bin;
+# Win32 Thinks the bin directory is the root.
+my $httpd_root = $^O eq 'MSWin32' ? $bin_dir : 't';
 
 my @mods = qw(http_core mod_env mod_log_config mod_mime mod_negotiation
               mod_status mod_include mod_autoindex mod_dir mod_cgi mod_asis
@@ -37,9 +40,9 @@ is( $apache->version, "1.3.31", "Test Version" );
 is( $apache->major_version, '1', "Test major version" );
 is( $apache->minor_version, '3', "Test minor version" );
 is( $apache->patch_version, '31', "Test patch version" );
-is( $apache->httpd_root, "t", "Test httpd root" );
+is( $apache->httpd_root, $httpd_root, "Test httpd root" );
 ok( $apache->mod_perl, "Test mod_perl" );
-is( $apache->conf_file, "t/testlib/httpd.conf", "Test conf file" );
+is( $apache->conf_file, catfile(qw(t testlib httpd.conf)), "Test conf file" );
 is( $apache->user, "nobody", "Test user" );
 is( $apache->group, "nobody", "Test group" );
 is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',

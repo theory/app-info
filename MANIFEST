@@ -46,7 +46,6 @@ t/testinc/sqlite3.h
 t/testlib/httpd.conf
 t/testlib/libexpat.so
 t/testlib/libiconv.so
-t/testlib/libsqlite3.a
 t/testlib/libsqlite3.so
 t/util.t
 t/zpod.t

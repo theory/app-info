@@ -533,7 +533,7 @@ my $lib_dir = sub {
 sub lib_dir {
     my $self = shift;
     return unless $self->{sqlite};
-    $self->{lib_dir} = $lib_dir->($self, 'library', $self->search_lib_names)
+    $self->{lib_dir} = $self->$lib_dir('library', $self->search_lib_names)
       unless exists $self->{lib_dir};
     return $self->{lib_dir};
 }
@@ -573,8 +573,8 @@ Enter a valid Expat shared object library directory
 sub so_lib_dir {
     my $self = shift;
     return unless $self->{sqlite};
-    $self->{so_lib_dir} = $lib_dir->($self, 'shared object library',
-                                     $self->search_so_lib_names)
+    $self->{so_lib_dir} = $self->$lib_dir('shared object library',
+                                          $self->search_so_lib_names)
       unless exists $self->{so_lib_dir};
     return $self->{so_lib_dir};
 }
@@ -740,7 +740,7 @@ search for library files. By default, the list is:
 
 sub search_lib_names {
     my $self = shift;
-    my $exe = $u->splitpath($self->{sqlite});
+    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_lib_names,
       map { "lib$exe.$_"} qw(a la so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
 }
@@ -786,7 +786,7 @@ C<so_lib_dir()> to search for library files. By default, the list is:
 
 sub search_so_lib_names {
     my $self = shift;
-    my $exe = $u->splitpath($self->{sqlite});
+    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_so_lib_names,
       map { "lib$exe.$_"}
         qw(so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
@@ -821,7 +821,7 @@ F<sqlite.h>.
 
 sub search_inc_names {
     my $self = shift;
-    my $exe = $u->splitpath($self->{sqlite});
+    (my $exe = $u->splitpath($self->{sqlite})) =~ s/\.[^.]+$//;
     return $self->SUPER::search_inc_names, "$exe.h";
 }
 
