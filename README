@@ -1,16 +1,17 @@
-App/Info version 0.01
+App/Info version 0.02
 =====================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+App::Info provides a generalized interface for providing meta data about
+software packages installed on a system. The idea is that App::Info subclasses
+can be used in Perl application installers in order to determine whether
+software dependencies have been fulfilled.
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+A few sample subclasses are provided with the distribution, but others are
+invited to write their own subclasses and contribute them to the CPAN.
+Contributors are welcome to extend their subclasses to provide more
+information relevant to the application for which data is to be provided (see
+App::Info::HTTPD::Apache for an example), but are encouraged to, at a minimum,
+implement the methods defined by the App::Info abstract base class.
 
 INSTALLATION
 
@@ -25,11 +26,12 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  File::Spec
+  Test::More -- For testing only -- part of the Test::Simple distribution.
 
 COPYRIGHT AND LICENCE
 
-Put the correct copyright and licence information here.
+Copyright (c) 2002, David Wheeler. All Rights Reserved.
 
-Copyright (C) 2002 A. U. Thor blah blah blah
-
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
