@@ -533,7 +533,7 @@ my $lib_dir = sub {
 sub lib_dir {
     my $self = shift;
     return unless $self->{sqlite};
-    $self->{lib_dir} = $lib_dir->($self, $self->search_lib_names)
+    $self->{lib_dir} = $lib_dir->($self, 'library', $self->search_lib_names)
       unless exists $self->{lib_dir};
     return $self->{lib_dir};
 }

@@ -21,6 +21,10 @@ META.yml
 README
 t/apache.t
 t/apache_info.t
+t/bin/httpd
+t/bin/iconv
+t/bin/pg_config
+t/bin/sqlite3
 t/carp.t
 t/confirm.t
 t/expat.t
@@ -29,11 +33,6 @@ t/iconv.t
 t/iconv_info.t
 t/lib/EventTest.pm
 t/lib/TieOut.pm
-t/myapache.t
-t/myexpat.t
-t/myiconv.t
-t/mypostgres.t
-t/mysqlite.t
 t/postgres.t
 t/postgres_info.t
 t/print.t
@@ -41,5 +40,13 @@ t/prompt.t
 t/request.t
 t/sqlite.t
 t/sqlite_info.t
+t/testinc/expat.h
+t/testinc/iconv.h
+t/testinc/sqlite3.h
+t/testlib/httpd.conf
+t/testlib/libexpat.so
+t/testlib/libiconv.so
+t/testlib/libsqlite3.a
+t/testlib/libsqlite3.so
 t/util.t
 t/zpod.t
