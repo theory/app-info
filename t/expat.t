@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+# $Id: expat.t,v 1.2 2002/06/03 16:06:40 david Exp $
+
 use strict;
 use Test::More tests => 17;
 
