@@ -1,6 +1,6 @@
 package App::Info::RDBMS::PostgreSQL;
 
-# $Id: PostgreSQL.pm,v 1.19 2002/06/27 19:22:12 david Exp $
+# $Id: PostgreSQL.pm,v 1.20 2002/06/27 19:59:19 david Exp $
 
 =head1 NAME
 
@@ -287,7 +287,7 @@ B<Events:>
 
 Executing `pg_config --version`
 
-=error
+=item error
 
 Failed to find PostgreSQL version with `pg_config --version`
 
@@ -350,7 +350,7 @@ B<Events:>
 
 Executing `pg_config --version`
 
-=error
+=item error
 
 Failed to find PostgreSQL version with `pg_config --version`
 
@@ -402,7 +402,7 @@ B<Events:>
 
 Executing `pg_config --version`
 
-=error
+=item error
 
 Failed to find PostgreSQL version with `pg_config --version`
 
@@ -450,7 +450,7 @@ B<Events:>
 
 Executing `pg_config --version`
 
-=error
+=item error
 
 Failed to find PostgreSQL version with `pg_config --version`
 
