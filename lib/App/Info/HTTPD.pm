@@ -4,12 +4,29 @@ use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.01';
+$VERSION = '0.02';
+
+my $croak = sub {
+    my ($caller, $meth) = @_;
+    $caller = ref $caller || $caller;
+    if ($caller eq __PACKAGE__) {
+        $meth = __PACKAGE__ . '::' . shift;
+        Carp::croak(__PACKAGE__ . " is an abstract base class. Attempt to " .
+                    " call non-existent method $meth");
+    } else {
+        Carp::croak("Class $caller inherited from the abstract base class " .
+                    __PACKAGE__ . "but failed to redefine the $meth method. " .
+                    "Attempt to call non-existent method ${caller}::$meth");
+    }
+};
+
+sub httpd_root { $croak->(shift, 'httpd_root') }
+
 
 1;
 __END__
 
-# $Id: HTTPD.pm,v 1.3 2002/06/01 22:23:30 david Exp $
+# $Id: HTTPD.pm,v 1.4 2002/06/03 18:57:08 david Exp $
 
 =head1 NAME
 
