@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.27 2002/06/13 22:20:20 david Exp $
+# $Id: Info.pm,v 1.28 2002/06/14 02:15:14 david Exp $
 
 =head1 NAME
 
@@ -37,7 +37,8 @@ L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example), but are
 encouraged to, at a minimum, implement the abstract methods defined here and
 in the category abstract base classes (e.g.
 L<App::Info::HTTPD|App::Info::HTTPD> and L<App::Info::Lib|App::Info::Lib>. See
-L<"NOTES ON SUBCLASSING"> for more information on implementing new subclasses.
+L<Subclassing|"SUBCLASSING"> for more information on implementing new
+subclasses.
 
 =cut
 
@@ -96,18 +97,28 @@ my $set_handlers = sub {
   my $app = App::Info::Category::FooApp->new(@params);
 
 Consructs the FooApp App::Info object and returns it. The @params arguments
-define how the App::Info object will respond to certain events. Events can be
-handled one more more subclasses of L<App::Info::Handler|App::Info::Handler>
--- the first to return a true value will be the last to execute.
+define how the App::Info object will respond to certain events, and correspond
+to their like-named methods. See L<Event Handler Object Methods|"EVENT HANDLER
+OBJECT METHODS"> for more information on App::Info events and how to handle
+them. The parameters to C<new()> for the different types of App::Info events
+are as follows:
 
 =over 4
 
 =item on_info
 
+=item on_error
 
+=item on_unknown
+
+=item on_confirm
 
 =back
 
+When passing in event handlers to C<new()>, the list of handlers for each even
+type should be an anonymous array:
+
+  my $app = App::Info::Category::FooApp->new(on_info => [@handlers]);
 
 =cut
 
@@ -126,145 +137,11 @@ sub new {
     return bless \%p, $class;
 }
 
-my $handler = sub {
-    my ($self, $meth, $params) = @_;
+=head1 METADATA OBJECT METHODS
 
-    # Sanity check. We really want to keep control over this.
-    Carp::croak("Cannot call protected method $meth()")
-      unless UNIVERSAL::isa($self, scalar caller(1));
-
-    # Create the request object.
-    $params->{type} ||= $meth;
-    my $req = App::Info::Request->new($params);
-
-    # Do the deed. The ultimate handling handler may die.
-    foreach my $eh (@{$self->{"on_$meth"}}) {
-        last if $eh->handler($req);
-    }
-
-    # Return the requst.
-    return $req;
-};
-
-sub on_error {
-    my $self = shift;
-    $self->{on_error} = $set_handlers->(\@_) if @_;
-    return @{ $self->{on_error} };
-}
-
-sub error {
-    my $self = shift;
-    # Execute the handler sequence.
-    my $req = $handler->($self, 'error', { message => join('', @_) });
-    # If we haven't died, save the error.
-    $self->{error} = $req->message;
-}
-
-sub on_info {
-    my $self = shift;
-    $self->{on_info} = $set_handlers->(\@_) if @_;
-    return @{ $self->{on_info} };
-}
-
-sub info {
-    my $self = shift;
-    # Execute the handler sequence.
-    my $req = $handler->($self, 'info', { message => join('', @_) });
-    # If we haven't died, save the error.
-    $self->{info} = $req->message;
-}
-
-sub on_unknown {
-    my $self = shift;
-    $self->{on_unknown} = $set_handlers->(\@_) if @_;
-    return @{ $self->{on_unknown} };
-}
-
-sub unknown {
-    my ($self, $key, $prompt, $cb, $err, $sigil) = @_;
-
-    # Create a prompt, if necessary.
-    unless ($prompt) {
-        my $name = $self->key_name;
-        $prompt = "Enter a valid $name $key";
-    }
-    $err ||= 'Invalid value';
-
-    # Prepare the request arguments.
-    my $params = { message  => $prompt,
-                   error    => $err,
-                   sigil    => $sigil,
-                   callback => $cb };
-
-    # Execute the handler sequence.
-    my $req = $handler->($self, "unknown", $params);
-    return $req->value;
-}
-
-sub on_confirm {
-    my $self = shift;
-    $self->{on_confirm} = $set_handlers->(\@_) if @_;
-    return @{ $self->{on_confirm} };
-}
-
-sub confirm {
-    my ($self, $key, $prompt, $val, $cb, $err, $sigil) = @_;
-    # Just return the value if we've already confirmed this value.
-    return $val if $self->{__confirm__}{$key};
-
-    # Create a prompt, if necessary.
-    unless ($prompt) {
-        my $name = $self->key_name;
-        $prompt = "Enter a valid $name $key";
-    }
-    $err ||= 'Invalid value';
-
-    # Prepare the request arguments.
-    my $params = { message  => $prompt,
-                   error    => $err,
-                   value    => $val,
-                   sigil    => $sigil,
-                   callback => $cb };
-
-    # Execute the handler sequence.
-    my $req = $handler->($self, "confirm", $params);
-
-    # Mark that we've confirmed this value.
-    $self->{"_conf_$key"} = 1;
-
-    return $req->value;
-}
-
-sub validate {
-    my ($self, $key, $val, $cb, $sigil) = @_;
-    # Sanity check. We really want to keep control over this.
-    Carp::croak("Cannot call protected method validate()")
-      unless UNIVERSAL::isa($self, scalar caller);
-
-    # Make sure we have a value and then confirm it.
-    $val = $self->unknown($key, $cb, $sigil) unless defined $val;
-    return $self->confirm($key, $val, $cb, $sigil);
-}
-
-sub last_error { $_[0]->{error} }
-sub last_info { $_[0]->{info} }
-sub installed { $croak->(shift, 'installed') }
-sub name { $croak->(shift, 'name') }
-sub version { $croak->(shift, 'version') }
-sub major_version { $croak->(shift, 'major_version') }
-sub minor_version { $croak->(shift, 'minor_version') }
-sub patch_version { $croak->(shift, 'patch_version') }
-sub inc_dir { $croak->(shift, 'inc_dir') }
-sub bin_dir { $croak->(shift, 'bin_dir') }
-sub lib_dir { $croak->(shift, 'lib_dir') }
-sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
-sub home_url  { $croak->(shift, 'home_url') }
-sub download_url  { $croak->(shift, 'download_url') }
-
-1;
-__END__
-
-=head1 OBJECT METHODS
+These are abstract methods in App::Info and must be provided by its
+subclasses. They provide the essential metadata of the software package
+supported by the App::Info subclass.
 
 =head2 installed
 
@@ -277,17 +154,29 @@ __END__
 Returns a true value if the application is installed, and a false value if it
 is not.
 
+=cut
+
+sub installed { $croak->(shift, 'installed') }
+
 =head2 name
 
   my $name = $app->name;
 
 Returns the name of the application.
 
+=cut
+
+sub name { $croak->(shift, 'name') }
+
 =head2 version
 
   my $version = $app->version;
 
 Returns the full version number of the application.
+
+=cut
+
+sub version { $croak->(shift, 'version') }
 
 =head2 major_version
 
@@ -296,12 +185,20 @@ Returns the full version number of the application.
 Returns the major version number of the application. For example, if
 C<version()> returns "7.1.2", then this method returns "7".
 
+=cut
+
+sub major_version { $croak->(shift, 'major_version') }
+
 =head2 minor_version
 
   my $minor_version = $app->minor_version;
 
 Returns the minor version number of the application. For example, if
 C<version()> returns "7.1.2", then this method returns "1".
+
+=cut
+
+sub minor_version { $croak->(shift, 'minor_version') }
 
 =head2 patch_version
 
@@ -310,11 +207,19 @@ C<version()> returns "7.1.2", then this method returns "1".
 Returns the patch version number of the application. For example, if
 C<version()> returns "7.1.2", then this method returns "2".
 
+=cut
+
+sub patch_version { $croak->(shift, 'patch_version') }
+
 =head2 bin_dir
 
   my $bin_dir = $app->bin_dir;
 
 Returns the full path the application's bin directory, if it exists.
+
+=cut
+
+sub bin_dir { $croak->(shift, 'bin_dir') }
 
 =head2 inc_dir
 
@@ -322,11 +227,19 @@ Returns the full path the application's bin directory, if it exists.
 
 Returns the full path the application's include directory, if it exists.
 
+=cut
+
+sub inc_dir { $croak->(shift, 'inc_dir') }
+
 =head2 lib_dir
 
   my $lib_dir = $app->lib_dir;
 
 Returns the full path the application's lib directory, if it exists.
+
+=cut
+
+sub lib_dir { $croak->(shift, 'lib_dir') }
 
 =head2 so_lib_dir
 
@@ -335,11 +248,19 @@ Returns the full path the application's lib directory, if it exists.
 Returns the full path the application's shared library directory, if it
 exists.
 
+=cut
+
+sub so_lib_dir { $croak->(shift, 'so_lib_dir') }
+
 =head2 home_url
 
   my $home_url = $app->home_url;
 
 The URL for the software's home page.
+
+=cut
+
+sub home_url  { $croak->(shift, 'home_url') }
 
 =head2 download_url
 
@@ -347,32 +268,155 @@ The URL for the software's home page.
 
 The URL for the software's download page.
 
-=head2 last_error
+=cut
 
-  my $err = $app->last_error;
+sub download_url  { $croak->(shift, 'download_url') }
 
-Returns the last error encountered by the object. Useful for instances where
-C<error_level> is set to "silent", though in truth it returns the last
-non-fatal error.
+=head1 EVENT HANDLER OBJECT METHODS
 
-=head1 PROTECTED OBJECT METHODS
+These methods provide control over event App::Info event handling. Events can
+be handled by one or more more objects of subclasses of App::Info::Handler --
+the first to return a true value will be the last to execute. This allows you
+to stack handlers, if you wish, or to implement your own. See
+L<App::Info::Handler|App::Info::Handler> for information on writing event
+handlers.
 
-=head2 error
+Each of the event handler methods takes a list of event handlers as their
+arguments. If none are passed, the existing list of handlers for the relevant
+event type will be returned. If new handlers are passed in, they will be
+retrurned.
 
-  my $version = parse_version();
-  $self->error("Unable to parse version number") unless $version;
+The event handlers may be specified as one or more objects of the
+App::Info::Handler class or subclasses, as one or more strings that tell
+App::Info construct such handlers itself, or a combination of the two. The
+strings can only be used if the relevant App::Info::Handler subclasses have
+registered the appropriate strings with App::Info. For example, the
+App::Info::Handler::Print class included in the App::Info distribution
+registers the strings "stderr" and "stdout" when it starts up. These strings
+may then be used to tell App::Info to construct App::Info::Handler::Print
+objects that print to STDERR or to STDOUT, respectively. See the
+App::Info::Handler subclasses for what strings they register with App::Info.
 
-The C<error()> method should be considered the sole method for alerting the
-clients of App::Info subclasses that an error was encountered. Think of it as
-a substitute for C<Carp::warn> (serious exceptions can use C<Carp::croak()>,
-instead. Using the C<error()> method allows App::Info subclass clients to
-handle the errors in any of several ways. See the description the L<new|"new">
-method above to see how clients can manage error levels. Do not assume that
-errors will be fatal. See L<Notes on Sublcassing|"NOTES ON SUBCLASSING"> below
-for more on subclassing App::Info. The C<error()> method is a protected
-method and therefore cannot be used by client libraries.
+=head2 on_info
 
-=head1 NOTES ON SUBCLASSING
+  my @handlers = $app->on_info;
+  $app->on_info(@handlers);
+
+Info events are triggered when the App::Info subclass wants to send an
+informational status message to the user. By default, these events are
+ignored, but a common need is for such messages to simply print to STDOUT. Use
+the L<App::Info::Handler::Print|App::Info::Handler::Print> class included with
+the App::Info distribution to have info messages print to STDOUT:
+
+  use App::Info::Handler::Print;
+  $app->on_info('stdout');
+  # Or:
+  my $stdout_handler = App::Info::Handler::Print->new('stdout');
+  $app->on_info($stdout_handler);
+
+=cut
+
+sub on_info {
+    my $self = shift;
+    $self->{on_info} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_info} };
+}
+
+=head2 on_error
+
+  my @handlers = $app->on_error;
+  $app->on_error(@handlers);
+
+Error events are triggered when the App::Info subclass runs into an unexpected
+but not fatal problem. (Note that fatal problems will likely throw an
+exception.) By default, these events are ignored. A common way of handling
+these events is to print to STDERR, once again using the
+L<App::Info::Handler::Print|App::Info::Handler::Print> class included with the
+App::Info distribution:
+
+  use App::Info::Handler::Print;
+  my $app->on_error('stderr');
+  # Or:
+  my $stderr_handler = App::Info::Handler::Print->new('stderr');
+  $app->on_error($stderr_handler);
+
+Another approach might be to turn such events into fatal exceptions. Use the
+included L<App::Info::Handler::Carp|App::Info::Handler::Carp> class for this
+purpose:
+
+  use App::Info::Handler::Carp;
+  my $app->on_error('croak');
+  # Or:
+  my $croaker = App::Info::Handler::Carp->new('croak');
+  $app->on_error($croaker);
+
+=cut
+
+sub on_error {
+    my $self = shift;
+    $self->{on_error} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_error} };
+}
+
+=head2 on_unknown
+
+  my @handlers = $app->on_unknown;
+  $app->on_uknown(@handlers);
+
+Unknown events are trigged when the App::Info subclass cannot find the value
+to be returned by a method call. By default, these events are ignored. A
+common way of handling them is to have the application prompt the user for the
+relevant data. The App::Info::Handler::Prompt class included with the
+App::Info distribution can do just that:
+
+  use App::Info::Handler::Prompt;
+  my $app->on_unknown('prompt');
+  # Or:
+  my $prompter = App::Info::Handler::Prompt;
+  $app->on_unknown($prompter);
+
+See L<App::Info::Handler::Prompt|App::Info::Handler::Prompt> for information
+on how it works.
+
+=cut
+
+sub on_unknown {
+    my $self = shift;
+    $self->{on_unknown} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_unknown} };
+}
+
+=head on_confirm
+
+  my @handlers = $app->on_confirm;
+  $app->on_confirm(@handlers);
+
+Confirm events are triggered when the App::Info subclass has found an
+important piece of information (such as the location of the binary it'll use
+to collect information for the rest of its methods) and wants to confirm that
+the information is correct. These events will most often be triggered during
+the App::Info subclass object construction. Here, too, the
+App::Info::Handler::Prompt class included with the App::Info distribution can
+help out:
+
+  use App::Info::Handler::Prompt;
+  my $app->on_confirm('prompt');
+  # Or:
+  my $prompter = App::Info::Handler::Prompt;
+  $app->on_confirm($prompter);
+
+Again, consult the L<App::Info::Handler::Prompt|App::Info::Handler::Prompt>
+documentation for details on its operation.
+
+=cut
+
+sub on_confirm {
+    my $self = shift;
+    $self->{on_confirm} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_confirm} };
+}
+
+=head1 SUBCLASSING
 
 The organizational idea behind App::Info is to name subclasses by broad
 software categories. This approach allows the categories to function as
@@ -450,6 +494,92 @@ when necessary, on a single software package. Broader categories can then be
 aggregated in Bundle distributions.
 
 But I get ahead of myself...
+
+=cut
+
+my $handler = sub {
+    my ($self, $meth, $params) = @_;
+
+    # Sanity check. We really want to keep control over this.
+    Carp::croak("Cannot call protected method $meth()")
+      unless UNIVERSAL::isa($self, scalar caller(1));
+
+    # Create the request object.
+    $params->{type} ||= $meth;
+    my $req = App::Info::Request->new($params);
+
+    # Do the deed. The ultimate handling handler may die.
+    foreach my $eh (@{$self->{"on_$meth"}}) {
+        last if $eh->handler($req);
+    }
+
+    # Return the requst.
+    return $req;
+};
+
+sub info {
+    my $self = shift;
+    # Execute the handler sequence.
+    my $req = $handler->($self, 'info', { message => join '', @_ });
+}
+
+sub error {
+    my $self = shift;
+    # Execute the handler sequence.
+    my $req = $handler->($self, 'error', { message => join '', @_ });
+}
+
+sub unknown {
+    my ($self, $key, $prompt, $cb, $err, $sigil) = @_;
+
+    # Create a prompt, if necessary.
+    unless ($prompt) {
+        my $name = $self->key_name;
+        $prompt = "Enter a valid $name $key";
+    }
+    $err ||= 'Invalid value';
+
+    # Prepare the request arguments.
+    my $params = { message  => $prompt,
+                   error    => $err,
+                   sigil    => $sigil,
+                   callback => $cb };
+
+    # Execute the handler sequence.
+    my $req = $handler->($self, "unknown", $params);
+    return $req->value;
+}
+
+sub confirm {
+    my ($self, $key, $prompt, $val, $cb, $err, $sigil) = @_;
+    # Just return the value if we've already confirmed this value.
+    return $val if $self->{__confirm__}{$key};
+
+    # Create a prompt, if necessary.
+    unless ($prompt) {
+        my $name = $self->key_name;
+        $prompt = "Enter a valid $name $key";
+    }
+    $err ||= 'Invalid value';
+
+    # Prepare the request arguments.
+    my $params = { message  => $prompt,
+                   error    => $err,
+                   value    => $val,
+                   sigil    => $sigil,
+                   callback => $cb };
+
+    # Execute the handler sequence.
+    my $req = $handler->($self, "confirm", $params);
+
+    # Mark that we've confirmed this value.
+    $self->{"_conf_$key"} = 1;
+
+    return $req->value;
+}
+
+1;
+__END__
 
 =head1 BUGS
 
