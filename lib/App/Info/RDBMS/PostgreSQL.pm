@@ -74,7 +74,7 @@ directories:
 
 =item $ENV{POSTGRES_HOME}/bin (if $ENV{POSTGRES_HOME} exists)
 
-=item $ENV{POSTGRES_LIB}/../bin (if $ENV{POSTGRES_HOME} exists)
+=item $ENV{POSTGRES_LIB}/../bin (if $ENV{POSTGRES_LIB} exists)
 
 =item /usr/local/pgsql/bin
 
@@ -257,6 +257,7 @@ my $get_version = sub {
     if ($version) {
         my ($x, $y, $z) = $version =~ /(\d+)\.(\d+).(\d+)/;
         if (defined $x and defined $y and defined $z) {
+            # Beta/devel/release candidates are treated as patch level "0"
             @{$self}{qw(version major minor patch)} =
               ($version, $x, $y, $z);
         } elsif ($version =~ /(\d+)\.(\d+)/) {
@@ -686,6 +687,8 @@ sub so_lib_dir {
 
     return $self->{so_lib_dir};
 }
+
+##############################################################################
 
 =head3 configure options
 
