@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.8 2002/06/16 01:18:55 david Exp $
+# $Id: Handler.pm,v 1.9 2002/06/16 01:45:02 david Exp $
 
 =head1 NAME
 
@@ -53,11 +53,12 @@ This class method may be used by App::Info::Handler subclasses to register
 themselves with App::Info::Handler. Multiple registrations are supported. The
 idea is that a subclass can define different functionality by specifying
 different strings that represent different modes of constructing an
-App::Info::Handler subclass object. The keys should be unique across
-App::Info::Handler subclasses so that many subclasses can be loaded and used
-separately. If the C<$key> is already registered, C<register_handler()> will
-throw an exception. The values are code references that, when executed, return
-the appropriate App::Info::Handler subclass object.
+App::Info::Handler subclass object. The keys are case-sensitve, and should be
+unique across App::Info::Handler subclasses so that many subclasses can be
+loaded and used separately. If the C<$key> is already registered,
+C<register_handler()> will throw an exception. The values are code references
+that, when executed, return the appropriate App::Info::Handler subclass
+object.
 
 =cut
 
