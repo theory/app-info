@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.25 2002/06/21 04:38:02 david Exp $
+# $Id: Expat.pm,v 1.26 2002/06/27 18:13:31 david Exp $
 
 =head1 NAME
 
@@ -123,20 +123,22 @@ sub new {
                 "libexpat.dylib", "libexpat.0.dylib", "libexpat.0.0.1.dylib",
                 "libexpat.a", "libexpat.la"];
 
+    my $cb = sub { $u->first_cat_dir($libs, $_) };
     if (my $lexpat = $u->first_cat_dir($libs, @paths)) {
         # We found libexpat. Confirm.
         $self->{libexpat} =
-          $self->confirm('libexpat',
-                         'Path to Expat library directory?',
-                         $lexpat,  sub { $u->first_cat_dir($libs, $_) },
-                         'No Expat libraries found in directory');
+          $self->confirm( key      => 'libexpat',
+                          prompt   => 'Path to Expat library directory?',
+                          value    => $lexpat,
+                          callback => $cb,
+                          error    => 'No Expat libraries found in directory');
     } else {
         # Handle an unknown value.
         $self->{libexpat} =
-          $self->unknown('libexpat',
-                         'Path to Expat library directory?',
-                          sub { $u->first_cat_dir($libs, $_) },
-                         'No Expat libraries found in directory');
+          $self->unknown( key      => 'libexpat',
+                          prompt   => 'Path to Expat library directory?',
+                          callback => $cb,
+                          error    => 'No Expat libraries found in directory');
     }
 
     return $self;
@@ -266,8 +268,8 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} =
-          $self->unknown('version number', undef, $chk_version);
+        $self->{version} = $self->unknown( key      => 'version number',
+                                           callback => $chk_version);
     }
     return $self->{version};
 }
@@ -322,7 +324,8 @@ sub major_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{major} = $self->unknown('major version number', undef, $is_int)
+    $self->{major} = $self->unknown( key      => 'major version number',
+                                     callback => $is_int)
       unless $self->{major};
 
     return $self->{major};
@@ -374,7 +377,8 @@ sub minor_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{minor} = $self->unknown('minor version number', undef, $is_int)
+    $self->{minor} = $self->unknown( key       =>'minor version number',
+                                     callback  => $is_int)
       unless $self->{minor};
 
     return $self->{minor};
@@ -426,7 +430,8 @@ sub patch_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{patch} = $self->unknown('patch version number', undef, $is_int)
+    $self->{patch} = $self->unknown( key      => 'patch version number',
+                                     callback => $is_int)
       unless $self->{patch};
 
     return $self->{patch};
@@ -501,10 +506,12 @@ sub inc_dir {
             $self->{inc_dir} = $dir;
         } else {
             $self->error("Cannot find include directory");
+            my $cb = sub { $u->first_cat_dir('expat.h', $_) };
             $self->{inc_dir} =
-              $self->unknown('include directory', undef,
-                             sub { $u->first_cat_dir('expat.h', $_) },
-                             "File 'expat.h' not found in directory");
+              $self->unknown( key      => 'include directory',
+                              callback => $cb,
+                              error    => "File 'expat.h' not found in " .
+                                          "directory");
         }
     }
     return $self->{inc_dir};
@@ -588,9 +595,10 @@ sub so_lib_dir {
         } else {
             $self->error("Cannot find shared object library direcory");
             $self->{inc_dir} =
-              $self->unknown('shared object library directory', undef,
-                             sub { $u->first_cat_dir($libs, $_) },
-                             "Shared object libraries not found in directory");
+              $self->unknown( key      => 'shared object library directory',
+                              callback => sub { $u->first_cat_dir($libs, $_) },
+                              error    => "Shared object libraries not " .
+                                          "found in directory");
         }
     }
     return $self->{so_lib_dir};
