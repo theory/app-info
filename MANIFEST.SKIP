@@ -5,4 +5,4 @@
 \.bak$
 ^MANIFEST\.SKIP$
 ^App-Info
-.svn
+\.svn
