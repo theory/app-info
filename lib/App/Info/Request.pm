@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.6 2002/06/16 00:50:18 david Exp $
+# $Id: Request.pm,v 1.7 2002/06/16 01:22:34 david Exp $
 
 =head1 NAME
 
@@ -8,14 +8,7 @@ App::Info::Handler - App::Info event handler request object
 
 =head1 SYNOPSIS
 
-  package App::Info::Handler::FooHandler;
-  use strict;
-  use App::Info::Handler;
-  use vars qw(@ISA);
-  @ISA = qw(App::Info::Handler);
-
-  # ...
-
+  # In an App::Info::Handler subclass:
   sub handler {
       my ($self, $req) = @_;
       print "Event Type:  ", $req->type;
@@ -28,22 +21,24 @@ App::Info::Handler - App::Info event handler request object
 
 Objects of this class are passed to the C<handler()> method of App::Info event
 handlers. Generally, this class will be of most interest to App::Info::Handler
-subclass implementors.
+subclass implementers.
 
 The L<event triggering methods|App::Info/"Events"> in App::Info each construct
 a new App::Info::Request object and initialize it with their arguments. The
 App::Info::Request object is then the sole argument passed to the C<handler()>
 method of any and all App::Info::Handler objects in the event handling chain.
 Thus, if you'd like to create your own App::Info event handler, this is the
-object you need to be familiar with.
+object you need to be familiar with. Consult the
+C<App::Info::Handler|App::Info::Handler> documentation for details on creating
+custom event handlers.
 
 Each of the App::Info event triggering methods constructs an
-App::Info::Request object with different values. Be sure to consult the
-documentation for the L<event triggering methods|App::Info/"Events"> in
+App::Info::Request object with different attribute values. Be sure to consult
+the documentation for the L<event triggering methods|App::Info/"Events"> in
 App::Info, where the values assigned to the App::Info::Request object are
 documented. Then, in your event handler subclass, check the value returned by
-the C<type()> method to determine what type of event request you'r handling to
-handle the request appropriately.
+the C<type()> method to determine what type of event request you're handling
+to handle the request appropriately.
 
 =cut
 
@@ -68,7 +63,7 @@ App::Info::Request objects to pass to event handler objects. Generally, you
 won't need to use it, other than perhaps for testing custom App::Info::Handler
 classes.
 
-The parameters to C<new()> are passed as a hash of named parameter, which
+The parameters to C<new()> are passed as a hash of named parameters that
 correspond to their like-named methods. The supported parameters are:
 
 =over 4
@@ -143,7 +138,7 @@ sub message { $_[0]->{message} }
   my $error = $req->error;
 
 Returns any error message associated with the App::Info::Request object. The
-error message is typically there to display for users when C<callbac()>
+error message is typically there to display for users when C<callback()>
 returns false.
 
 =cut
@@ -152,9 +147,52 @@ sub error { $_[0]->{error} }
 
 ##############################################################################
 
+=head3 type
+
+  my $type = $req->type;
+
+Returns a string representing the type of event that triggered this request.
+The types are the same as the event triggering methods defined in App::Info.
+As of this writing, the supported types are:
+
+=over
+
+=item info
+
+=item error
+
+=item unknown
+
+=item confirm
+
+=back
+
+Be sure to consult the App::Info documentation for more details on the event
+types.
+
+=cut
+
 sub type { $_[0]->{type} }
 
 ##############################################################################
+
+=head3 callback
+
+  if ($req->callback($value)) {
+      print "Value '$value' is valid.\n";
+  } else {
+      print "Value '$value' is not valid.\n";
+  }
+
+Executes the callback anonymous subroutine supplied by the App::Info concrete
+base class that triggered the event. If the callback returns false, then
+C<$value> is invalid. If the callback returns true, then C<$value> is valid
+and can be assigned via the C<value()> method.
+
+Note that the C<value()> method itself calls C<callback()> if it was passed a
+value to assign. See its documentation below for more information.
+
+=cut
 
 sub callback {
     my $self = shift;
@@ -164,6 +202,27 @@ sub callback {
 }
 
 ##############################################################################
+
+=head3 value
+
+  my $value = $req->value;
+  if ($req->value($value)) {
+      print "Value '$value' successfully assigned.\n";
+  } else {
+      print "Value '$value' not successfully assigned.\n";
+  }
+
+When called without an argument, C<value()> simply returns the value currently
+stored by the App::Info::Request object. Typically, the value is the default
+value for a confirm event, or a value assigned to an unknown event.
+
+When passed an argument, C<value()> attempts to store the the argument as a
+new value. However, C<value()> calls C<callback()> on the new value, and if
+C<callback()> returns false, then C<value()> returns false and does not store
+the new value. If C<callback()> returns true, on the other hand, then
+C<value()> goes ahead and stores the new value and returns true.
+
+=cut
 
 sub value {
     my $self = shift;
@@ -189,7 +248,7 @@ __END__
 
 =head1 BUGS
 
-I suppose it's possible that there are bugs in this code. Drop me a line if
+I suppose it's possible that there are bugs in this code. Drop me an email if
 you happen to discover any.
 
 =head1 AUTHOR
@@ -198,8 +257,25 @@ David Wheeler <david@wheeler.net>
 
 =head1 SEE ALSO
 
-L<App::Info|App::Info>
-L<App::Info::Handler:|App::Info::Handler>
+L<App::Info|App::Info> documents the event triggering methods and how they
+construct App::Info::Request objects to pass to event handlers.
+
+L<App::Info::Handler:|App::Info::Handler> documents how to create custom event
+handlers, which must make use of the App::Info::Request object passed to their
+C<handler()> object methods.
+
+The following classes subclass App::Info::Handler, and thus offer good
+exemplars for using App::Info::Request objects when handling events.
+
+=over 4
+
+=item L<App::Info::Handler::Carp|App::Info::Handler::Carp>
+
+=item L<App::Info::Handler::Print|App::Info::Handler::Print>
+
+=item L<App::Info::Handler::Prompt|App::Info::Handler::Prompt>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
