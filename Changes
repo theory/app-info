@@ -1,6 +1,8 @@
 Revision history for Perl extension App::Info.
 
-0.29
+0.29  2004-11-20T00:09:22
+      - Added App::Info::RDBMS::SQLite to the MANIFEST so that it will
+        actually show up in the distribution!
 
 0.28  2004-11-19T23:35:25
       - Added App::Info::RDBMS::SQLite.

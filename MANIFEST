@@ -12,6 +12,7 @@ lib/App/Info/Lib/Expat.pm
 lib/App/Info/Lib/Iconv.pm
 lib/App/Info/RDBMS.pm
 lib/App/Info/RDBMS/PostgreSQL.pm
+lib/App/Info/RDBMS/SQLite.pm
 lib/App/Info/Request.pm
 lib/App/Info/Util.pm
 Makefile.PL
@@ -32,10 +33,13 @@ t/myapache.t
 t/myexpat.t
 t/myiconv.t
 t/mypostgres.t
+t/mysqlite.t
 t/postgres.t
 t/postgres_info.t
 t/print.t
 t/prompt.t
 t/request.t
+t/sqlite.t
+t/sqlite_info.t
 t/util.t
 t/zpod.t
