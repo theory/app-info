@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.42
+
 0.41  2004-11-28T20:01:57
       - Fixed Apache, SQLite, and Iconv tests to pass under Win32.
       - Fixed "bin_dir()" method for Apache module to return the same
