@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.7 2002/06/02 00:21:25 david Exp $
+# $Id: Iconv.pm,v 1.8 2002/06/03 02:37:23 david Exp $
 
 =head1 NAME
 
@@ -126,37 +126,76 @@ sub name { 'libiconv' }
 
   my $version = $iconv->version;
 
-Unimplemented. Patches welcome.
+Returns the full version number for libiconv. App::Info::Lib::Iconv parses the
+version number from the iconv.h file, if it exists. Returns undef if Iconv is
+not installed. Emits a warning if Iconv is installed but F<iconv.h> could not
+be found or the version number could not be parsed.
 
 =cut
 
-sub version {}
+sub version {
+    return unless $_[0]->{iconv_exe};
+    unless (exists $_[0]->{version}) {
+        $_[0]->{version} = undef;
+        my $inc = $_[0]->inc_dir
+          or Carp::carp("Cannot get libiconv version because file 'iconv.h' " .
+                        "does not exist");
+        my $header = $u->catfile($inc, 'iconv.h');
+        # This is the line we're looking for:
+        # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
+        my $regex = qr/_LIBICONV_VERSION\s+([^\s]+)\s/;
+        # Grab the version number and convert it from hex.
+        my $ver = hex $u->search_file($header, $regex);
+        # Shift 8.
+        my $major = $ver >> 8;
+        # Left shift 8 and subtract from version.
+        my $minor = $ver - ($major << 8);
+        # Store 'em!
+        @{$_[0]}{qw(version major minor)} = ("$major.$minor", $major, $minor);
+    }
+    return $_[0]->{version};
+}
 
 =head2 major_version
 
   my $major_version = $iconv->major_version;
 
-Unimplemented. Patches welcome.
+Returns the Iconv major version number. App::Info::Lib::Iconv parses the
+version number from the iconv.h file, if it exists. If C<version()> returns
+"1.95.2", then this method returns "1". Returns undef if Iconv is not
+installed. Emits a warning if Iconv is installed but F<iconv.h> could not
+be found or the version number could not be parsed.
 
 =cut
 
-sub major_version {}
+sub major_version {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{major};
+}
 
 =head2 minor_version
 
   my $minor_version = $iconv->minor_version;
 
-Unimplemented. Patches welcome.
+Returns the Iconv minor version number. App::Info::Lib::Iconv parses the
+version number from the iconv.h file, if it exists. If C<version()> returns
+"1.95.2", then this method returns "95". Returns undef if Iconv is not
+installed. Emits a warning if Iconv is installed but F<iconv.h> could not be
+found or the version number could not be parsed.
 
 =cut
 
-sub minor_version {}
+sub minor_version {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{minor};
+}
 
 =head2 patch_version
 
   my $patch_version = $iconv->patch_version;
 
-Unimplemented. Patches welcome.
+Libiconv has no patch number in its version number, so this method will always
+return false.
 
 =cut
 

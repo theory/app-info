@@ -13,10 +13,10 @@ ok( $iconv->name, "Got name" );
 if ($iconv->installed) {
     ok( $iconv->installed, "libiconv is installed" );
     # Don't know how to get the version number!
-    ok( !$iconv->version, "Got version" );
-    ok( !$iconv->major_version, "Got major version" );
-    ok( !$iconv->minor_version, "Got minor version" );
-    ok( !$iconv->patch_version, "Got patch version" );
+    ok( $iconv->version, "Got version" );
+    ok( $iconv->major_version, "Got major version" );
+    ok( $iconv->minor_version, "Got minor version" );
+    ok( !$iconv->patch_version, "There is no patch version" );
 } else {
     ok( !$iconv->installed, "libiconv is not installed" );
     ok( !$iconv->version, "Don't got version" );
