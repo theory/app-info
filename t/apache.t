@@ -1,13 +1,14 @@
 #!/usr/bin/perl -w
 
-# $Id: apache.t,v 1.8 2002/06/05 21:39:35 david Exp $
+# $Id: apache.t,v 1.9 2002/06/05 23:50:42 david Exp $
 
 use strict;
 use Test::More tests => 26;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
 
-ok( my $apache = App::Info::HTTPD::Apache->new, "Got Object");
+ok( my $apache = App::Info::HTTPD::Apache->new( error_level => 'silent' ),
+    "Got Object");
 isa_ok($apache, 'App::Info::HTTPD::Apache');
 isa_ok($apache, 'App::Info');
 

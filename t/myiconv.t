@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myiconv.t,v 1.2 2002/06/03 18:28:02 david Exp $
+# $Id: myiconv.t,v 1.3 2002/06/05 23:50:42 david Exp $
 
 use strict;
 use Test::More;
@@ -13,7 +13,8 @@ if (exists $ENV{APP_INFO_MAINTAINER}) {
 
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 
-ok( my $iconv = App::Info::Lib::Iconv->new, "Got Object");
+ok( my $iconv = App::Info::Lib::Iconv->new( error_level => 'confess' ),
+    "Got Object");
 isa_ok($iconv, 'App::Info::Lib::Iconv');
 isa_ok($iconv, 'App::Info::Lib');
 isa_ok($iconv, 'App::Info');

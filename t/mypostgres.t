@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: mypostgres.t,v 1.1 2002/06/03 18:03:19 david Exp $
+# $Id: mypostgres.t,v 1.2 2002/06/05 23:50:42 david Exp $
 
 use strict;
 use Test::More;
@@ -13,7 +13,8 @@ if (exists $ENV{APP_INFO_MAINTAINER}) {
 
 BEGIN { use_ok('App::Info::RDBMS::PostgreSQL') }
 
-ok( my $pg = App::Info::RDBMS::PostgreSQL->new, "Got Object");
+ok( my $pg = App::Info::RDBMS::PostgreSQL->new( error_level => 'confess' ),
+    "Got Object");
 isa_ok($pg, 'App::Info::RDBMS::PostgreSQL');
 isa_ok($pg, 'App::Info::RDBMS');
 isa_ok($pg, 'App::Info');

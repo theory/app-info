@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: myexpat.t,v 1.1 2002/06/03 16:16:49 david Exp $
+# $Id: myexpat.t,v 1.2 2002/06/05 23:50:42 david Exp $
 
 use strict;
 use Test::More;
@@ -13,7 +13,8 @@ if (exists $ENV{APP_INFO_MAINTAINER}) {
 
 BEGIN { use_ok('App::Info::Lib::Expat') }
 
-ok( my $expat = App::Info::Lib::Expat->new, "Got Object");
+ok( my $expat = App::Info::Lib::Expat->new( error_level => 'confess' ),
+    "Got Object");
 isa_ok($expat, 'App::Info::Lib::Expat');
 isa_ok($expat, 'App::Info::Lib');
 isa_ok($expat, 'App::Info');

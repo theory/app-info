@@ -5,7 +5,8 @@ use Test::More tests => 16;
 
 BEGIN { use_ok('App::Info::Lib::Iconv') }
 
-ok( my $iconv = App::Info::Lib::Iconv->new, "Got Object");
+ok( my $iconv = App::Info::Lib::Iconv->new( error_level => 'silent' ),
+    "Got Object");
 isa_ok($iconv, 'App::Info::Lib::Iconv');
 isa_ok($iconv, 'App::Info');
 ok( $iconv->name, "Got name" );
