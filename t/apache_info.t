@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: apache_info.t,v 1.4 2002/07/31 18:55:04 david Exp $
+# $Id: apache_info.t,v 1.5 2002/08/08 19:27:02 david Exp $
 
 use strict;
 use Test::More tests => 83;
@@ -36,7 +36,7 @@ SKIP: {
     ##########################################################################
     # Check name.
     $apache->name;
-    like($info->message, qr/^Executing `.*-v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
          "Check name info" );
     $apache->name;
     ok( ! defined $info->message, "No info" );
@@ -49,7 +49,7 @@ SKIP: {
         "Got Object 2");
     $info->message; # Throw away constructor message.
     $apache->version;
-    like($info->message, qr/^Executing `.*-v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
         "Check version info" );
 
     $apache->version;
@@ -63,7 +63,7 @@ SKIP: {
         "Got Object 3");
     $info->message; # Throw away constructor message.
     $apache->major_version;
-    like($info->message, qr/^Executing `.*-v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
         "Check major info" );
 
     ##########################################################################
@@ -72,7 +72,7 @@ SKIP: {
         "Got Object 4");
     $info->message; # Throw away constructor message.
     $apache->minor_version;
-    like($info->message, qr/^Executing `.*-v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
         "Check minor info" );
 
     ##########################################################################
@@ -81,13 +81,13 @@ SKIP: {
         "Got Object 5");
     $info->message; # Throw away constructor message.
     $apache->patch_version;
-    like($info->message, qr/^Executing `.*-v`$/,
+    like($info->message, qr/^Executing `.*(httpd|apache-perl|apache) -v`$/,
         "Check patch info" );
 
     ##########################################################################
     # Check bin_dir method.
     $apache->bin_dir;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check bin info" );
     is( $info->message, "Searching for bin directory",
         "Check bin info again" );
@@ -101,7 +101,7 @@ SKIP: {
     $info->message; # Throw away constructor message.
 
     $apache->bin_dir;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
         "Check bin info new" );
     is( $info->message, "Searching for bin directory",
         "Check bin info again" );
@@ -122,7 +122,7 @@ SKIP: {
     $info->message; # Throw away constructor message.
 
     $apache->inc_dir;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
         "Check inc info new" );
     is( $info->message, "Searching for include directory",
         "Check inc info again" );
@@ -143,7 +143,7 @@ SKIP: {
     $info->message; # Throw away constructor message.
 
     $apache->lib_dir;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
         "Check lib info new" );
     is( $info->message, "Searching for library directory",
         "Check lib info again" );
@@ -156,7 +156,7 @@ SKIP: {
     $info->message; # Throw away constructor message.
 
     $apache->httpd_root;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check httpd_root info" );
     ok( ! defined $info->message, "No more httpd_root info" );
     $apache->httpd_root;
@@ -170,7 +170,7 @@ SKIP: {
         "Got Object 10");
     $info->message; # Throw away constructor message.
     $apache->magic_number;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check magic_number info" );
     ok( ! defined $info->message, "No more magic_number info" );
 
@@ -182,7 +182,7 @@ SKIP: {
         "Got Object 10");
     $info->message; # Throw away constructor message.
     $apache->compile_option;
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check compile_option info" );
     ok( ! defined $info->message, "No more compile_option info" );
 
@@ -207,7 +207,7 @@ SKIP: {
     $apache->user;
     is( $info->message, "Searching for Apache configuration file",
        "Check user info 2" );
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check user info 3" );
     is( $info->message, "Parsing Apache configuration file",
        "Check user info 4" );
@@ -223,7 +223,7 @@ SKIP: {
     $apache->group;
     is( $info->message, "Searching for Apache configuration file",
        "Check group info 2" );
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check group info 3" );
     is( $info->message, "Parsing Apache configuration file",
        "Check group info 4" );
@@ -239,7 +239,7 @@ SKIP: {
     $apache->port;
     is( $info->message, "Searching for Apache configuration file",
        "Check port info 2" );
-    like( $info->message, qr/^Executing `.*-V`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -V`$/,
           "Check port info 3" );
     is( $info->message, "Parsing Apache configuration file",
        "Check port info 4" );
@@ -248,7 +248,7 @@ SKIP: {
     ##########################################################################
     # Tests static_mods().
     $apache->static_mods;
-    like( $info->message, qr/^Executing `.*-l`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -l`$/,
           "Check static_mods info" );
     ok( ! defined $info->message, "No more static_mods info" );
 
@@ -260,7 +260,7 @@ SKIP: {
         "Got Object 12");
     $info->message; # Throw away constructor message.
     $apache->mod_so;
-    like( $info->message, qr/^Executing `.*-l`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -l`$/,
           "Check mod_so info" );
     ok( ! defined $info->message, "No more mod_so info" );
 
@@ -272,7 +272,7 @@ SKIP: {
         "Got Object 13");
     $info->message; # Throw away constructor message.
     $apache->mod_perl;
-    like( $info->message, qr/^Executing `.*-l`$/,
+    like( $info->message, qr/^Executing `.*(httpd|apache-perl|apache) -l`$/,
           "Check mod_perl info" );
     ok( ! defined $info->message, "No more mod_perl info" );
 }
