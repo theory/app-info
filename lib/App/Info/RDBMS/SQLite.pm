@@ -80,15 +80,15 @@ B<Events:>
 
 =item info
 
-Looking for sqlite3 or sqlite.
+Looking for SQLite.
 
 =item confirm
 
-Path to sqlite3 or sqlite?
+Path to SQLite executable?
 
 =item unknown
 
-Path to sqlite3 or sqlite?
+Path to SQLite executable?
 
 =back
 
@@ -99,7 +99,7 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Find pg_config.
-    $self->info("Looking for sqlite3 or sqlite");
+    $self->info("Looking for SQLite");
 
     my @exes = qw(sqlite3 sqlite);
     if (WIN32) { $_ .= ".exe" for @exes }
@@ -108,7 +108,7 @@ sub new {
         # We found it. Confirm.
         $self->{sqlite} = $self->confirm(
             key      => 'sqlite',
-            prompt   => "Path to sqlite3 or sqlite?",
+            prompt   => "Path to SQLite executable?",
             value    => $cfg,
             callback => sub { -x },
             error    => 'Not an executable'
@@ -130,7 +130,7 @@ sub new {
         # Handle an unknown value.
         $self->{sqlite} = $self->unknown(
             key      => 'sqlite',
-            prompt   => "Path to sqlite3 or sqlite?",
+            prompt   => "Path to SQLite executable?",
             callback => sub { -x },
             error    => 'Not an executable'
         );

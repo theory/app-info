@@ -26,7 +26,7 @@ BEGIN { use_ok('App::Info::RDBMS::SQLite') }
 ok( my $info = EventTest->new, "Create info EventTest" );
 ok( my $pg = App::Info::RDBMS::SQLite->new( on_info => $info ),
     "Got Object");
-is( $info->message, "Looking for sqlite3 or sqlite",
+is( $info->message, "Looking for SQLite",
     "Check constructor info" );
 
 SKIP: {
