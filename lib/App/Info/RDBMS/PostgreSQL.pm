@@ -92,6 +92,8 @@ directories:
 
 =item /bin
 
+=item C:\Program Files\PostgreSQL\bin
+
 =back
 
 B<Events:>
@@ -129,7 +131,8 @@ sub new {
          /usr/local/sbin
          /usr/bin
          /usr/sbin
-         /bin));
+         /bin),
+      'C:\Program Files\PostgreSQL\bin');
 
     unshift @paths, "$ENV{POSTGRES_HOME}/bin" if exists $ENV{POSTGRES_HOME};
     unshift @paths, "$ENV{POSTGRES_LIB}/../bin" if exists $ENV{POSTGRES_LIB};

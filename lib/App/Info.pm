@@ -556,7 +556,7 @@ my $handler = sub {
         last if $eh->handler($req);
     }
 
-    # Return the requst.
+    # Return the request.
     return $req;
 };
 

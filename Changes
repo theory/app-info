@@ -7,6 +7,7 @@ Revision history for Perl extension App::Info.
         Geoff Richards.
       - Added "configure()" method to the PostgreSQL library. From the
         DBD::Pg project.
+      - Added Windows support to the PostgreSQL module.
 
 0.26  2004-11-03T17:53:58
       - Added new path to list of paths to search for PostgreSQL. The new
