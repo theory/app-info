@@ -7,6 +7,7 @@ Revision history for Perl extension App::Info.
         Greg Sabino Mullane.
       - Added handling of PostgreSQL beta version numbers to
         App::Info::RDBMS::PostgreSQL. Patch from Greg Sabino Mullane.
+      - Switched to Module::Build.
 
 0.23  Thu Aug  8 19:32:42 2002
       - Fixed tests that check Apache info events so that they're more
