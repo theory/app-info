@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.8 2002/06/03 01:31:09 david Exp $
+# $Id: Util.pm,v 1.9 2002/06/03 16:14:20 david Exp $
 
 =head1 NAME
 
@@ -176,13 +176,13 @@ the first file that exists in this order:
 
 =item /usr/local/bin/httpd
 
-=item /usr/bin/httpd
-
-=item /bin/httpd
-
 =item /usr/local/bin/apache
 
+=item /usr/bin/httpd
+
 =item /usr/bin/apache
+
+=item /bin/httpd
 
 =item /bin/apache
 
@@ -195,14 +195,13 @@ are found, then undef will be returned.
 
 sub first_cat_file {
     my $self = shift;
-    my $file = shift;
-    foreach my $exe (ref $file ? @$file : ($file)) {
-        foreach (@_) {
-            my $path = File::Spec::Functions::catfile($_, $exe);
+    my $files = ref $_[0] ? shift() : [shift()];
+    foreach my $p (@_) {
+        foreach my $f (@$files) {
+            my $path = File::Spec::Functions::catfile($p, $f);
             return $path if -f $path;
         }
     }
-    return;
 }
 
 =head2 first_cat_dir
@@ -218,14 +217,13 @@ path name to the file.
 
 sub first_cat_dir {
     my $self = shift;
-    my $file = shift;
-    foreach my $exe (ref $file ? @$file : ($file)) {
-        foreach (@_) {
-            my $path = File::Spec::Functions::catfile($_, $exe);
-            return $_ if -f $path;
+    my $files = ref $_[0] ? shift() : [shift()];
+    foreach my $p (@_) {
+        foreach my $f (@$files) {
+            my $path = File::Spec::Functions::catfile($p, $f);
+            return $p if -f $path;
         }
     }
-    return;
 }
 
 =head2 search_file
