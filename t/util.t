@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.6 2002/06/03 18:43:16 david Exp $
+# $Id: util.t,v 1.7 2002/06/05 20:34:41 david Exp $
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 20;
 use File::Spec::Functions;
 use File::Path;
 
@@ -31,7 +31,8 @@ if ($^O eq 'MSWin32' or $^O eq 'os2') {
 }
 
 # Test first_file(). First, create a file to find.
-my $tmp_file = $util->catfile($util->tmpdir, 'app-info.tst');
+my $tmpdir = $util->tmpdir;
+my $tmp_file = $util->catfile($tmpdir, 'app-info.tst');
 open F, ">$tmp_file" or die "Cannot open $tmp_file: $!\n";
 print F "King of the who?\nWell, I didn't vote for ya.";
 close F;
@@ -41,22 +42,40 @@ is( $util->first_file("this.foo", "that.foo", "C:\\foo.tst", $tmp_file),
     $tmp_file, "Test first_file" );
 
 # Now find the same file with first_cat_path().
-is( $util->first_cat_path('app-info.tst', $util->path, $util->tmpdir),
+is( $util->first_cat_path('app-info.tst', $util->path, $tmpdir),
     $tmp_file, "Test first_cat_path" );
 
 # And test it again using an array.
 is( $util->first_cat_path(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
-                          $util->path, $util->tmpdir, "C:\\mytemp"),
+                          $util->path, $tmpdir, "C:\\mytemp"),
     $tmp_file, "Test first_cat_path with array" );
 
 # Now find the directory housing the file.
-is( $util->first_cat_dir('app-info.tst', $util->path, $util->tmpdir),
-    $util->tmpdir, "Test first_cat_path" );
+is( $util->first_cat_dir('app-info.tst', $util->path, $tmpdir),
+    $tmpdir, "Test first_cat_path" );
 
 # And test it again using an array.
 is( $util->first_cat_dir(['foo.foo', 'bar.foo', 'app-info.tst', 'ick'],
-                          $util->path, $util->tmpdir, "C:\\mytemp"),
-    $util->tmpdir, "Test first_cat_path with array" );
+                          $util->path, $tmpdir, "C:\\mytemp"),
+    $tmpdir, "Test first_cat_path with array" );
+
+SKIP: {
+    # These tests are OS dependent. Skip them unless the maintainer is running
+    # it.
+    skip "OS dependent", 3 unless $ENV{APP_INFO_MAINTAINER};
+    # Find an executable.
+    is( $util->first_exe("this.foo", "that.exe", "/bin/sh"), "/bin/sh",
+        "Find executable" );
+
+    # Test first_cat_exe().
+    is( $util->first_cat_exe('sh', $util->path, $tmpdir), '/bin/sh',
+        "Test first_cat_exe" );
+
+    # Test it again with an array.
+    is( $util->first_cat_exe(['foo.foo', 'bar.foo', 'sh', 'ick'],
+                          $util->path, $tmpdir, "C:\\mytemp"),
+    '/bin/sh', "Test first_cat_exe with array" );
+}
 
 # Look for stuff in the file.
 is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
