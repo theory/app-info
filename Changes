@@ -6,6 +6,7 @@ Revision history for Perl extension App::Info.
         Bergman for the spot.
       - Fixed Lib::Expat so that verion() would properly return undef when
         no includ director was found. Thanks to Artur Bergman for the spot.
+      - Fixed $VERSION in Info.pm to be available to pre-5.6.0 perls.
 
 0.11  Sat Jun  8 05:49:40 2002
       - Improved validation for the error_level parameter.
