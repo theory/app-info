@@ -747,9 +747,9 @@ sub search_lib_names {
 
 ##############################################################################
 
-=head3 search_lib_names
+=head3 search_so_lib_names
 
-  my @seach_lib_names = $self->search_lib_nams
+  my @seach_so_lib_names = $self->search_so_lib_nams
 
 Returns a list of possible names for shared object library files. Used by
 C<so_lib_dir()> to search for library files. By default, the list is:
@@ -831,8 +831,8 @@ sub search_inc_names {
 
   my @search_inc_dirs = $sqlite->search_inc_dirs;
 
-Returns a list of possible directories in which to search for includes
-files. Used by C<inc_dir()> to search for an include file. By default, the
+Returns a list of possible directories in which to search for include files.
+Used by C<inc_dir()> to search for an include file. By default, the
 directories are:
 
 =over 4

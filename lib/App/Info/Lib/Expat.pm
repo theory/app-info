@@ -61,33 +61,10 @@ my $u = App::Info::Util->new;
 Returns an App::Info::Lib::Expat object. See L<App::Info|App::Info> for a
 complete description of argument parameters.
 
-When called, C<new()> searches all of the paths in the C<libsdirs> and
-C<loclibpth> attributes defined by the Perl L<Config|Config> module -- plus
-F</sw/lib> (in support of all you Fink users out there) -- for one of the
-following files:
-
-=over 4
-
-=item libexpat.so
-
-=item libexpat.so.0
-
-=item libexpat.so.0.0.1
-
-=item libexpat.dylib
-
-=item libexpat.0.dylib
-
-=item libexpat.0.0.1.dylib
-
-=item libexpat.a
-
-=item libexpat.la
-
-=back
-
-If any of these files is found, then Expat is assumed to be installed.
-Otherwise, most of the object methods will return C<undef>.
+When called, C<new()> searches all of the paths returned by the
+C<search_lib_dirs()> method for one of the files returned by the
+C<search_lib_names()> method. If any of is found, then Expat is assumed to be
+installed. Otherwise, most of the object methods will return C<undef>.
 
 B<Events:>
 
@@ -115,12 +92,9 @@ sub new {
     # Find libexpat.
     $self->info("Searching for Expat libraries");
 
-    my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
-                "libexpat.dylib", "libexpat.0.dylib", "libexpat.0.0.1.dylib",
-                "libexpat.a", "libexpat.la"];
-
-    my $cb = sub { $u->first_cat_dir($libs, $_) };
-    if (my $lexpat = $u->first_cat_dir($libs, $u->lib_dirs, '/sw/lib')) {
+    my @libs = $self->search_lib_names;
+    my $cb = sub { $u->first_cat_dir(\@libs, $_) };
+    if (my $lexpat = $u->first_cat_dir(\@libs, $self->search_lib_dirs)) {
         # We found libexpat. Confirm.
         $self->{libexpat} =
           $self->confirm( key      => 'libexpat',
@@ -493,20 +467,17 @@ sub inc_dir {
     return unless $self->{libexpat};
     unless (exists $self->{inc_dir}) {
         $self->info("Searching for include directory");
-        # Should there be more paths than this?
-        my @paths = qw(/usr/local/include
-                       /usr/include
-                       /sw/include);
+        my @incs = $self->search_inc_names;
 
-        if (my $dir = $u->first_cat_dir('expat.h', @paths)) {
+        if (my $dir = $u->first_cat_dir(\@incs, $self->search_inc_dirs)) {
             $self->{inc_dir} = $dir;
         } else {
             $self->error("Cannot find include directory");
-            my $cb = sub { $u->first_cat_dir('expat.h', $_) };
+            my $cb = sub { $u->first_cat_dir(\@incs, $_) };
             $self->{inc_dir} =
               $self->unknown( key      => 'include directory',
                               callback => $cb,
-                              error    => "File 'expat.h' not found in " .
+                              error    => "No expat include file found in " .
                                           "directory");
         }
     }
@@ -579,16 +550,16 @@ sub so_lib_dir {
     return unless $self->{libexpat};
     unless (exists $self->{so_lib_dir}) {
         $self->info("Searching for shared object library directory");
-        my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
-                    "libexpat.dylib", "libexpat.0.dylib",
-                    "libexpat.0.0.1.dylib"];
-        if (my $dir = $u->first_cat_dir($libs, $u->lib_dirs, '/sw/lib')) {
+
+    my @libs = $self->search_so_lib_names;
+    my $cb = sub { $u->first_cat_dir(\@libs, $_) };
+        if (my $dir = $u->first_cat_dir(\@libs, $self->search_lib_dirs)) {
             $self->{so_lib_dir} = $dir;
         } else {
             $self->error("Cannot find shared object library direcory");
             $self->{so_lib_dir} =
               $self->unknown( key      => 'shared object library directory',
-                              callback => sub { $u->first_cat_dir($libs, $_) },
+                              callback => $cb,
                               error    => "Shared object libraries not " .
                                           "found in directory");
         }
@@ -615,6 +586,136 @@ Returns the libexpat download URL.
 =cut
 
 sub download_url { 'http://sourceforge.net/projects/expat/' }
+
+##############################################################################
+
+=head3 search_lib_names
+
+  my @seach_lib_names = $self->search_lib_nams
+
+Returns a list of possible names for library files. Used by C<lib_dir()> to
+search for library files. By default, the list is:
+
+=over
+
+=item libexpat.a
+
+=item libexpat.la
+
+=item libexpat.so
+
+=item libexpat.so.0
+
+=item libexpat.so.0.0.1
+
+=item libexpat.dylib
+
+=item libexpat.0.dylib
+
+=item libexpat.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_lib_names {
+    my $self = shift;
+    return $self->SUPER::search_lib_names,
+      map { "libexpat.$_"} qw(a la so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
+=head3 search_so_lib_names
+
+  my @seach_so_lib_names = $self->search_so_lib_nams
+
+Returns a list of possible names for shared object library files. Used by
+C<so_lib_dir()> to search for library files. By default, the list is:
+
+=over
+
+=item libexpat.so
+
+=item libexpat.so.0
+
+=item libexpat.so.0.0.1
+
+=item libexpat.dylib
+
+=item libexpat.0.dylib
+
+=item libexpat.0.0.1.dylib
+
+=back
+
+=cut
+
+sub search_so_lib_names {
+    my $self = shift;
+    return $self->SUPER::search_so_lib_names,
+      map { "libexpat.$_"} qw(so so.0 so.0.0.1 dylib 0.dylib 0.0.1.dylib);
+}
+
+##############################################################################
+
+=head3 search_lib_dirs
+
+  my @search_lib_dirs = $expat->search_lib_dirs;
+
+Returns a list of possible directories in which to search for libraries. By
+default, it returns all of the paths in the C<libsdirs> and C<loclibpth>
+attributes defined by the Perl L<Config|Config> module -- plus F</sw/lib> (in
+support of all you Fink users out there).
+
+=cut
+
+sub search_lib_dirs { shift->SUPER::search_lib_dirs, $u->lib_dirs, '/sw/lib' }
+
+##############################################################################
+
+=head3 search_inc_names
+
+  my @search_inc_names = $expat->search_inc_names;
+
+Returns a list of include file names to search for. Used by C<inc_dir()> to
+search for an include file. By default, the only name returned is F<expat.h>.
+
+=cut
+
+sub search_inc_names {
+    my $self = shift;
+    return $self->SUPER::search_inc_names, "expat.h";
+}
+
+##############################################################################
+
+=head3 search_inc_dirs
+
+  my @search_inc_dirs = $expat->search_inc_dirs;
+
+Returns a list of possible directories in which to search for include files.
+Used by C<inc_dir()> to search for an include file. By default, the
+directories are:
+
+=over 4
+
+=item /usr/local/include
+
+=item /usr/include
+
+=item /sw/include
+
+=back
+
+=cut
+
+sub search_inc_dirs {
+    shift->SUPER::search_inc_dirs,
+      qw(/usr/local/include
+         /usr/include
+         /sw/include);
+}
 
 1;
 __END__
