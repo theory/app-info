@@ -1,6 +1,6 @@
 package App::Info::Request;
 
-# $Id: Request.pm,v 1.10 2002/08/08 19:19:18 david Exp $
+# $Id: Request.pm,v 1.11 2002/08/09 18:37:23 david Exp $
 
 =head1 NAME
 
@@ -29,7 +29,7 @@ App::Info::Request object is then the sole argument passed to the C<handler()>
 method of any and all App::Info::Handler objects in the event handling chain.
 Thus, if you'd like to create your own App::Info event handler, this is the
 object you need to be familiar with. Consult the
-C<App::Info::Handler|App::Info::Handler> documentation for details on creating
+L<App::Info::Handler|App::Info::Handler> documentation for details on creating
 custom event handlers.
 
 Each of the App::Info event triggering methods constructs an
@@ -44,7 +44,7 @@ to handle the request appropriately.
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 ##############################################################################
 
