@@ -113,16 +113,14 @@ sub new {
         # Try using DBD::SQLite, which includes SQLite.
         for my $dbd ('SQLite', 'SQLite2') {
             eval "use DBD::$dbd";
-            unless ($@) {
-                # Looks like DBD::SQLite is installed. Set up a temp database
-                # handle so we can get information from it.
-                require DBI;
-                $self->{dbfile} = $u->catfile($u->tmpdir, 'tmpdb');
-                $self->{dbh} = DBI->connect("dbi:$dbd:dbname=$self->{dbfile}","","");
-                # I don't think there's any way to really confirm, so just return.
-                return $self;
-            } else {
-            }
+            next if $@;
+            # Looks like DBD::SQLite is installed. Set up a temp database
+            # handle so we can get information from it.
+            require DBI;
+            $self->{dbfile} = $u->catfile($u->tmpdir, 'tmpdb');
+            $self->{dbh} = DBI->connect("dbi:$dbd:dbname=$self->{dbfile}","","");
+            # I don't think there's any way to really confirm, so just return.
+            return $self;
         }
 
         # Handle an unknown value.
