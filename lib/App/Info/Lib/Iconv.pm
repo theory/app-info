@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.18 2002/06/05 23:47:13 david Exp $
+# $Id: Iconv.pm,v 1.19 2002/06/08 21:16:47 david Exp $
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ use App::Info::Util;
 use App::Info::Lib;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 my $u = App::Info::Util->new;
 
@@ -139,8 +139,8 @@ sub version {
     unless (exists $self->{version}) {
         $self->{version} = undef;
         my $inc = $self->inc_dir
-          or $self->error("Cannot get libiconv version because file " .
-                          "'iconv.h' does not exist");
+          or ($self->error("Cannot get libiconv version because file " .
+                           "'iconv.h' does not exist")) && return;
         my $header = $u->catfile($inc, 'iconv.h');
         # This is the line we're looking for:
         # #define _LIBICONV_VERSION 0x0107    /* version number: (major<<8) + minor */
