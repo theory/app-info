@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.22 2002/06/05 23:47:13 david Exp $
+# $Id: Expat.pm,v 1.23 2002/06/08 16:10:08 david Exp $
 
 =head1 NAME
 
@@ -137,9 +137,10 @@ sub version {
     my $self = shift;
     return unless $self->{libexpat};
     unless (exists $self->{version}) {
+        $self->{version} = undef;
         my $inc = $self->inc_dir
-          or $self->error("Cannot get Expat version because file 'expat.h' " .
-                          "does not exist");
+          or ($self->error("Cannot get Expat version because file 'expat.h' " .
+                           "does not exist")) && return;
         my $header = $u->catfile($inc, 'expat.h');
         my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
                         qr/XML_MINOR_VERSION\s+(\d+)$/,
@@ -153,7 +154,6 @@ sub version {
         } else {
             # Warn them if we couldn't get them all.
             $self->error("Failed to parse Expat version from file '$header'");
-            $self->{version} = undef;
         }
     }
     return $self->{version};
