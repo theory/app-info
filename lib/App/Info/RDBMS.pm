@@ -4,12 +4,12 @@ use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 1;
 __END__
 
-# $Id: RDBMS.pm,v 1.3 2002/06/01 22:23:30 david Exp $
+# $Id: RDBMS.pm,v 1.4 2002/06/03 19:14:31 david Exp $
 
 =head1 NAME
 
@@ -18,10 +18,15 @@ App::Info::RDBMS - Information about databases on a system
 =head1 DESCRIPTION
 
 This class is an abstract base class for App::Info subclasses that provide
-information about web servers. Its subclasses are required to implement its
-interface. See L<App::Info|App::Info> for a complete description and
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache> for an example
+information about relational databases. Its subclasses are required to
+implement its interface. See L<App::Info|App::Info> for a complete description
+and L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL> for an example
 implementation.
+
+=head1 INTERFACE
+
+Currently, App::Info::RDBMS adds no more methods than those from its parent
+class, App::Info.
 
 =head1 AUTHOR
 
@@ -30,7 +35,7 @@ David Wheeler <david@wheeler.net>
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::HTTPD::Apache|App::Info::HTTPD::Apache>
+L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>
 
 =head1 COPYRIGHT AND LICENSE
 

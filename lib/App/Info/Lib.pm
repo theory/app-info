@@ -4,12 +4,12 @@ use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 1;
 __END__
 
-# $Id: Lib.pm,v 1.3 2002/06/01 22:23:30 david Exp $
+# $Id: Lib.pm,v 1.4 2002/06/03 19:14:12 david Exp $
 
 =head1 NAME
 
@@ -23,6 +23,11 @@ implement its interface. See L<App::Info|App::Info> for a complete
 description, and L<App::Info::Lib::Iconv|App::Info::Lib::Iconv> for an example
 implementation.
 
+=head1 INTERFACE
+
+Currently, App::Info::Lib adds no more methods than those from its parent
+class, App::Info.
+
 =head1 AUTHOR
 
 David Wheeler <david@wheeler.net>
@@ -30,7 +35,8 @@ David Wheeler <david@wheeler.net>
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::Lib::Iconv|App::Info::Lib::Iconv>
+L<App::Info::Lib::Iconv|App::Info::Lib::Iconv>,
+L<App::Info::Lib::Expat|App::Info::Lib::Expat>
 
 =head1 COPYRIGHT AND LICENSE
 
