@@ -1,5 +1,7 @@
 package App::Info::Util;
 
+# $Id: Util.pm,v 1.6 2002/06/01 21:29:05 david Exp $
+
 =head1 NAME
 
 App::Info::Util - Utility class for App::Info subclasses
@@ -45,7 +47,7 @@ use strict;
 use File::Spec::Functions ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',

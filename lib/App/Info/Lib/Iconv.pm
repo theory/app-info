@@ -1,5 +1,7 @@
 package App::Info::Lib::Iconv;
 
+# $Id: Iconv.pm,v 1.4 2002/06/01 21:29:05 david Exp $
+
 use strict;
 use File::Basename ();
 use App::Info::Util;

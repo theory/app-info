@@ -1,11 +1,13 @@
 package App::Info::HTTPD::Apache;
 
+# $Id: Apache.pm,v 1.3 2002/06/01 21:29:05 david Exp $
+
 use strict;
 use App::Info::Util;
 use Carp ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 my $obj = {};
 my $u = App::Info::Util->new;

@@ -1,9 +1,11 @@
 package App::Info;
 
+# $Id: Info.pm,v 1.2 2002/06/01 21:29:05 david Exp $
+
 use strict;
 use Carp ();
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $croak = sub {
     my ($caller, $meth) = @_;
@@ -45,7 +47,7 @@ App::Info - Information about software packages on your system
 
   use App::Info::Category::FooApp;
 
-  my $app = App::Info::Category::FooApp;
+  my $app = App::Info::Category::FooApp->new;
 
   if ($app->installed) {
       print "App name: ", $app->name, "\n";
@@ -54,7 +56,6 @@ App::Info - Information about software packages on your system
   } else {
       print "App not installed on your system. :-(\n";
   }
-
 
 =head1 DESCRIPTION
 

@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+# $Id: util.t,v 1.3 2002/06/01 21:29:05 david Exp $
+
 use strict;
 use Test::More tests => 8;
 use File::Spec::Functions;

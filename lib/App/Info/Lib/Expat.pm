@@ -1,5 +1,7 @@
 package App::Info::Lib::Expat;
 
+# $Id: Expat.pm,v 1.3 2002/06/01 21:29:05 david Exp $
+
 use strict;
 use File::Spec::Functions ();
 use App::Info::Util;
