@@ -659,12 +659,13 @@ sub download_url { "http://www.sqlite.org/download.html" }
 
 ##############################################################################
 
-=head3 exe_names
+=head3 search_exe_names
 
   my @search_exe_names = $app->search_exe_names;
 
-Returns a list of possible names for for the SQLite executable. The names
-are F<sqlite3> and F<sqlite> by default.
+Returns a list of possible names for the SQLite executable. The names are
+F<sqlite3> and F<sqlite> by default (F<sqlite3.exe> and F<sqlite.exe> on
+Win32).
 
 =cut
 

@@ -60,41 +60,12 @@ my $u = App::Info::Util->new;
 Returns an App::Info::RDBMS::PostgreSQL object. See L<App::Info|App::Info> for
 a complete description of argument parameters.
 
-When it called, C<new()> searches the file system for the F<pg_config>
-application. If found, F<pg_config> will be called by the object methods below
-to gather the data necessary for each. If F<pg_config> cannot be found, then
-PostgreSQL is assumed not to be installed, and each of the object methods will
-return C<undef>.
-
-App::Info::RDBMS::PostgreSQL searches for F<pg_config> along your path, as
-defined by C<File::Spec-E<gt>path>. Failing that, it searches the following
-directories:
-
-=over 4
-
-=item $ENV{POSTGRES_HOME}/bin (if $ENV{POSTGRES_HOME} exists)
-
-=item $ENV{POSTGRES_LIB}/../bin (if $ENV{POSTGRES_LIB} exists)
-
-=item /usr/local/pgsql/bin
-
-=item /usr/local/postgres/bin
-
-=item /opt/pgsql/bin
-
-=item /usr/local/bin
-
-=item /usr/local/sbin
-
-=item /usr/bin
-
-=item /usr/sbin
-
-=item /bin
-
-=item C:\Program Files\PostgreSQL\bin
-
-=back
+When it called, C<new()> searches the file system for an executable named for
+the list returned by C<search_exe_names()>, usually F<pg_config>, in the list
+of directories returned by C<search_bin_dirs()>. If found, F<pg_config> will
+be called by the object methods below to gather the data necessary for
+each. If F<pg_config> cannot be found, then PostgreSQL is assumed not to be
+installed, and each of the object methods will return C<undef>.
 
 B<Events:>
 
@@ -122,35 +93,21 @@ sub new {
 
     # Find pg_config.
     $self->info("Looking for pg_config");
-    my @paths = ($u->path,
-      qw(/usr/local/pgsql/bin
-         /usr/local/postgres/bin
-         /usr/lib/postgresql/bin
-         /opt/pgsql/bin
-         /usr/local/bin
-         /usr/local/sbin
-         /usr/bin
-         /usr/sbin
-         /bin),
-      'C:\Program Files\PostgreSQL\bin');
 
-    unshift @paths, "$ENV{POSTGRES_HOME}/bin" if exists $ENV{POSTGRES_HOME};
-    unshift @paths, "$ENV{POSTGRES_LIB}/../bin" if exists $ENV{POSTGRES_LIB};
+    my @paths = $self->search_bin_dirs;
+    my @exes = $self->search_exe_names;
 
-    my $exe = 'pg_config';
-    $exe .= '.exe' if WIN32;
-
-    if (my $cfg = $u->first_cat_exe($exe, @paths)) {
+    if (my $cfg = $u->first_cat_exe(\@exes, @paths)) {
         # We found it. Confirm.
         $self->{pg_config} = $self->confirm( key      => 'pg_config',
-                                             prompt   => "Path to $exe?",
+                                             prompt   => "Path to pg_config?",
                                              value    => $cfg,
                                              callback => sub { -x },
                                              error    => 'Not an executable');
     } else {
         # Handle an unknown value.
         $self->{pg_config} = $self->unknown( key      => 'pg_config',
-                                             prompt   => "Path to $exe?",
+                                             prompt   => "Path to pg_config?",
                                              callback => sub { -x },
                                              error    => 'Not an executable');
     }
@@ -760,6 +717,89 @@ Returns the PostgreSQL download URL.
 =cut
 
 sub download_url { "http://www.postgresql.org/mirrors-ftp.html" }
+
+##############################################################################
+
+=head3 search_exe_names
+
+  my @search_exe_names = $app->search_exe_names;
+
+Returns a list of possible names for F<pg_config> executable. By default, only
+F<pg_config> is returned (or F<pg_config.exe> on Win32).
+
+=cut
+
+sub search_exe_names {
+    my $self = shift;
+    my $exe = 'pg_config';
+    $exe .= '.exe' if WIN32;
+    return ($self->SUPER::search_exe_names, $exe);
+}
+
+##############################################################################
+
+=head3 search_bin_dirs
+
+  my @search_bin_dirs = $app->search_bin_dirs;
+
+Returns a list of possible directories in which to search an executable. Used
+by the C<new()> constructor to find an executable to execute and collect
+application info. The found directory will also be returned by the C<bin_dir>
+method.
+
+The list of directories by default consists of the path as defined by
+C<< File::Spec->path >>, as well as the following directories:
+
+=over 4
+
+=item $ENV{POSTGRES_HOME}/bin (if $ENV{POSTGRES_HOME} exists)
+
+=item $ENV{POSTGRES_LIB}/../bin (if $ENV{POSTGRES_LIB} exists)
+
+=item /usr/local/pgsql/bin
+
+=item /usr/local/postgres/bin
+
+=item /opt/pgsql/bin
+
+=item /usr/local/bin
+
+=item /usr/local/sbin
+
+=item /usr/bin
+
+=item /usr/sbin
+
+=item /bin
+
+=item C:\Program Files\PostgreSQL\bin
+
+=back
+
+=cut
+
+sub search_bin_dirs {
+    return shift->SUPER::search_bin_dirs,
+      ( exists $ENV{POSTGRES_HOME}
+          ? ($u->catdir($ENV{POSTGRES_HOME}, "bin"))
+          : ()
+      ),
+      ( exists $ENV{POSTGRES_LIB}
+          ? ($u->catdir($ENV{POSTGRES_LIB}, $u->updir, "bin"))
+          : ()
+      ),
+      $u->path,
+      qw(/usr/local/pgsql/bin
+         /usr/local/postgres/bin
+         /usr/lib/postgresql/bin
+         /opt/pgsql/bin
+         /usr/local/bin
+         /usr/local/sbin
+         /usr/bin
+         /usr/sbin
+         /bin),
+      'C:\Program Files\PostgreSQL\bin';
+}
 
 1;
 __END__

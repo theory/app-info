@@ -4,38 +4,34 @@
 
 use strict;
 use Test::More tests => 18;
+use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::RDBMS::PostgreSQL') }
 
-ok( my $pg = App::Info::RDBMS::PostgreSQL->new, "Got Object");
+my $ext = $^O eq 'MSWin32' ? '.bat' : '';
+my $bin_dir = catdir 't', 'scripts';
+$bin_dir = catdir 't', 'bin' unless -d $bin_dir;
+
+ok( my $pg = App::Info::RDBMS::PostgreSQL->new(
+    search_bin_dirs => $bin_dir,
+    search_exe_names => "pg_config$ext",
+), "Got Object");
+
 isa_ok($pg, 'App::Info::RDBMS::PostgreSQL');
 isa_ok($pg, 'App::Info');
 is( $pg->key_name, 'PostgreSQL', "Check key name" );
 
-if ($pg->installed) {
-    ok( $pg->installed, "PostgreSQL is installed" );
-    ok( $pg->name, "Got name" );
-    ok( $pg->version, "Got version" );
-    ok( $pg->major_version, "Got major version" );
-    ok( defined $pg->minor_version, "Got minor version" );
-    ok( defined $pg->patch_version, "Got patch version" );
-    ok( $pg->lib_dir, "Got lib dir" );
-    ok( $pg->bin_dir, "Got bin_dir" );
-    ok( $pg->so_lib_dir, "Got so lib dir" );
-    ok( $pg->inc_dir, "Got inc dir" );
-    ok( defined $pg->configure, "Got configure" );
-} else {
-    ok( !$pg->installed, "PostgreSQL is not installed" );
-    ok( !$pg->name, "Don't got name" );
-    ok( !$pg->version, "Don't got version" );
-    ok( !$pg->major_version, "Don't got major version" );
-    ok( !$pg->minor_version, "Don't got minor version" );
-    ok( !$pg->patch_version, "Don't got patch version" );
-    ok( !$pg->lib_dir, "Don't got lib dir" );
-    ok( !$pg->bin_dir, "Don't got bin_dir" );
-    ok( !$pg->so_lib_dir, "Don't got so lib dir" );
-    ok( !$pg->inc_dir, "Don't got inc dir" );
-    ok( !$pg->configure, "Don't got configure" );
-}
-ok( $pg->home_url, "Get home URL" );
-ok( $pg->download_url, "Get download URL" );
+ok( $pg->installed, "PostgreSQL is installed" );
+is( $pg->name, "PostgreSQL", "Get name" );
+is( $pg->version, "8.0.0", "Test Version" );
+is( $pg->major_version, '8', "Test major version" );
+is( $pg->minor_version, '0', "Test minor version" );
+is( $pg->patch_version, '0', "Test patch version" );
+is( $pg->lib_dir, 't/testlib', "Test lib dir" );
+is( $pg->bin_dir, 't/bin', "Test bin dir" );
+is( $pg->so_lib_dir, 't/testlib', "Test so lib dir" );
+is( $pg->inc_dir, "t/testinc", "Test inc dir" );
+is( $pg->configure, '', "Test configure" );
+is( $pg->home_url, 'http://www.postgresql.org/', "Get home URL" );
+is( $pg->download_url, 'http://www.postgresql.org/mirrors-ftp.html',
+    "Get download URL" );
