@@ -1,6 +1,6 @@
 package App::Info::Lib::Iconv;
 
-# $Id: Iconv.pm,v 1.6 2002/06/01 23:44:45 david Exp $
+# $Id: Iconv.pm,v 1.7 2002/06/02 00:21:25 david Exp $
 
 =head1 NAME
 
@@ -115,8 +115,8 @@ sub installed { $_[0]->{iconv_exe} ? 1 : undef }
 
   my $name = $iconv->name;
 
-Returns the name of the application. In this case, C<new()> simply returns the
-string "libiconv".
+Returns the name of the application. In this case, C<name()> simply returns
+the string "libiconv".
 
 =cut
 
@@ -208,7 +208,7 @@ sub inc_dir {
                        /usr/include
                        /sw/include);
 
-        $_[0]->{inc_dir} = $u->first_cat_file('iconv.h', @paths);
+        $_[0]->{inc_dir} = $u->first_cat_dir('iconv.h', @paths);
     }
     return $_[0]->{inc_dir};
 }
@@ -223,15 +223,15 @@ App::Info::Lib::Iconv searches for these files:
 
 =over 4
 
-=item libexpat.so
+=item libiconv.so
 
-=item libexpat.so.0
+=item libiconv.so.0
 
-=item libexpat.so.0.0.1
+=item libiconv.so.0.0.1
 
-=item libexpat.a
+=item libiconv.a
 
-=item libexpat.la
+=item libiconv.la
 
 =back
 
@@ -257,13 +257,13 @@ sub lib_dir {
         my @paths = qw(/usr/local/lib
                        /usr/lib
                        /sw/lib);
-        my @files = qw(libexpat.so
-                       libexpat.so.0
-                       libexpat.so.0.0.1
-                       libexpat.a
-                       libexpat.la);
+        my @files = qw(libiconv.so
+                       libiconv.so.0
+                       libiconv.so.0.0.1
+                       libiconv.a
+                       libiconv.la);
 
-        $_[0]->{lib_dir} = $u->first_cat_file(\@files, @paths);
+        $_[0]->{lib_dir} = $u->first_cat_dir(\@files, @paths);
     }
     return $_[0]->{lib_dir};
 }
@@ -278,11 +278,11 @@ object library could be found. App::Info::Lib::Iconv searches for these files:
 
 =over 4
 
-=item lib3expat.so
+=item libiconv.so
 
-=item libexpat.so.0
+=item libiconv.so.0
 
-=item libexpat.so.0.0.1
+=item libiconv.so.0.0.1
 
 =back
 
@@ -309,11 +309,11 @@ sub so_lib_dir {
                        /usr/lib);
         # Testing is the same as for lib_dir() except that we only check for
         # sos.
-        my @files = qw(libexpat.so
-                       libexpat.so.0
-                       libexpat.so.0.0.1);
+        my @files = qw(libiconv.so
+                       libiconv.so.0
+                       libiconv.so.0.0.1);
 
-        $_[0]->{so_lib_dir} = $u->first_cat_file(\@files, @paths);
+        $_[0]->{so_lib_dir} = $u->first_cat_dir(\@files, @paths);
     }
     return $_[0]->{so_lib_dir};
 }
@@ -326,7 +326,7 @@ Returns the libiconv home page URL.
 
 =cut
 
-sub home_url { 'http://http://www.gnu.org/software/libiconv/' }
+sub home_url { 'http://www.gnu.org/software/libiconv/' }
 
 =head2 download_url
 

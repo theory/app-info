@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.6 2002/06/01 23:44:45 david Exp $
+# $Id: Apache.pm,v 1.7 2002/06/02 00:21:25 david Exp $
 
 =head1 NAME
 
@@ -315,7 +315,7 @@ sub bin_dir {
     unless (exists $_[0]->{bin_dir}) {
         $_[0]->{bin_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_file('bin', $root)) {
+        if (my $dir = $u->first_cat_dir('bin', $root)) {
             $_[0]->{bin_dir} = $dir;
         }
 
@@ -338,7 +338,7 @@ sub inc_dir {
     unless (exists $_[0]->{inc_dir}) {
         $_[0]->{inc_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_file(['include', 'inc',], $root)){
+        if (my $dir = $u->first_cat_dir(['include', 'inc',], $root)){
             $_[0]->{inc_dir} = $dir;
         }
     }
@@ -360,7 +360,7 @@ sub lib_dir {
     unless (exists $_[0]->{lib_dir}) {
         $_[0]->{lib_dir} = undef;
         my $root = $_[0]->httpd_root || return;
-        if (my $dir = $u->first_cat_file(['lib', 'modules', 'libexec'], $root)){
+        if (my $dir = $u->first_cat_dir(['lib', 'modules', 'libexec'], $root)){
             $_[0]->{lib_dir} = $dir;
         } elsif ($u->first_dir('/usr/lib/apache/1.3')) {
             # The Debian way.
