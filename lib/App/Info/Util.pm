@@ -46,6 +46,7 @@ class offers methods that simplify those tasks.
 
 use strict;
 use File::Spec ();
+use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
 $VERSION = '0.30';
@@ -426,6 +427,26 @@ sub multi_search_file {
     close F;
     return unless %ret;
     return wantarray ? @ret{@regexen} : \@ret{@regexen};
+}
+
+=head2 lib_dirs
+
+  my @dirs = $util->lib_dirs;
+
+Returns a list of possible library directories to be searched. These are
+gathered from the C<libsdirs> and C<loclibpth> Config settings. These are
+useful for passing to C<first_cat_dir()> to search typical directories for
+library files.
+
+=cut
+
+sub lib_dirs {
+    grep { defined and length }
+    map { split ' ' }
+    grep { defined }
+    $Config{libsdirs},
+    $Config{loclibpth},
+    '/sw/lib';
 }
 
 1;

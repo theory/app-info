@@ -119,7 +119,7 @@ sub new {
             if (eval "use DBD::$dbd") {
                 # Looks like DBD::SQLite is installed. Set up a temp database
                 # handle so we can get information from it.
-                use DBI;
+                require DBI;
                 $self->{dbfile} = $u->catfile($u->tmpdir, 'tmpdb');
                 $self->{dbh} = DBI->connect("dbi:$dbd:dbname=$self->{dbfile}","","");
                 # I don't think there's any way to really confirm, so just return.
@@ -493,8 +493,9 @@ sub bin_dir {
 Returns the directory path in which an SQLite shared object library was
 found. No search is performed if SQLite is not installed or if only
 DBD::SQLite is installed. It searches all of the paths in the C<libsdirs> and
-C<loclibpth> attributes defined by the Perl L<Config|Config> module for one of
-the following files:
+C<loclibpth> attributes defined by the Perl L<Config|Config> module -- plus
+F</sw/lib> (in support of all you Fink users out there) -- for one of the
+following files:
 
 =over
 
@@ -556,15 +557,12 @@ my $lib_dir = sub {
     my ($self, $label) = (shift, shift, shift);
     return unless $self->{sqlite};
     $self->info("Searching for $label directory");
-    my @paths = grep { defined and length }
-      ( split(' ', $Config{libsdirs}),
-        split(' ', $Config{loclibpth}) );
     my $exe = $u->splitpath($self->{sqlite});
     my $libs = [ map { "lib$exe.$_"} @_,
                  qw(so so.0 so.0.0.1 dylib 0.dylib .0.0.1.dylib)
              ];
     my $dir;
-    unless ($dir = $u->first_cat_dir($libs, @paths)) {
+    unless ($dir = $u->first_cat_dir($libs, $u->lib_dirs, '/sw/lib')) {
         $self->error("Cannot find $label direcory");
         $dir = $self->unknown(
             key      => "$label directory",
@@ -593,8 +591,9 @@ sub lib_dir {
 Returns the directory path in which an SQLite shared object library was
 found. No search is performed if SQLite is not installed or if only
 DBD::SQLite is installed. It searches all of the paths in the C<libsdirs> and
-C<loclibpth> attributes defined by the Perl L<Config|Config> module for one of
-the following files:
+C<loclibpth> attributes defined by the Perl L<Config|Config> module -- plus
+F</sw/lib> (in support of all you Fink users out there) -- for one of the
+following files:
 
 =over
 

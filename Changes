@@ -1,6 +1,18 @@
 Revision history for Perl extension App::Info.
 
 0.30
+      - Fixed number of tests to skip in "sqlite_info.t" for systems that
+        don't have SQLite installed. Reported by numerous CPAN testers.
+      - Fixed carp.t to be compatable with older Perls.
+      - Added new C<lib_dirs()> method to App::Info::Util to centrally handle
+        the parsing and returning of typical library directories as defined by
+        the "libsdirs" and "loclibpth" Config settings.
+      - Added /sw/lib to the list of library diretories to search for
+        SQLite libraries.
+      - Only loading DBI in App::Info::RDBMS::SQLite if a version of
+        DBD::SQLite is known to be installed, rather than at compile
+        time.
+      - Fixed tests in sqlite_info.t to work properly on Windows.
 
 0.29  2004-11-20T00:09:22
       - Added App::Info::RDBMS::SQLite to the MANIFEST so that it will

@@ -4,7 +4,7 @@
 
 use strict;
 use Test::More tests => 17;
-use constant SKIP => 16;
+use constant SKIP => 13;
 
 ##############################################################################
 # Make sure that we can use the stuff that's in our local lib directory.
@@ -38,7 +38,7 @@ SKIP: {
         "Got Object 2");
     $info->message; # Throw away constructor message.
     $pg->version;
-    like($info->message, qr/^Executing `".*sqlite3?" -version`$/,
+    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
         "Check version info" );
 
     $pg->version;
@@ -51,7 +51,7 @@ SKIP: {
         "Got Object 3");
     $info->message; # Throw away constructor message.
     $pg->major_version;
-    like($info->message, qr/^Executing `".*sqlite3?" -version`$/,
+    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
         "Check major info" );
 
     # Check minor version.
@@ -59,7 +59,7 @@ SKIP: {
         "Got Object 4");
     $info->message; # Throw away constructor message.
     $pg->minor_version;
-    like($info->message, qr/^Executing `".*sqlite3?" -version`$/,
+    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
         "Check minor info" );
 
     # Check patch version.
@@ -67,7 +67,7 @@ SKIP: {
         "Got Object 5");
     $info->message; # Throw away constructor message.
     $pg->patch_version;
-    like($info->message, qr/^Executing `".*sqlite3?" -version`$/,
+    like($info->message, qr/^Executing `".*sqlite3?(.exe)?" -version`$/,
         "Check patch info" );
 
     # Check dir methods.

@@ -5,7 +5,7 @@
 use strict;
 use Test::More tests => 23;
 
-our $msg = "Error retrieving version";
+my $msg = "Error retrieving version";
 
 # Set up an App::Info subclass to ruin.
 package App::Info::Category::FooApp;
