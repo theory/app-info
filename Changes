@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.27
+
 0.26  2004-11-03T17:53:58
       - Added new path to list of paths to search for PostgreSQL. The new
         path, /usr/lib/postgresql/bin, is used by at least one Debian package.

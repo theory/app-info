@@ -6,7 +6,7 @@ use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.26';
+$VERSION = '0.27';
 
 1;
 __END__
