@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.23 2002/06/11 06:09:45 david Exp $
+# $Id: Info.pm,v 1.24 2002/06/12 04:16:57 david Exp $
 
 =head1 NAME
 
@@ -112,6 +112,7 @@ my $handler = sub {
       unless UNIVERSAL::isa($self, scalar caller(1));
 
     # Create the request object.
+    $params->{type} ||= $meth;
     my $req = App::Info::Request->new($params);
 
     # Do the deed. The ultimate handling handler may die.

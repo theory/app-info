@@ -1,12 +1,25 @@
 #!/usr/bin/perl -w
 
-# $Id: print.t,v 1.1 2002/06/11 23:56:44 david Exp $
+# $Id: print.t,v 1.2 2002/06/12 04:16:57 david Exp $
+
+# Make sure that we can use the stuff that's in our local lib directory.
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
+    }
+}
+chdir 't';
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 20;
 use File::Spec::Functions qw(:ALL);
 use File::Path;
 use FileHandle;
+use TieOut;
 
 # This is the message we'll test for.
 my $msg = "Run away! Run away!";
@@ -26,11 +39,41 @@ BEGIN { use_ok('App::Info::Handler::Print') }
 
 my $file = catfile tmpdir, 'app-info-print.tst';
 
+# Start by testing the default.
+my $stderr = tie *STDERR, 'TieOut' or die "Cannot tie STDERR: $!\n";
+ok( my $p = App::Info::Handler::Print->new, "Create default" );
+ok( my $app = App::Info::Category::FooApp->new( on_info => $p),
+    "Set up for default" );
+$app->version;
+is ($stderr->read, "$msg\n", "Check default" );
+
+# Now try STDERR, which should be the same thing.
+ok( $p = App::Info::Handler::Print->new('stderr'), "Create STDERR" );
+ok( $app = App::Info::Category::FooApp->new( on_info => $p),
+    "Set up for STDERR" );
+$app->version;
+is ($stderr->read, "$msg\n", "Check STDERR" );
+
+# Release!
+undef $stderr;
+untie *STDERR;
+
+# Now test STDOUT.
+my $stdout = tie *STDOUT, 'TieOut' or die "Cannot tie STDOUT: $!\n";
+ok( $p = App::Info::Handler::Print->new('stdout'), "Create STDOUT" );
+ok( $app = App::Info::Category::FooApp->new( on_info => $p),
+    "Set up for STDOUT" );
+$app->version;
+is ($stdout->read, "$msg\n", "Check STDOUT" );
+undef $stdout;
+untie *STDOUT;
+
+# Now try STDOUT.
+
 # Try a file handle.
 my $fh = FileHandle->new(">$file");
-ok( my $p = App::Info::Handler::Print->new($fh), "Create with file handle" );
-ok( my $app = App::Info::Category::FooApp->new( on_info => $p),
-    "Set up for file handle" );
+ok( $p = App::Info::Handler::Print->new($fh), "Create with file handle" );
+ok( $app->on_info($p), "Set file handle handler" );
 $app->version;
 $fh->close;
 chk_file($file, "Check file handle output", "$msg\n");
@@ -64,40 +107,6 @@ sub chk_file {
     local $/;
     is(<F>, $val || "$msg\n", $tst_name);
     close F or die "Cannot close $file: $!\n";
-}
-
-__END__
-
-# Start by testing STDERR.
-ok( my $p = App::Info::Handler::Print->new, "Create default" );
-close STDERR or die "Cannot close STDERR: $!\n";
-stderr(sub { $p->handler($req) }, "Check default's output" );
-ok( $p = App::Info::Handler::Print->new('stderr'), "Create stderr" );
-stderr(sub { $p->handler($req) }, "Check stderr's output" );
-
-# Now test STDOUT.
-close STDERR or die "Cannot close STDOUT: $!\n";
-ok( $p = App::Info::Handler::Print->new('stdout'), "Create stdout" );
-stderr(sub { $p->handler($req) }, "Check stdout's output" );
-
-sub stderr {
-    my ($code, $name) = @_;
-    open STDERR, ">$stderr" or die "Cannot open $stderr: $!\n";
-    $code->();
-    close STDERR or die "Cannot close $stderr: $!\n";
-    open STDERR, "<$stderr" or die "Cannot open $stderr: $!\n";
-    is(<STDERR>, $msg, $name );
-    close STDERR or die "Cannot close $stderr: $!\n";
-}
-
-sub stdout {
-    my ($code, $name) = @_;
-    open STDOUT, ">$stdout" or die "Cannot open $stdout: $!\n";
-    $code->();
-    close STDOUT or die "Cannot close $stdout: $!\n";
-    open STDOUT, "<$stdout" or die "Cannot open $stdout: $!\n";
-    is(<STDOUT>, $msg, $name );
-    close STDOUT or die "Cannot close $stdout: $!\n";
 }
 
 __END__
