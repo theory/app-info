@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.11 2002/06/03 17:47:25 david Exp $
+# $Id: Util.pm,v 1.12 2002/06/04 00:12:45 david Exp $
 
 =head1 NAME
 
@@ -30,16 +30,17 @@ App::Info::Util - Utility class for App::Info subclasses
 
 =head1 DESCRIPTION
 
-This class subclasses L<File::Spec|File::Spec> and adds a couple more methods
-in order to offer utility methods to L<App::Info|App::Info> subclasses.
-Although it is intended to be used by App::Info subclasses, in truth its
-utiltiy may be considered more general, so feel free to use it elsewhere.
+This class subclasses L<File::Spec|File::Spec> and adds its own methods in
+order to offer utility methods to L<App::Info|App::Info> classes. Although
+intended to be used by App::Info subclasses, in truth App::Info::Util's
+utility may be considered more general, so feel free to use it elsewhere.
 
 The methods added in addition to the usual File::Spec suspects are designed to
-facilitate locating files and directories on the local file system. The
-assumption is that, in order to provide useful metadata about a given software
-package, an App::Info subclass must find relevant files and directories.
-This class offers methods that may commonly be used for that task.
+facilitate locating files and directories on the file system, as well as
+searching those files. The assumption is that, in order to provide useful
+metadata about a given software package, an App::Info subclass must find
+relevant files and directories and parse them with regular expressions. This
+class offers methods that simplify those tasks.
 
 =cut
 
@@ -47,7 +48,7 @@ use strict;
 use File::Spec::Functions ();
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 my %path_dems = (MacOS   => qr',',
                  MSWin32 => qr';',
@@ -74,7 +75,7 @@ sub new { bless {}, ref $_[0] || $_[0] }
 
 =head1 OBJECT METHODS
 
-In addition to all of the methods offered by its superclass,
+In addition to all of the methods offered by its super class,
 L<File::Spec|File::Spec>, App::Info::Util offers the following methods.
 
 =head2 first_dir
@@ -83,8 +84,8 @@ L<File::Spec|File::Spec>, App::Info::Util offers the following methods.
   my $dir = $util->first_dir(@dirs);
 
 Returns the first file system directory in @paths that exists on the local
-file system. Only the first item in @paths that is a director will be
-returned; any other paths that lead to non-directories will be ignored.
+file system. Only the first item in @paths that exists as a directory will be
+returned; any other paths leading to non-directories will be ignored.
 
 =cut
 
@@ -138,8 +139,8 @@ sub first_path {
   my $file = $util->first_file(@filelist);
 
 Examines each of the files in @filelist and returns the first one that exists
-on the local file system. The file must be a regular file -- directories will
-be ignored.
+on the file system. The file must be a regular file -- directories will be
+ignored.
 
 =cut
 
@@ -158,9 +159,9 @@ The first argument to this method may be either a file or directory base name
 (that is, a file or directory name without a full path specification), or a
 reference to an array of file or directory base names. The remaining arguments
 constitute a list of directory paths. C<first_cat_path()> processes each of
-the directory paths, concatenates (by the method native to the local operating
-system) each of the file or directory base names, and returns the first one
-that exists on the file system.
+these directory paths, concatenates (by the method native to the local
+operating system) each of the file or directory base names, and returns the
+first one that exists on the file system.
 
 For example, let us say that we were looking for a file called either F<httpd>
 or F<apache>, and it could be in any of the following paths:
@@ -169,8 +170,8 @@ F</usr/local/bin>, F</usr/bin/>, F</bin>. The method call looks like this:
   my $httpd = $util->first_cat_path(['httpd', 'apache'], '/usr/local/bin',
                                     '/usr/bin/', '/bin');
 
-If the local file system is Unix-based, C<first_cat_path()> will then look for
-the first file that exists in this order:
+If the OS is a Unix variant, C<first_cat_path()> will then look for the first
+file that exists in this order:
 
 =over 4
 
@@ -188,8 +189,8 @@ the first file that exists in this order:
 
 =back
 
-The first of these complete file names to be found will be returned. If none
-are found, then undef will be returned.
+The first of these complete paths to be found will be returned. If none are
+found, then undef will be returned.
 
 =cut
 
@@ -202,6 +203,7 @@ sub first_cat_path {
             return $path if -e $path;
         }
     }
+    return;
 }
 
 =head2 first_cat_dir
@@ -211,7 +213,9 @@ sub first_cat_path {
 
 Funtionally identical to C<first_cat_path()>, except that it returns the
 directory path in which the first file was found, rather than the full
-concatenated path.
+concatenated path. Thus, in the above example, if the file found was
+F</usr/bin/httpd>, while C<first_cat_path()> would return that value,
+C<first_cat_dir()> would return F</usr/bin> instead.
 
 =cut
 
@@ -224,6 +228,7 @@ sub first_cat_dir {
             return $p if -e $path;
         }
     }
+    return;
 }
 
 =head2 search_file
@@ -243,7 +248,7 @@ be grabbed like this:
   my $regex = qr/Version\s+(\d+)\.(\d+),[^\d]*(\d+)/;
   my @nums = $util->search_file($file, $regex);
 
-Now version will contain the values C<(6, 5, 8)>. Note that in a scalar
+Now C<@nums> will contain the values C<(6, 5, 8)>. Note that in a scalar
 context, the above search would yeild an array reference:
 
   my $regex = qr/Version\s+(\d+)\.(\d+),[^\d]*(\d+)/;
@@ -258,16 +263,16 @@ of the following two calls would get you the data you need:
   my @minions = $util->search_file($file, qr/King\s+of\s+(.*)/);
 
 In the first case, because the regular expression contains only one set of
-parentheses, C<search_file()> will simply return that value; C<$minions>
+parentheses, C<search_file()> will simply return that value: C<$minions>
 contains the string "the who?". In the latter case, C<@minions> of course
 contains a single element: C<("the who?")>.
 
 Note that a regular expression without parentheses -- that is, one that
 doesn't grab values and put them into $1, $2, etc., will never successfully
-match a line in this file. You must include something to parentetically match.
-If you just want to know if something has matched, parentesize the whole thing
-and if the value returns, you have a match. Also, if you need to match
-patterns across lines, try using multiple regular expressions with
+match a line in this method. You must include something to parentetically
+match. If you just want to know the value of what was matched, parenthesize
+the whole thing and if the value returns, you have a match. Also, if you need
+to match patterns across lines, try using multiple regular expressions with
 C<multi_search_file()>, instead.
 
 =cut
@@ -284,6 +289,7 @@ sub search_file {
     close F;
     # If the match returned an more than one value, always return the full
     # array. Otherwise, return just the first value in a scalar context.
+    return unless @ret;
     return wantarray ? @ret : $#ret <= 0 ? $ret[0] : \@ret;
 }
 
@@ -307,9 +313,9 @@ For example, say you are parsing a file with lines like the following:
 
 You need to get each of these numbers, but calling C<search_file()> for each
 of them would be wasteful, as each call to C<search_file()> opens the file and
-parses it. With C<multi_search_file()>, the file will be opened only once,
-and, once all of the regular expressions has returned matches, the file will
-be closed and the matches returned.
+parses it. With C<multi_search_file()>, on the other hand, the file will be
+opened only once, and, once all of the regular expressions have returned
+matches, the file will be closed and the matches returned.
 
 Thus the above values can be collected like this:
 
@@ -319,10 +325,10 @@ Thus the above values can be collected like this:
 
   my @nums = $file->multi_search_file($file, @regexen);
 
-The result will be that @nums contains C<(1, 95, 2)>. Note that
+The result will be that C<@nums> contains C<(1, 95, 2)>. Note that
 C<multi_file_search()> tries to do the right thing by only parsing the file
 until all of the regular expressions have been matched. Thus, a large file
-with the values you need near the top can be parsed versy quickly.
+with the values you need near the top can be parsed very quickly.
 
 As with C<search_file()>, C<multi_search_file()> can take regular expressions
 that match multiple values. These will be returned as array references. For
@@ -380,6 +386,7 @@ sub multi_search_file {
         last unless @each;
     }
     close F;
+    return unles %ret;
     return wantarray ? @ret{@regexen} : \@ret{@regexen};
 }
 
