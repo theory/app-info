@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.45
+
 0.44  2005-01-08T00:29:03
       - Yet another fix for test failures on Win32, this time for PostgreSQL.
       - Fixed SQLite tests for DBD::SQLite (which is used to collect
