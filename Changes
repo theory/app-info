@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.31
+0.40
       - Eliminated "Odd number of elements in hash assignment" warning when
         creating an App::Info::Handler::Prompt object.
       - Changed SQLite event messages to simply refer to "SQLite" instead
@@ -13,6 +13,7 @@ Revision history for Perl extension App::Info.
         file system. Users can now override the directories ande files that
         the classes search for with their own values. Subclasses override the
         accessor methods to provide such values.
+      - Updated subclases to use the new "search" methods.
       - Added "search_conf_names" and "search_conf_dirs" parameters and
         methods to App::Info::HTTPD::Apache to allow users to affect the
         file names paths used to search for Apache configuration files.

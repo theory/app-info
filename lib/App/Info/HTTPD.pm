@@ -6,7 +6,7 @@ use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info);
-$VERSION = '0.31';
+$VERSION = '0.40';
 
 my $croak = sub {
     my ($caller, $meth) = @_;

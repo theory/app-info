@@ -44,7 +44,7 @@ to handle the request appropriately.
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.31';
+$VERSION = '0.40';
 
 ##############################################################################
 

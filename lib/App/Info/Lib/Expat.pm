@@ -44,7 +44,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.31';
+$VERSION = '0.40';
 
 my $u = App::Info::Util->new;
 
