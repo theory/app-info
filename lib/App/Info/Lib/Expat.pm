@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.4 2002/06/02 00:20:51 david Exp $
+# $Id: Expat.pm,v 1.5 2002/06/03 01:46:14 david Exp $
 
 =head1 NAME
 
@@ -64,11 +64,12 @@ do {
     my @paths = grep { defined and length }
       ( split(' ', $Config{libsdirs}),
         split(' ', $Config{loclibpth}) );
+    push @paths, '/sw/lib';
 
     my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1",
                 "libexpat.a", "libexpat.la"];
 
-    $obj->{libexpat} = $u->cat_first_dir($libs, @paths);
+    $obj->{libexpat} = $u->first_cat_dir($libs, @paths);
 };
 
 =head1 CONSTRUCTOR
@@ -113,7 +114,33 @@ string "Expat".
 
 sub name { 'Expat' }
 
-sub version {}
+=head2 version
+
+Returns the full version number for Expat. This number is parsed from the
+expat.h file if it exists. Returns undef if Expat is not installed or if the
+version number could not be found.
+
+=cut
+
+sub version {
+    return unless $_[0]->{libexpat};
+    unless (exists $_[0]->{version}) {
+        my $inc = $_[0]->inc_dir || return;
+        my $header = $u->catfile($inc, 'expat.h');
+        my @regexen = ( qr/XML_MAJOR_VERSION\s+(\d+)$/,
+                        qr/XML_MINOR_VERSION\s+(\d+)$/,
+                        qr/XML_MICRO_VERSION\s+(\d+)$/ );
+
+        my ($x, $y, $z) = $u->multi_search_file($header, @regexen);
+        unless (defined $x and defined $y and defined $z) {
+            # Warn them if we couldn't get them all.
+            Carp::carp("Failed to parse Expat version from file '$header'");
+        }
+        # But go ahead and keep them all, anyway -- some may be there.
+        @{$_[0]}{qw(version major minor patch)} = ("$x.$y.$z", $x, $y, $z);
+    }
+    return $_[0]->{version};
+}
 
 =head2 major_version
 
@@ -123,7 +150,10 @@ Unimplemented. Patches welcome.
 
 =cut
 
-sub major_version {}
+sub major_version {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{major};
+}
 
 =head2 minor_version
 
@@ -133,7 +163,10 @@ Unimplemented. Patches welcome.
 
 =cut
 
-sub minor_version {}
+sub minor_version {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{minor};
+}
 
 =head2 patch_version
 
@@ -143,7 +176,10 @@ Unimplemented. Patches welcome.
 
 =cut
 
-sub patch_version {}
+sub patch_version {
+    $_[0]->version unless exists $_[0]->{version};
+    return $_[0]->{patch};
+}
 
 =head2 bin_dir
 
@@ -227,7 +263,7 @@ sub so_lib_dir {
           ( split(' ', $Config{libsdirs}),
             split(' ', $Config{loclibpth}) );
         my $libs = ["libexpat.so", "libexpat.so.0", "libexpat.so.0.0.1"];
-        $obj->{so_lib_dir} = $u->cat_first_dir($libs, @paths);
+        $obj->{so_lib_dir} = $u->first_cat_dir($libs, @paths);
     }
     return $_[0]->{so_lib_dir};
 }
