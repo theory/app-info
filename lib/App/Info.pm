@@ -83,7 +83,7 @@ my $croak = sub {
 my $set_handlers = sub {
     my $on_key = shift;
     # Default is to do nothing.
-    return [] unless $on_key;
+    return unless $on_key;
     my $ref = ref $on_key;
     if ($ref) {
         $on_key = [$on_key] unless $ref eq 'ARRAY';
@@ -98,10 +98,10 @@ my $set_handlers = sub {
             }
         }
         # Return 'em!
-        return $on_key;
+        return @$on_key;
     } else {
         # Look up the handler.
-        return [ App::Info::Handler->new( key => $on_key) ];
+        return App::Info::Handler->new( key => $on_key);
     }
 };
 
@@ -204,7 +204,7 @@ sub new {
 
     # Set up handlers.
     for (qw(on_error on_unknown on_info on_confirm)) {
-        $p{$_} = $set_handlers->($p{$_});
+        $p{$_} = [$set_handlers->($p{$_})];
     }
 
     # Set up search defaults.
@@ -559,7 +559,7 @@ App::Info distribution to have info messages print to STDOUT:
 
 sub on_info {
     my $self = shift;
-    $self->{on_info} = $set_handlers->(\@_) if @_;
+    @{ $self->{on_info} } = $set_handlers->(\@_) if @_;
     return @{ $self->{on_info} };
 }
 
@@ -595,7 +595,7 @@ purpose:
 
 sub on_error {
     my $self = shift;
-    $self->{on_error} = $set_handlers->(\@_) if @_;
+    @{ $self->{on_error} } = $set_handlers->(\@_) if @_;
     return @{ $self->{on_error} };
 }
 
@@ -623,7 +623,7 @@ on how it works.
 
 sub on_unknown {
     my $self = shift;
-    $self->{on_unknown} = $set_handlers->(\@_) if @_;
+    @{ $self->{on_unknown} } = $set_handlers->(\@_) if @_;
     return @{ $self->{on_unknown} };
 }
 
@@ -650,7 +650,7 @@ help out:
 
 sub on_confirm {
     my $self = shift;
-    $self->{on_confirm} = $set_handlers->(\@_) if @_;
+    @{ $self->{on_confirm} } = $set_handlers->(\@_) if @_;
     return @{ $self->{on_confirm} };
 }
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: print.t,v 1.5 2002/06/21 05:43:12 david Exp $
+# $Id$
 
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
@@ -15,7 +15,7 @@ BEGIN {
 chdir 't';
 
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 23;
 use File::Spec::Functions qw(:ALL);
 use File::Path;
 use FileHandle;
@@ -73,7 +73,8 @@ untie *STDOUT;
 # Try a file handle.
 my $fh = FileHandle->new(">$file");
 ok( $p = App::Info::Handler::Print->new( fh => $fh ), "Create with file handle" );
-ok( $app->on_info($p), "Set file handle handler" );
+is( ($app->on_info($p))[0], $p, "Set file handle handler" );
+is( ($app->on_info)[0], $p, "Make sure the file handle handler is set" );
 $app->version;
 $fh->close;
 chk_file($file, "Check file handle output", "$msg\n");
@@ -81,7 +82,8 @@ chk_file($file, "Check file handle output", "$msg\n");
 # Try appending.
 $fh = FileHandle->new(">>$file");
 ok( $p = App::Info::Handler::Print->new( fh => $fh ), "Create with append" );
-ok( $app->on_info($p), "Set append handler" );
+is( ($app->on_info($p))[0], $p, "Set append handler" );
+is( ($app->on_info)[0], $p, "Make sure the append handler is set" );
 $app->version;
 $fh->close;
 chk_file($file, "Check append output", "$msg\n$msg\n");
@@ -89,7 +91,8 @@ chk_file($file, "Check append output", "$msg\n$msg\n");
 # Try a file handle glob.
 open F, ">$file" or die "Cannot open $file: $!\n";
 ok( $p = App::Info::Handler::Print->new( fh => \*F ), "Create with glob" );
-ok( $app->on_info($p), "Set glob handler" );
+is( ($app->on_info($p))[0], $p, "Set glob handler" );
+is( ($app->on_info)[0], $p, "Make sure the glob handler is set" );
 $app->version;
 close F or die "Cannot close $file: $!\n";
 chk_file($file, "Check glob output", "$msg\n");
