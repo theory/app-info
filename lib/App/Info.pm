@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.34 2002/06/27 18:06:50 david Exp $
+# $Id: Info.pm,v 1.35 2002/06/27 20:23:40 david Exp $
 
 =head1 NAME
 
@@ -28,6 +28,14 @@ installed on a system. The idea is that these classes can be used in Perl
 application installers in order to determine whether software dependencies
 have been fulfilled, and to get necessary metadata about those software
 packages.
+
+App::Info provides an event model for handling events triggered by App::Info
+subclasses. The events are classified as "info", "error", "unknown", and
+"confirm" events, and multiple handlers may be specified to handle any or all
+of these event types. This allows App::Info clients to flexibly handle events
+in any way they deem necessary. Implementing new event handlers is
+straight-forward, and use the triggering of events by App::Info subclasses is
+likewise kept easy-to-use.
 
 A few L<sample subclasses|"SEE ALSO"> are provided with the distribution, but
 others are invited to write their own subclasses and contribute them to the
