@@ -1,5 +1,12 @@
 Revision history for Perl extension App::Info.
 
+0.04
+        - Wrote documentation on subclassing App::Info.
+        - Added httpd_root() abstract method to App::Info::HTTPD abstract
+          base class.
+        - Added and corrected documentation in App::Info::HTTPD,
+          App::Info::RDBMS, and App::Info::Lib.
+
 0.03  Mon Jun  3 18:37:50 2002
         - Private release.
         - Changed first_cat_file() to first_cat_path() in App::Info::Util.

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
-# $Id: myapache.t,v 1.1 2002/06/03 17:59:17 david Exp $
+# $Id: myapache.t,v 1.2 2002/06/03 23:49:18 david Exp $
 
 use strict;
 use Test::More;
 
 if (exists $ENV{APP_INFO_MAINTAINER}) {
-    plan tests => 21;
+    plan tests => 25;
 } else {
     plan skip_all => "maintainer's internal tests.";
 }
@@ -32,9 +32,13 @@ is( $apache->httpd_root, "/usr/local/apache", "Test httpd root" );
 is( $apache->magic_number, '19990320:11', "Test magic number" );
 ok( $apache->mod_so, "Test mod_so" );
 ok( $apache->mod_perl, "Test mod_perl" );
+is( $apache->conf_file, "/usr/local/apache/conf/httpd.conf", "Test conf file" );
+is( $apache->user, "nobody", "Test user" );
+is( $apache->group, "nobody", "Test group" );
+is( $apache->port, '80', "Test port" );
 eq_set( scalar $apache->static_mods, \@mods, "Check static mods" );
-is( $apache->compile_option('SERVER_CONFIG_FILE'), 'conf/httpd.conf',
-    "Check config file [compile_option()]" );
+is( $apache->compile_option('DEFAULT_ERRORLOG'), 'logs/error_log',
+    "Check error log from compile_option()" );
 
 is( $apache->lib_dir, '/usr/local/apache/libexec', "Test lib dir" );
 is( $apache->bin_dir, '/usr/local/apache/bin', "Test bin dir" );
