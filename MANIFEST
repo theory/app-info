@@ -30,6 +30,7 @@ t/bin/postgres
 t/bin/sqlite3
 t/carp.t
 t/confirm.t
+t/errors.t
 t/expat.t
 t/expat_info.t
 t/iconv.t

@@ -125,6 +125,14 @@ sub new {
     return $self;
 }
 
+##############################################################################
+
+=head3 handler
+
+This method is called by App::Info to print out the message from events.
+
+=cut
+
 sub handler {
     my ($self, $req) = @_;
     print {$self->{fh}} $req->message, "\n";
