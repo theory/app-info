@@ -1,6 +1,6 @@
 package App::Info::Lib::Expat;
 
-# $Id: Expat.pm,v 1.15 2002/06/05 00:15:21 david Exp $
+# $Id: Expat.pm,v 1.16 2002/06/05 00:17:49 david Exp $
 
 =head1 NAME
 
@@ -149,7 +149,7 @@ sub version {
             Carp::carp("Failed to parse Expat version from file '$header'");
         }
         # But go ahead and keep them all, anyway -- some may be there.
-        my $v = ($x || '') . '.' . ($y || '') . '.' . ($z || '';
+        my $v = ($x || '') . '.' . ($y || '') . '.' . ($z || '');
         @{$_[0]}{qw(version major minor patch)} = ($v, $x, $y, $z);
     }
     return $_[0]->{version};
