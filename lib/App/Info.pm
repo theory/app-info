@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.31 2002/06/15 00:49:55 david Exp $
+# $Id: Info.pm,v 1.32 2002/06/16 00:42:51 david Exp $
 
 =head1 NAME
 
@@ -541,7 +541,7 @@ my $handler = sub {
 
     # Create the request object.
     $params->{type} ||= $meth;
-    my $req = App::Info::Request->new($params);
+    my $req = App::Info::Request->new(%$params);
 
     # Do the deed. The ultimate handling handler may die.
     foreach my $eh (@{$self->{"on_$meth"}}) {
@@ -556,7 +556,7 @@ my $handler = sub {
 
 =head3 info
 
-  $self->info($message);
+  $self->info(@message);
 
 Use this method to display status messages for the user. You may wish to use
 it to inform users that you're searching for a particular file, or attempting
@@ -572,6 +572,9 @@ Note that, due to the nature of App::Info event handlers, your informational
 message may be used or displayed any number of ways, or indeed not at all (as
 is the default behavior).
 
+The C<@message> will be joined into a single string and stored in the message
+attribute of the App::Info::Request object passed to info event handlers.
+
 =cut
 
 sub info {
@@ -584,7 +587,7 @@ sub info {
 
 =head3 error
 
-  $self->error($error);
+  $self->error(@error);
 
 Use this method to inform the user that something unexpected has happened. An
 example might be when you invoke another program to parse its output, but it's
@@ -594,6 +597,11 @@ output isn't what you expected:
 
 As with all events, keep in mind that error events may be handled in any
 number of ways, or not at all.
+
+The C<@erorr> will be joined into a single string and stored in the message
+attribute of the App::Info::Request object passed to error event handlers. If
+that seems confusing, think of it as an "error message" rather than an "error
+error." :-)
 
 =cut
 
@@ -630,7 +638,8 @@ decide to prompt for the appropriate value. Such a prompt might be something
 like "Path to your httpd binary?". If this value is not provided, App::Info
 will construct one for you using your class' C<key_name()> method and the
 C<$key> argument. The result would be something like "Enter a valid FooApp
-version".
+version". This value will be stored in the message attribute of the
+App::Info::Request object passed to event handlers.
 
 =item C<$callback>
 
@@ -644,7 +653,8 @@ convenience, the first argument to the callback code reference is also stored
 in C<$_> .This makes it easy to validate using functions or operators that,
 er, operate on $_ by default, but still allows you to get more information
 from C<@_> if necessary. For the directory example, a good callback might be
-C<sub { -d }>.
+C<sub { -d }>. This value will be stored in the callback attribute of the
+App::Info::Request object passed to event handlers.
 
 =item C<$error>
 
@@ -655,7 +665,8 @@ entered. For example, if the unknown value was a directory, and the user
 entered a value that the C<$callback> identified as invalid, a message to
 display might be something like "Invalid directory path". Note that if the
 C<$error> argument is not provided, App::Info will supply the generic error
-message "Invalid value".
+message "Invalid value". This value will be stored in the error attribute of
+the App::Info::Request object passed to event handlers.
 
 =back
 
@@ -728,24 +739,30 @@ returned by the first call for a given key.
 Same as for C<unknown()>. Although C<confirm()> is called to confirm a value,
 typically the prompt should request the relevant value, just as for
 C<unknown()>. The difference is that the handler I<should> use the C<$value>
-argument as the default should the user not provide a value.
+argument as the default should the user not provide a value. This value will
+be stored in the message attribute of the App::Info::Request object passed to
+event handlers.
 
 =item C<$value>
 
 The value to be confirmed. This is the value you've found, and it will be
 provided to the user as the default option when they're prompted for a new
-value.
+value. This value will be stored in the value attribute of the
+App::Info::Request object passed to event handlers.
 
 =item C<$callback>
 
 Same as for C<unknown()>. Because the user can enter data to replace the
 default value provided via the C<$value> argument, you might want to validate
-it. Use this code reference to do so.
+it. Use this code reference to do so. This value will be stored in the
+callback attribute of the App::Info::Request object passed to event handlers.
 
 =item C<$error>
 
 Same as for C<unknown()>: an error message to display in the event that a
 value entered by the user isn't validated by the C<$callback> code reference.
+This value will be stored in the error attribute of the App::Info::Request
+object passed to event handlers.
 
 =back
 
@@ -753,6 +770,7 @@ Here's an example usage demonstrating all of the above arguments:
 
   my $exe = $self->confirm('shell', 'Path to your shell?', '/bin/sh',
                            sub { -x }, 'Not an executable');
+
 
 =cut
 

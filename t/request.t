@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# $Id: request.t,v 1.6 2002/06/14 19:02:34 david Exp $
+# $Id: request.t,v 1.7 2002/06/16 00:42:51 david Exp $
 
 use strict;
 use Test::More tests => 20;
@@ -12,11 +12,11 @@ ok( my $req = App::Info::Request->new, "New default request" );
 isa_ok($req, 'App::Info::Request');
 eval {  App::Info::Request->new('foo') };
 like( $@,
-      qr/^Parameters to App::Info::Request->new\(\) must be a hash reference/,
+      qr/^Odd number of parameters in call to App::Info::Request->new\(\)/,
       "Catch invalid params" );
-eval {  App::Info::Request->new({ sigil => 'foo' }) };
+eval {  App::Info::Request->new( sigil => 'foo' ) };
 like( $@, qr/^Sigil parameter must be one of/, "Catch invalid sigil" );
-eval {  App::Info::Request->new({ callback => 'foo' }) };
+eval {  App::Info::Request->new( callback => 'foo' ) };
 like( $@, qr/^Callback parameter 'foo' is not a code reference/,
       "Catch invalid callback" );
 
@@ -29,7 +29,7 @@ my %args = ( message  => 'Enter a value',
              type     => 'info'
            );
 
-ok( $req = App::Info::Request->new( \%args ), "New custom request" );
+ok( $req = App::Info::Request->new( %args ), "New custom request" );
 is( $req->message, $args{message}, "Check message" );
 is( $req->error, $args{error}, "Check error" );
 is( $req->sigil, $args{sigil}, "Check sigil" );
@@ -46,6 +46,6 @@ is( $req->value, $val, "Check value" );
 
 # Try changing the callback to use $_.
 $args{callback} = sub { -d };
-ok( $req = App::Info::Request->new( \%args ), "Another custom request" );
+ok( $req = App::Info::Request->new( %args ), "Another custom request" );
 ok( $req->callback(tmpdir), 'Try $_ callback');
 ok( !$req->callback('foo234234'),  'Fail $_ callback' );
