@@ -1,6 +1,6 @@
 package App::Info::Util;
 
-# $Id: Util.pm,v 1.10 2002/06/03 16:16:10 david Exp $
+# $Id: Util.pm,v 1.11 2002/06/03 17:47:25 david Exp $
 
 =head1 NAME
 
@@ -149,27 +149,27 @@ sub first_file {
     return;
 }
 
-=head2 first_cat_file
+=head2 first_cat_path
 
-  my $file = $util->first_cat_file('ick.txt', @paths);
-  $file = $util->first_cat_file(['this.txt', 'that.txt'], @paths);
+  my $file = $util->first_cat_path('ick.txt', @paths);
+  $file = $util->first_cat_path(['this.txt', 'that.txt'], @paths);
 
-The first argument to this method may be either a file base name (that is, a
-file name without a directory specification), or an reference to an array of
-file base names. The remaining arguments constitute a list of directory paths.
-C<first_cat_file()> processes each of the file base names in the first
-argument, concatenates them (by the method native to the local operating
-system) to each of the directory path names in turn, and returns the first one
-that exists on the local file system.
+The first argument to this method may be either a file or directory base name
+(that is, a file or directory name without a full path specification), or a
+reference to an array of file or directory base names. The remaining arguments
+constitute a list of directory paths. C<first_cat_path()> processes each of
+the directory paths, concatenates (by the method native to the local operating
+system) each of the file or directory base names, and returns the first one
+that exists on the file system.
 
 For example, let us say that we were looking for a file called either F<httpd>
-or F<apache>, and it could be in any of the following paths: F</usr/local/bin>,
-F</usr/bin/>, F</bin>. The method call looks like this:
+or F<apache>, and it could be in any of the following paths:
+F</usr/local/bin>, F</usr/bin/>, F</bin>. The method call looks like this:
 
-  my $httpd = $util->first_cat_file(['httpd', 'apache'], '/usr/local/bin',
+  my $httpd = $util->first_cat_path(['httpd', 'apache'], '/usr/local/bin',
                                     '/usr/bin/', '/bin');
 
-If the local file system is Unix-based, C<first_cat_file()> will then look for
+If the local file system is Unix-based, C<first_cat_path()> will then look for
 the first file that exists in this order:
 
 =over 4
@@ -193,25 +193,25 @@ are found, then undef will be returned.
 
 =cut
 
-sub first_cat_file {
+sub first_cat_path {
     my $self = shift;
     my $files = ref $_[0] ? shift() : [shift()];
     foreach my $p (@_) {
         foreach my $f (@$files) {
             my $path = File::Spec::Functions::catfile($p, $f);
-            return $path if -f $path;
+            return $path if -e $path;
         }
     }
 }
 
 =head2 first_cat_dir
 
-  my $dir = $util->first_cat_file('ick.txt', @paths);
-  $dir = $util->first_cat_file(['this.txt', 'that.txt'], @paths);
+  my $dir = $util->first_cat_dir('ick.txt', @paths);
+  $dir = $util->first_cat_dir(['this.txt', 'that.txt'], @paths);
 
-Funtionally identical to C<first_cat_file()>, except that it returns
-the directory in which the first file was found, rather than the full
-path name to the file.
+Funtionally identical to C<first_cat_path()>, except that it returns the
+directory path in which the first file was found, rather than the full
+concatenated path.
 
 =cut
 
@@ -221,7 +221,7 @@ sub first_cat_dir {
     foreach my $p (@_) {
         foreach my $f (@$files) {
             my $path = File::Spec::Functions::catfile($p, $f);
-            return $p if -f $path;
+            return $p if -e $path;
         }
     }
 }
