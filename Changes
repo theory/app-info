@@ -1,11 +1,11 @@
 Revision history for Perl extension App::Info.
 
-0.12  
-      - Fixed util.t test so that people who actually have directories named,
-        e.g., "/foo", will still have their tests pass. Thanks to Arthur
-        Bergman for the spot.
+0.12  Sat Jun  8 20:32:38 2002
+      - Now more silly-proof! Fixed util.t test so that people who actually
+        have directories named, e.g., "/foo", will still have their tests
+        pass. Thanks to Arthur Bergman for the spot.
       - Fixed Lib::Expat so that verion() would properly return undef when
-        no includ director was found. Thanks to Arthur Bergman for the spot.
+        no include directory was found. Thanks to Arthur Bergman for the spot.
       - Fixed $VERSION in Info.pm to be available to pre-5.6.0 perls.
 
 0.11  Sat Jun  8 05:49:40 2002
