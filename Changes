@@ -8,6 +8,9 @@ Revision history for Perl extension App::Info.
       - Fixed issue where RDBMS::PostgreSQL would try to execute pg_config
         even when it didn't exist.
       - Added To Do list.
+      - Made iconv.t and expat.t tests for version numbers safer for CPAN
+        distribution. Patches with improved methods of determining version
+        numbers for those libraries are welcome.
 
 0.04  Tue Jun  4 01:03:58 2002
       - Wrote documentation on subclassing App::Info.
