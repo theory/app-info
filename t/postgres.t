@@ -20,6 +20,7 @@ ok( my $pg = App::Info::RDBMS::PostgreSQL->new(
     search_bin_dirs => $bin_dir,
     search_exe_names => "pg_config$ext",
     search_createdb_names => "mycreatedb$ext",
+    search_postgres_names => "postgres$ext",
 ), "Got Object");
 
 isa_ok($pg, 'App::Info::RDBMS::PostgreSQL');
