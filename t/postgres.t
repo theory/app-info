@@ -35,7 +35,7 @@ is( $pg->lib_dir, 't/testlib', "Test lib dir" );
 is( $pg->executable, $exes{postgres}, "Test executable" );
 is( $pg->postgres, $exes{postgres}, "Test postgres" );
 is( $pg->createdb, $exes{createdb}, "Test createdb" );
-is( $pg->bin_dir, 't/bin', "Test bin dir" );
+is( $pg->bin_dir, $bin_dir, "Test bin dir" );
 is( $pg->so_lib_dir, 't/testlib', "Test so lib dir" );
 is( $pg->inc_dir, "t/testinc", "Test inc dir" );
 is( $pg->configure, '', "Test configure" );

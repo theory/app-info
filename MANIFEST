@@ -21,9 +21,12 @@ META.yml
 README
 t/apache.t
 t/apache_info.t
+t/bin/apxs
+t/bin/createdb
 t/bin/httpd
 t/bin/iconv
 t/bin/pg_config
+t/bin/postgres
 t/bin/sqlite3
 t/carp.t
 t/confirm.t

@@ -906,58 +906,21 @@ An alias for C<executable()>.
 
   my $bin_dir = $apache->bin_dir;
 
-Returns the Apache binary directory path. App::Info::HTTPD::Apache simply
-looks for the F<bin> directory under the HTTPD root directory, as returned by
-C<httpd_root()>.
-
-B<Events:>
-
-=over 4
-
-=item info
-
-Executing `httpd -V`
-
-Searching for bin directory
-
-=item error
-
-Unable to extract compile settings from `httpd -V`
-
-Cannot parse HTTPD root from `httpd -V`
-
-Cannot find bin directory
-
-=item unknown
-
-Enter a valid HTTPD root
-
-Enter a valid Apache bin directory
-
-=back
+Returns the SQLite binary directory path. App::Info::HTTPD::Apache simply
+retreives it as the directory part of the path to the HTTPD executable.
 
 =cut
 
 sub bin_dir {
     my $self = shift;
     return unless $self->{executable};
-    unless (exists $self->{bin_dir}) {{
-        my $root = $self->httpd_root || last; # Double braces allow this.
-        $self->info("Searching for bin directory");
-        if (WIN32) {
-            # Windows thinks that the bin directory is the same as the root.
-            $self->{bin_dir} = $root;
-        } else {
-            # Other platforms have a "bin" director under the root.
-            $self->{bin_dir} = $u->first_cat_path('bin', $root)
-              or $self->error("Cannot find bin directory");
-        }
-    }}
-
-    # Handle unknown value.
-    $self->{bin_dir} = $self->unknown( key      => 'bin directory',
-                                       callback => $is_dir)
-      unless $self->{bin_dir};
+    unless (exists $self->{bin_dir} ) {
+        my @parts = $u->splitpath($self->{executable});
+        $self->{bin_dir} = $u->catdir(
+            ($parts[0] eq '' ? () : $parts[0]),
+            $u->splitdir($parts[1])
+        );
+    }
     return $self->{bin_dir};
 }
 

@@ -8,6 +8,9 @@ Revision history for Perl extension App::Info.
         including "postgres()", "createdb()", "createuser()", and others.
       - Added other executable methods to App::Info::RDBMS::PostgreSQL,
         including "ab()", "apachectl()", "apxs()", and others.
+      - Changed behavior of App::Info::HTTPD::Apache->bin_dir to just return
+        the name of the directory in which the httpd executable is stored,
+	rather than a possible "bin" directory under the httpd_root.
 
 0.41  2004-11-28T20:01:57
       - Fixed Apache, SQLite, and Iconv tests to pass under Win32.

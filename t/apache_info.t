@@ -3,8 +3,8 @@
 # $Id$
 
 use strict;
-use Test::More tests => 83;
-use constant SKIP => 79;
+use Test::More tests => 76;
+use constant SKIP => 72;
 
 ##############################################################################
 # Make sure that we can use the stuff that's in our local lib directory.
@@ -85,31 +85,10 @@ SKIP: {
         "Check patch info" );
 
     ##########################################################################
-    # Check bin_dir method.
-    $apache->bin_dir;
-    like( $info->message, qr/^Executing `".*(httpd|apache-perl|apache)(.exe)?" -V`$/,
-          "Check bin info" );
-    is( $info->message, "Searching for bin directory",
-        "Check bin info again" );
-    ok( ! defined $info->message, "No more bin info" );
-    $apache->bin_dir;
-    ok( ! defined $info->message, "Still no more bin info" );
-
-    # Try again with a new object.
-    ok( $apache = App::Info::HTTPD::Apache->new( on_info => $info ),
-        "Got Object 6");
-    $info->message; # Throw away constructor message.
-
-    $apache->bin_dir;
-    like( $info->message, qr/^Executing `".*(httpd|apache-perl|apache)(.exe)?" -V`$/,
-        "Check bin info new" );
-    is( $info->message, "Searching for bin directory",
-        "Check bin info again" );
-    ok( ! defined $info->message, "No more bin new info" );
-
-    ##########################################################################
     # Check inc_dir method.
     $apache->inc_dir;
+    like( $info->message, qr/^Executing `".*(httpd|apache-perl|apache)(.exe)?" -V`$/,
+          "Check inc_dir info" );
     is( $info->message, "Searching for include directory",
         "Check inc info again" );
     ok( ! defined $info->message, "No more inc info" );
