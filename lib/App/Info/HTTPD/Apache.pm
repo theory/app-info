@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.12 2002/06/03 17:58:55 david Exp $
+# $Id: Apache.pm,v 1.13 2002/06/03 18:13:35 david Exp $
 
 =head1 NAME
 
@@ -481,12 +481,14 @@ Feel free to drop me a line if you discover any bugs. Patches welcome.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <david@wheeler.net> based on code by Sam Tregar
+<sam@tregar.com>.
 
 =head1 SEE ALSO
 
 L<App::Info|App::Info>,
-L<App::Info::HTTPD|App::Info::HTTPD>
+L<App::Info::HTTPD|App::Info::HTTPD>,
+L<Apache|Apache>
 
 =head1 COPYRIGHT AND LICENSE
 
