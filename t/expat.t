@@ -1,14 +1,13 @@
 #!/usr/bin/perl -w
 
-# $Id: expat.t,v 1.5 2002/06/05 23:50:42 david Exp $
+# $Id: expat.t,v 1.6 2002/06/10 23:47:48 david Exp $
 
 use strict;
 use Test::More tests => 17;
 
 BEGIN { use_ok('App::Info::Lib::Expat') }
 
-ok( my $expat = App::Info::Lib::Expat->new( error_level => 'silent' ),
-    "Got Object");
+ok( my $expat = App::Info::Lib::Expat->new, "Got Object");
 isa_ok($expat, 'App::Info::Lib::Expat');
 isa_ok($expat, 'App::Info::Lib');
 isa_ok($expat, 'App::Info');

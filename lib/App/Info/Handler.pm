@@ -1,6 +1,6 @@
 package App::Info::Handler;
 
-# $Id: Handler.pm,v 1.2 2002/06/10 06:03:06 david Exp $
+# $Id: Handler.pm,v 1.3 2002/06/10 23:47:48 david Exp $
 
 =head1 NAME
 
@@ -58,9 +58,9 @@ __PACKAGE__->register_handler('default', sub { __PACKAGE__->new } );
 sub new {
     my ($pkg, $key) = @_;
     my $class = ref $pkg || $pkg;
-    if ($class eq __PACKAGE__) {
+    $key ||= 'default';
+    if ($class eq __PACKAGE__ && $key ne 'default') {
         # We were called directly! Handle it.
-        $key ||= 'default';
         return $handlers{$key}->();
     } else {
         # A subclass called us -- just instantiate and return.

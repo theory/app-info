@@ -1,6 +1,6 @@
 package App::Info;
 
-# $Id: Info.pm,v 1.21 2002/06/10 06:03:06 david Exp $
+# $Id: Info.pm,v 1.22 2002/06/10 23:47:48 david Exp $
 
 =head1 NAME
 
@@ -123,6 +123,12 @@ my $handler = sub {
     return $req;
 };
 
+sub on_error {
+    my $self = shift;
+    $self->{on_error} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_error} };
+}
+
 sub error {
     my $self = shift;
     # Execute the handler sequence.
@@ -131,12 +137,24 @@ sub error {
     $self->{error} = $req->message;
 }
 
+sub on_info {
+    my $self = shift;
+    $self->{on_info} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_info} };
+}
+
 sub info {
     my $self = shift;
     # Execute the handler sequence.
     my $req = $handler->($self, 'info', { message => join('', @_) });
     # If we haven't died, save the error.
     $self->{info} = $req->message;
+}
+
+sub on_unknown {
+    my $self = shift;
+    $self->{on_unknown} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_unknown} };
 }
 
 sub unknown {
@@ -154,6 +172,12 @@ sub unknown {
     my $req = $handler->($self, "unknown", $params);
     # If we haven't died, return the value.
     return $req->value;
+}
+
+sub on_confirm {
+    my $self = shift;
+    $self->{on_confirm} = $set_handlers->(\@_) if @_;
+    return @{ $self->{on_confirm} };
 }
 
 sub confirm {
