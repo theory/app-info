@@ -1,6 +1,6 @@
 package App::Info::HTTPD::Apache;
 
-# $Id: Apache.pm,v 1.24 2002/06/10 23:28:23 david Exp $
+# $Id: Apache.pm,v 1.25 2002/06/10 23:34:43 david Exp $
 
 =head1 NAME
 
@@ -193,7 +193,7 @@ sub version {
         chomp $version;
         my ($n, $x, $y, $z) = $version =~
           /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
-        unless ($n and defined $x and defined $y and defined $z) {
+        unless ($n and $x and defined $y and defined $z) {
             $self->error("Failed to parse Apache name and ",
                          "version from string '$version'");
             last; # Double braces allow this.
@@ -203,10 +203,24 @@ sub version {
           ($n, "$x.$y.$z", $x, $y, $z);
     }} # unless
 
-    # Note -- add code here to handle splitting up an entered version into
-    # major, minor, and patch parts.
     # Handle an unknown value.
-    $self->{version} = $self->unknown('version') unless $self->{version};
+    unless ($self->{version}) {
+        # Create a validation code reference.
+        my $chk_version = sub {
+            my $ver = shift;
+            # Try to get the version number parts.
+            my ($x, $y, $z) =
+              $ver =~ /Server\s+version:\s+([^\/]*)\/(\d+)\.(\d+).(\d+)/;
+            # Return false if we didn't get all three.
+            return unless $x and defined $y and defined $z;
+            # Save all three parts.
+            @{$self}{qw(major minor patch)} = ($x, $y, $z);
+            # Return true.
+            return 1;
+        };
+        $self->{version} = $self->unknown('version', $chk_version);
+    }
+
     # Return the version number.
     return $self->{version};
 }
