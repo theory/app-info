@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: prompt.t,v 1.7 2002/06/27 18:06:50 david Exp $
+# $Id: prompt.t,v 1.8 2002/07/01 03:32:49 david Exp $
 
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 32;
 use File::Spec::Functions qw(:ALL);
 
 ##############################################################################
@@ -122,6 +122,20 @@ is($dir, $tmpdir, "Got tmpdir from second confirm" );
 $expected = qq{Path to tmpdir [$tmpdir] Not a valid directory: 'foo123123'
 Path to tmpdir [$tmpdir] };
 is( $stdout->read, $expected, "Check second confirm prompt" );
+
+##############################################################################
+# Now just try the default answer.
+ok( $app = App::Info::Category::FooApp->new( on_confirm => $p),
+    "Set up for third confirm" );
+# Set up the answers.
+print STDIN "\n";
+# Set it off.
+$dir = $app->lib_dir;
+# Check the answer.
+is($dir, $tmpdir, "Got tmpdir from third confirm" );
+# Check the output.
+$expected = qq{Path to tmpdir [$tmpdir] };
+is( $stdout->read, $expected, "Check third confirm prompt" );
 
 ##############################################################################
 # Now test just a key argument to unknown
