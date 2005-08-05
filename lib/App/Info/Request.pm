@@ -120,6 +120,21 @@ sub new {
 
 =head2 Object Methods
 
+=head3 key
+
+  my $key = $req->key;
+
+Returns the key stored in the App::Info::Request object. The key is used by
+the App::Info subclass to uniquely identify the information it is harvesting,
+such as the path to an executable. It might be used by request handlers,
+for example, to see if an option was passed on the command-line.
+
+=cut
+
+sub key { $_[0]->{key} }
+
+##############################################################################
+
 =head3 message
 
   my $message = $req->message;

@@ -876,7 +876,7 @@ of the above arguments:
 
 sub unknown {
     my ($self, %params) = @_;
-    my $key = delete $params{key}
+    my $key = $params{key}
       or Carp::croak("No key parameter passed to unknown()");
     # Just return the value if we've already handled this value. Ideally this
     # shouldn't happen.
@@ -971,7 +971,7 @@ Here's an example usage demonstrating all of the above arguments:
 
 sub confirm {
     my ($self, %params) = @_;
-    my $key = delete $params{key}
+    my $key = $params{key}
       or Carp::croak("No key parameter passed to confirm()");
     return $self->{__confirm__}{$key} if exists $self->{__confirm__}{$key};
 
