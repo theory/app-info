@@ -97,7 +97,7 @@ sub new {
                                     $self->search_bin_dirs)) {
         # We found it. Confirm.
         $self->{executable} = $self->confirm(
-            key      => 'iconv_exe',
+            key      => 'path-to-iconv',
             prompt   => 'Path to iconv executable?',
             value    => $exe,
             callback => sub { -x },
@@ -106,7 +106,7 @@ sub new {
     } else {
         # No luck. Ask 'em for it.
         $self->{executable} = $self->unknown(
-            key      => 'iconv_exe',
+            key      => 'path-to-iconv',
             prompt   => 'Path to iconv executable?',
             callback => sub { -x },
             error    => 'Not an executable'
@@ -252,7 +252,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'version number',
+        $self->{version} = $self->unknown( key      => 'iconv-version-number',
                                            callback => $chk_version);
     }
 
@@ -309,7 +309,7 @@ sub major_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'major version number',
+    $self->{major} = $self->unknown( key      => 'iconv-major-version-number',
                                      callback => $is_int)
       unless $self->{major};
 
@@ -362,7 +362,7 @@ sub minor_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key      => 'minor version number',
+    $self->{minor} = $self->unknown( key      => 'iconv-minor-version-number',
                                      callback => $is_int)
       unless $self->{minor};
 
@@ -440,7 +440,7 @@ sub bin_dir {
             $self->{bin_dir} = $bin;
         } else {
             $self->{bin_dir} = $self->unknown(
-                key      => 'bin directory',
+                key      => 'iconv-bin-dir',
                 callback => $is_dir
             );
         }
@@ -499,7 +499,7 @@ sub inc_dir {
             $self->error("Cannot find include directory");
             my $cb = sub { $u->first_cat_dir(\@incs, $_) };
             $self->{inc_dir} =
-              $self->unknown( key      => 'include directory',
+              $self->unknown( key      => 'iconv-inc-dir',
                               callback => $cb,
                               error    => "Iconv include file not found in " .
                                           "directory");
@@ -556,7 +556,7 @@ sub lib_dir {
             $self->error("Cannot not find library direcory");
             my $cb = sub { $u->first_cat_dir(\@files, $_) };
             $self->{lib_dir} = $self->unknown(
-                key      => 'library directory',
+                key      => 'iconv-lib-dir',
                 callback => $cb,
                 error    => "Library files not found in directory"
             );
@@ -611,7 +611,7 @@ sub so_lib_dir {
             $self->error("Cannot find shared object library directory");
             my $cb = sub { $u->first_cat_dir(\@files, $_) };
             $self->{so_lib_dir} =
-              $self->unknown( key      => 'shared object library directory',
+              $self->unknown( key      => 'iconv-so-dir',
                               callback => $cb,
                               error    => "Shared object libraries not " .
                                           "found in directory");

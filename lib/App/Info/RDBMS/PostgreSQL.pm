@@ -139,14 +139,14 @@ sub new {
 
     if (my $cfg = $u->first_cat_exe(\@exes, @paths)) {
         # We found it. Confirm.
-        $self->{pg_config} = $self->confirm( key      => 'pg_config',
+        $self->{pg_config} = $self->confirm( key      => 'path-to-pg_config',
                                              prompt   => "Path to pg_config?",
                                              value    => $cfg,
                                              callback => sub { -x },
                                              error    => 'Not an executable');
     } else {
         # Handle an unknown value.
-        $self->{pg_config} = $self->unknown( key      => 'pg_config',
+        $self->{pg_config} = $self->unknown( key      => 'path-to-pg_config',
                                              prompt   => "Path to pg_config?",
                                              callback => sub { -x },
                                              error    => 'Not an executable');
@@ -291,7 +291,7 @@ sub name {
     $get_version->($self) unless $self->{'--version'};
 
     # Handle an unknown name.
-    $self->{name} ||= $self->unknown( key => 'name' );
+    $self->{name} ||= $self->unknown( key => 'postgres-name' );
 
     # Return the name.
     return $self->{name};
@@ -352,7 +352,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'version number',
+        $self->{version} = $self->unknown( key      => 'postgres-version-number',
                                            callback => $chk_version);
     }
 
@@ -405,7 +405,7 @@ sub major_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'major version number',
+    $self->{major} = $self->unknown( key      => 'postgres-major-version-number',
                                      callback => $is_int)
       unless $self->{major};
     return $self->{major};
@@ -453,7 +453,7 @@ sub minor_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key      => 'minor version number',
+    $self->{minor} = $self->unknown( key      => 'postgres-minor-version-number',
                                      callback => $is_int)
       unless defined $self->{minor};
     return $self->{minor};
@@ -501,7 +501,7 @@ sub patch_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown( key      => 'patch version number',
+    $self->{patch} = $self->unknown( key      => 'postgres-patch-version-number',
                                      callback => $is_int)
       unless defined $self->{patch};
     return $self->{patch};
@@ -556,7 +556,7 @@ my $find_exe = sub  {
         if (my $exe = $u->first_cat_exe([$self->$meth(), $exe], $bin)) {
             # We found it. Confirm.
             $self->{$key} = $self->confirm(
-                key      => $key,
+                key      => "path-to-$key",
                 prompt   => "Path to $key executable?",
                 value    => $exe,
                 callback => sub { -x },
@@ -565,7 +565,7 @@ my $find_exe = sub  {
         } else {
             # Handle an unknown value.
             $self->{$key} = $self->unknown(
-                key      => $key,
+                key      => "path-to-$key",
                 prompt   => "Path to $key executable?",
                 callback => sub { -x },
                 error    => 'Not an executable'
@@ -626,7 +626,7 @@ sub bin_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find bin directory");
-            $self->{bin_dir} = $self->unknown( key      => 'bin directory',
+            $self->{bin_dir} = $self->unknown( key      => 'postgres-bin-dir',
                                                callback => $is_dir)
         }
     }
@@ -672,7 +672,7 @@ sub inc_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find include directory");
-            $self->{inc_dir} = $self->unknown( key      => 'include directory',
+            $self->{inc_dir} = $self->unknown( key      => 'postgres-include-dir',
                                                callback => $is_dir)
         }
     }
@@ -718,7 +718,7 @@ sub lib_dir {
         } else {
             # Handle an unknown value.
             $self->error("Cannot find library directory");
-            $self->{lib_dir} = $self->unknown( key      => 'library directory',
+            $self->{lib_dir} = $self->unknown( key      => 'postgres-library-dir',
                                                callback => $is_dir)
         }
     }
@@ -767,7 +767,7 @@ sub so_lib_dir {
             # Handle an unknown value.
             $self->error("Cannot find shared object library directory");
             $self->{so_lib_dir} =
-              $self->unknown( key      => 'shared object library directory',
+              $self->unknown( key      => 'postgres-so-directory',
                               callback => $is_dir)
         }
     }

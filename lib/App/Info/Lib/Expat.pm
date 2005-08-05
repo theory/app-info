@@ -97,7 +97,7 @@ sub new {
     if (my $lexpat = $u->first_cat_dir(\@libs, $self->search_lib_dirs)) {
         # We found libexpat. Confirm.
         $self->{libexpat} =
-          $self->confirm( key      => 'libexpat',
+          $self->confirm( key      => 'expat-lib-dir',
                           prompt   => 'Path to Expat library directory?',
                           value    => $lexpat,
                           callback => $cb,
@@ -105,7 +105,7 @@ sub new {
     } else {
         # Handle an unknown value.
         $self->{libexpat} =
-          $self->unknown( key      => 'libexpat',
+          $self->unknown( key      => 'expat-lib-dir',
                           prompt   => 'Path to Expat library directory?',
                           callback => $cb,
                           error    => 'No Expat libraries found in directory');
@@ -238,7 +238,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'version number',
+        $self->{version} = $self->unknown( key      => 'expat-version-number',
                                            callback => $chk_version);
     }
     return $self->{version};
@@ -294,7 +294,7 @@ sub major_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'major version number',
+    $self->{major} = $self->unknown( key      => 'expat-major-version-number',
                                      callback => $is_int)
       unless $self->{major};
 
@@ -347,7 +347,7 @@ sub minor_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key       =>'minor version number',
+    $self->{minor} = $self->unknown( key       =>'expat-minor-version-number',
                                      callback  => $is_int)
       unless $self->{minor};
 
@@ -400,7 +400,7 @@ sub patch_version {
     $get_version->($self) unless exists $self->{version};
 
     # Handle an unknown value.
-    $self->{patch} = $self->unknown( key      => 'patch version number',
+    $self->{patch} = $self->unknown( key      => 'expat-patch-version-number',
                                      callback => $is_int)
       unless $self->{patch};
 
@@ -487,7 +487,7 @@ sub inc_dir {
             $self->error("Cannot find include directory");
             my $cb = sub { $u->first_cat_dir(\@incs, $_) };
             $self->{inc_dir} =
-              $self->unknown( key      => 'include directory',
+              $self->unknown( key      => 'explat-inc-dir',
                               callback => $cb,
                               error    => "No expat include file found in " .
                                           "directory");
@@ -570,7 +570,7 @@ sub so_lib_dir {
         } else {
             $self->error("Cannot find shared object library direcory");
             $self->{so_lib_dir} =
-              $self->unknown( key      => 'shared object library directory',
+              $self->unknown( key      => 'expat-so-dir',
                               callback => $cb,
                               error    => "Shared object libraries not " .
                                           "found in directory");

@@ -2,6 +2,8 @@ Revision history for Perl extension App::Info.
 
 0.45
       - Added "key" attribute to handler requests.
+      - Changed the handler key names for each subclass to more command-line
+        friendly versions, such as "path-to-sqlite" instead of just "sqlite".
 
 0.44  2005-01-08T00:29:03
       - Yet another fix for test failures on Win32, this time for PostgreSQL.

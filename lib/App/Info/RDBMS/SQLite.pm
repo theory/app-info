@@ -102,7 +102,7 @@ sub new {
     if (my $cfg = $u->first_cat_exe(\@exes, $self->search_bin_dirs)) {
         # We found it. Confirm.
         $self->{executable} = $self->confirm(
-            key      => 'sqlite',
+            key      => 'path-to-sqlite',
             prompt   => "Path to SQLite executable?",
             value    => $cfg,
             callback => sub { -x },
@@ -125,7 +125,7 @@ sub new {
 
         # Handle an unknown value.
         $self->{executable} = $self->unknown(
-            key      => 'sqlite',
+            key      => 'path-to-sqlite',
             prompt   => "Path to SQLite executable?",
             callback => sub { -x },
             error    => 'Not an executable'
@@ -296,7 +296,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'version number',
+        $self->{version} = $self->unknown( key      => 'sqlite-version-number',
                                            callback => $chk_version);
     }
     return $self->{version};
@@ -351,7 +351,7 @@ sub major_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'major version number',
+    $self->{major} = $self->unknown( key      => 'sqlite-major-version-number',
                                      callback => $is_int)
       unless $self->{major};
     return $self->{major};
@@ -402,7 +402,7 @@ sub minor_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key      => 'minor version number',
+    $self->{minor} = $self->unknown( key      => 'sqlite-minor-version-number',
                                      callback => $is_int)
       unless defined $self->{minor};
     return $self->{minor};
@@ -453,7 +453,7 @@ sub patch_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown( key      => 'patch version number',
+    $self->{patch} = $self->unknown( key      => 'sqlite-patch-version-number',
                                      callback => $is_int)
       unless defined $self->{patch};
     return $self->{patch};
@@ -530,14 +530,14 @@ Enter a valid Expat shared object library directory
 =cut
 
 my $lib_dir = sub {
-    my ($self, $label) = (shift, shift);
+    my ($self, $key, $label) = (shift, shift, shift);
     return unless $self->{executable};
     $self->info("Searching for $label directory");
     my $dir;
     unless ($dir = $u->first_cat_dir(\@_, $self->search_lib_dirs)) {
         $self->error("Cannot find $label direcory");
         $dir = $self->unknown(
-            key      => "$label directory",
+            key      => "sqlite-$key-dir",
             callback => sub { $u->first_cat_dir(\@_, $_) },
             error    => "No $label found in directory "
         );
@@ -549,7 +549,7 @@ my $lib_dir = sub {
 sub lib_dir {
     my $self = shift;
     return unless $self->{executable};
-    $self->{lib_dir} = $self->$lib_dir('library', $self->search_lib_names)
+    $self->{lib_dir} = $self->$lib_dir('lib', 'library', $self->search_lib_names)
       unless exists $self->{lib_dir};
     return $self->{lib_dir};
 }
@@ -589,7 +589,7 @@ Enter a valid Expat shared object library directory
 sub so_lib_dir {
     my $self = shift;
     return unless $self->{executable};
-    $self->{so_lib_dir} = $self->$lib_dir('shared object library',
+    $self->{so_lib_dir} = $self->$lib_dir('so', 'shared object library',
                                           $self->search_so_lib_names)
       unless exists $self->{so_lib_dir};
     return $self->{so_lib_dir};
@@ -640,7 +640,7 @@ sub inc_dir {
         } else {
             $self->error("Cannot find include directory");
             $self->{inc_dir} = $self->unknown(
-                key      => 'include directory',
+                key      => 'sqlite-inc-dir',
                 callback => sub { $u->first_cat_dir(\@incs, $_) },
                 error    => "File 'sqlite.h' not found in directory"
             );
