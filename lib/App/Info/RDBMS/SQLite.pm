@@ -102,7 +102,7 @@ sub new {
     if (my $cfg = $u->first_cat_exe(\@exes, $self->search_bin_dirs)) {
         # We found it. Confirm.
         $self->{executable} = $self->confirm(
-            key      => 'path-to-sqlite',
+            key      => 'path to sqlite',
             prompt   => "Path to SQLite executable?",
             value    => $cfg,
             callback => sub { -x },
@@ -125,7 +125,7 @@ sub new {
 
         # Handle an unknown value.
         $self->{executable} = $self->unknown(
-            key      => 'path-to-sqlite',
+            key      => 'path to sqlite',
             prompt   => "Path to SQLite executable?",
             callback => sub { -x },
             error    => 'Not an executable'
@@ -296,7 +296,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'sqlite-version-number',
+        $self->{version} = $self->unknown( key      => 'sqlite version number',
                                            callback => $chk_version);
     }
     return $self->{version};
@@ -351,7 +351,7 @@ sub major_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'sqlite-major-version-number',
+    $self->{major} = $self->unknown( key      => 'sqlite major version number',
                                      callback => $is_int)
       unless $self->{major};
     return $self->{major};
@@ -402,7 +402,7 @@ sub minor_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key      => 'sqlite-minor-version-number',
+    $self->{minor} = $self->unknown( key      => 'sqlite minor version number',
                                      callback => $is_int)
       unless defined $self->{minor};
     return $self->{minor};
@@ -453,7 +453,7 @@ sub patch_version {
     # Load data.
     $get_version->($self) unless exists $self->{'--version'};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown( key      => 'sqlite-patch-version-number',
+    $self->{patch} = $self->unknown( key      => 'sqlite patch version number',
                                      callback => $is_int)
       unless defined $self->{patch};
     return $self->{patch};
@@ -537,7 +537,7 @@ my $lib_dir = sub {
     unless ($dir = $u->first_cat_dir(\@_, $self->search_lib_dirs)) {
         $self->error("Cannot find $label direcory");
         $dir = $self->unknown(
-            key      => "sqlite-$key-dir",
+            key      => "sqlite $key dir",
             callback => sub { $u->first_cat_dir(\@_, $_) },
             error    => "No $label found in directory "
         );
@@ -640,7 +640,7 @@ sub inc_dir {
         } else {
             $self->error("Cannot find include directory");
             $self->{inc_dir} = $self->unknown(
-                key      => 'sqlite-inc-dir',
+                key      => 'sqlite inc dir',
                 callback => sub { $u->first_cat_dir(\@incs, $_) },
                 error    => "File 'sqlite.h' not found in directory"
             );

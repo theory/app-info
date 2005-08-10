@@ -152,7 +152,7 @@ sub new {
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
         $self->{executable} =
-          $self->confirm( key      => 'path-to-httpd',
+          $self->confirm( key      => 'path to httpd',
                           prompt   => 'Path to your httpd executable?',
                           value    => $exe,
                           callback => sub { -x },
@@ -160,7 +160,7 @@ sub new {
     } else {
         # Handle an unknown value.
         $self->{executable} =
-          $self->unknown( key      => 'path-to-httpd',
+          $self->unknown( key      => 'path to httpd',
                           prompt   => 'Path to your httpd executable?',
                           callback => sub { -x },
                           error    => 'Not an executable');
@@ -265,7 +265,7 @@ sub name {
     $get_version->($self) unless exists $self->{-v};
 
     # Handle an unknown name.
-    $self->{name} ||= $self->unknown( key => 'apache-name' );
+    $self->{name} ||= $self->unknown( key => 'apache name' );
 
     # Return the name.
     return $self->{name};
@@ -322,7 +322,7 @@ sub version {
             # Return true.
             return 1;
         };
-        $self->{version} = $self->unknown( key      => 'apache-version-number',
+        $self->{version} = $self->unknown( key      => 'apache version number',
                                            callback => $chk_version);
     }
 
@@ -372,7 +372,7 @@ sub major_version {
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{major} = $self->unknown( key      => 'apache-major-version-number',
+    $self->{major} = $self->unknown( key      => 'apache major version number',
                                      callback => $is_int)
       unless $self->{major};
     return $self->{major};
@@ -417,7 +417,7 @@ sub minor_version {
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{minor} = $self->unknown( key      => 'apache-minor-version-number',
+    $self->{minor} = $self->unknown( key      => 'apache minor version number',
                                      callback => $is_int)
       unless defined $self->{minor};
     return $self->{minor};
@@ -461,7 +461,7 @@ sub patch_version {
     # Load data.
     $get_version->($self) unless exists $self->{-v};
     # Handle an unknown value.
-    $self->{patch} = $self->unknown( key      => 'apache-patch-version-number',
+    $self->{patch} = $self->unknown( key      => 'apache patch version number',
                                      callback => $is_int)
       unless defined $self->{patch};
     return $self->{patch};
@@ -550,7 +550,7 @@ sub httpd_root {
     # Get the compile settings.
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
-    $self->{httpd_root} = $self->unknown( key      => 'apache-httpd-root',
+    $self->{httpd_root} = $self->unknown( key      => 'apache httpd root',
                                           callback => $is_dir)
       unless defined $self->{httpd_root};
     return $self->{httpd_root};
@@ -594,7 +594,7 @@ sub magic_number {
     # Get the compile settings.
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
-    $self->{magic_number} = $self->unknown( key => 'apache-magic-number' )
+    $self->{magic_number} = $self->unknown( key => 'apache magic number' )
       unless defined $self->{magic_number};
     return $self->{magic_number};
 }
@@ -647,7 +647,7 @@ sub compile_option {
     $get_compile_settings->($self) unless $self->{-V};
     # Handle an unknown value.
     my $option = lc $_[0];
-    $self->{$option} = $self->unknown( key => "apache-option-$option" )
+    $self->{$option} = $self->unknown( key => "apache option $option" )
       unless defined $self->{$option};
     return $self->{$option};
 }
@@ -709,7 +709,7 @@ sub conf_file {
 
     # Handle an unknown value.
     $self->{conf_file} =
-      $self->unknown( key      => 'apache-conf-file',
+      $self->unknown( key      => 'apache conf file',
                       prompt   => "Location of httpd.conf file?",
                       callback => sub { -f },
                       error    => "Not a file")
@@ -788,7 +788,7 @@ sub user {
     return unless $self->{executable};
     $parse_conf_file->($self) unless exists $self->{user};
     # Handle an unknown value.
-    $self->{user} = $self->unknown( key      => 'apache-user',
+    $self->{user} = $self->unknown( key      => 'apache user',
                                     prompt   => 'Enter Apache user name',
                                     callback => sub { getpwnam $_ },
                                     error    => "Not a user")
@@ -841,7 +841,7 @@ sub group {
     $parse_conf_file->($self) unless exists $self->{group};
     # Handle an unknown value.
     $self->{group} =
-      $self->unknown( key       => 'apache-group',
+      $self->unknown( key       => 'apache group',
                       prompt    => 'Enter Apache user group name',
                       callback  => sub { getgrnam $_ },
                       error     => "Not a user group")
@@ -894,7 +894,7 @@ sub port {
     $parse_conf_file->($self) unless exists $self->{port};
     # Handle an unknown value.
     $self->{port} =
-      $self->unknown( key      => 'apache-port',
+      $self->unknown( key      => 'apache port',
                       prompt   => 'Enter Apache TCP/IP port number',
                       callback => $is_int,
                       error    => "Not a valid port number")
@@ -994,7 +994,7 @@ sub inc_dir {
           or $self->error("Cannot find include directory");
     }}
     # Handle unknown value.
-    $self->{inc_dir} = $self->unknown( key      => 'apache-inc-dir',
+    $self->{inc_dir} = $self->unknown( key      => 'apache inc dir',
                                        callback => $is_dir)
       unless $self->{inc_dir};
     return $self->{inc_dir};
@@ -1052,7 +1052,7 @@ sub lib_dir {
         } else {
             # Handle unknown value.
             $self->{lib_dir} = $self->unknown(
-                key      => 'apache-lib-dir',
+                key      => 'apache lib dir',
                 callback => $is_dir
             );
         }
@@ -1532,7 +1532,7 @@ my $find_exe = sub  {
         if (my $exe = $u->first_cat_exe([$self->$meth(), $exe], $bin)) {
             # We found it. Confirm.
             $self->{$key} = $self->confirm(
-                key      => "apache-$key",
+                key      => "apache $key",
                 prompt   => "Path to $key executable?",
                 value    => $exe,
                 callback => sub { -x },
@@ -1541,7 +1541,7 @@ my $find_exe = sub  {
         } else {
             # Handle an unknown value.
             $self->{$key} = $self->unknown(
-                key      => "apache-$key",
+                key      => "apache $key",
                 prompt   => "Path to $key executable?",
                 callback => sub { -x },
                 error    => 'Not an executable'
