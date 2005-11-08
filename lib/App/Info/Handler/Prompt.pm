@@ -45,7 +45,7 @@ events.
 use strict;
 use App::Info::Handler;
 use vars qw($VERSION @ISA);
-$VERSION = '0.45';
+$VERSION = '0.46';
 @ISA = qw(App::Info::Handler);
 
 # Register ourselves.
