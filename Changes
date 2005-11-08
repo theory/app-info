@@ -1,7 +1,7 @@
 Revision history for Perl extension App::Info.
 
-0.45
-      - Added "key" attribute to handler requests.
+0.45  2005-11-08T05:57:05
+      - Added "key" attribute to handler request objects.
       - Changed the handler key names for each subclass to more command-line
         friendly versions, such as "path to httpd" instead of just
         "executable". Just `tr/ /-/` to make them into command-line options.
