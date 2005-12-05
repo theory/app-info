@@ -1,6 +1,8 @@
 Revision history for Perl extension App::Info.
 
-0.46
+0.46  2005-12-05T22:43:20
+      - Added App::Info::Lib::OSSPUUID for information about the OSSP
+        UUID library.
 
 0.45  2005-11-08T05:57:05
       - Added "key" attribute to handler request objects.
