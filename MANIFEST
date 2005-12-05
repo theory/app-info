@@ -10,6 +10,7 @@ lib/App/Info/HTTPD/Apache.pm
 lib/App/Info/Lib.pm
 lib/App/Info/Lib/Expat.pm
 lib/App/Info/Lib/Iconv.pm
+lib/App/Info/Lib/OSSPUUID.pm
 lib/App/Info/RDBMS.pm
 lib/App/Info/RDBMS/PostgreSQL.pm
 lib/App/Info/RDBMS/SQLite.pm
@@ -25,9 +26,11 @@ t/bin/httpd
 t/bin/iconv
 t/bin/myapxs
 t/bin/mycreatedb
+t/bin/myuuid
 t/bin/pg_config
 t/bin/postgres
 t/bin/sqlite3
+t/bin/uuid-config
 t/carp.t
 t/confirm.t
 t/errors.t
@@ -52,4 +55,6 @@ t/testlib/libexpat.so
 t/testlib/libiconv.so
 t/testlib/libsqlite3.so
 t/util.t
+t/uuid.t
+t/uuid_info.t
 t/zpod.t

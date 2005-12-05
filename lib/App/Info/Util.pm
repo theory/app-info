@@ -249,8 +249,8 @@ sub first_cat_dir {
 
 =head2 first_cat_exe
 
-  my $exe = $util->first_cat_exe('ick.txt', @paths);
-  $exe = $util->first_cat_exe(['this.txt', 'that.txt'], @paths);
+  my $exe = $util->first_cat_exe('ick.exe', @paths);
+  $exe = $util->first_cat_exe(['this.exe', 'that.exe'], @paths);
 
 Funtionally identical to C<first_cat_path()>, except that it returns the full
 path to the first executable file found, rather than simply the first file

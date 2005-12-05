@@ -367,7 +367,7 @@ sub version {
 
 Returns the PostgreSQL major version number. App::Info::RDBMS::PostgreSQL
 parses the major version number from the system call C<`pg_config --version`>.
-For example, C<version()> returns "7.1.2", then this method returns "7".
+For example, if C<version()> returns "7.1.2", then this method returns "7".
 
 B<Events:>
 
