@@ -44,7 +44,7 @@ use App::Info::Lib;
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.47';
+$VERSION = '0.48';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;

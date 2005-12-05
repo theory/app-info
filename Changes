@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.48
+
 0.47  2005-12-05T22:56:12
       - Fixed "use lib" line in Makefile.PL caused by a bug in Module::Build.
 
