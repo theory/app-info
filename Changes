@@ -1,6 +1,7 @@
 Revision history for Perl extension App::Info.
 
 0.47
+      - Fixed "use lib" line in Makefile.PL caused by a bug in Module::Build.
 
 0.46  2005-12-05T22:43:20
       - Added App::Info::Lib::OSSPUUID for information about the OSSP
