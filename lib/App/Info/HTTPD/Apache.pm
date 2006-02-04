@@ -1348,6 +1348,12 @@ C<< File::Spec->path >>, as well as the following directories:
 
 =item /usr/local/apache/bin
 
+=item /usr/local/apache2/bin
+
+=item /opt/apache/bin
+
+=item /opt/apache2/bin
+
 =item /usr/local/bin
 
 =item /usr/local/sbin
@@ -1358,19 +1364,23 @@ C<< File::Spec->path >>, as well as the following directories:
 
 =item /bin
 
-=item /opt/apache/bin
-
 =item /etc/httpd/bin
 
 =item /etc/apache/bin
+
+=item /etc/apache2/bin
 
 =item /home/httpd/bin
 
 =item /home/apache/bin
 
+=item /home/apache2/bin
+
 =item /sw/bin
 
 =item /sw/sbin
+
+=item /web/httpd
 
 =back
 
@@ -1381,12 +1391,10 @@ sub search_bin_dirs {
         shift->SUPER::search_bin_dirs,
         $u->path,
         qw(
-           /usr/local/apache2/bin
-           /opt/apache2/bin
-
            /usr/local/apache/bin
+           /usr/local/apache2/bin
            /opt/apache/bin
-
+           /opt/apache2/bin
            /usr/local/bin
            /usr/local/sbin
            /usr/bin
@@ -1394,7 +1402,9 @@ sub search_bin_dirs {
            /bin
            /etc/httpd/bin
            /etc/apache/bin
+           /etc/apache2/bin
            /home/httpd/bin
+           /home/apache2/bin
            /home/apache/bin
            /sw/bin
            /sw/sbin
