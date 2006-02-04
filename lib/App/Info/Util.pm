@@ -74,6 +74,8 @@ to. The constructor here is provided merely as a convenience.
 
 sub new { bless {}, ref $_[0] || $_[0] }
 
+##############################################################################
+
 =head1 OBJECT METHODS
 
 In addition to all of the methods offered by its super class,
@@ -95,6 +97,8 @@ sub first_dir {
     foreach (@_) { return $_ if -d }
     return;
 }
+
+##############################################################################
 
 =head2 first_path
 
@@ -135,6 +139,8 @@ sub first_path {
     shift->first_dir(split /$path_dem/, shift)
 }
 
+##############################################################################
+
 =head2 first_file
 
   my $file = $util->first_file(@filelist);
@@ -151,6 +157,8 @@ sub first_file {
     return;
 }
 
+##############################################################################
+
 =head2 first_exe
 
   my $exe = $util->first_exe(@exelist);
@@ -165,6 +173,8 @@ sub first_exe {
     foreach (@_) { return $_ if -f && -x }
     return;
 }
+
+##############################################################################
 
 =head2 first_cat_path
 
@@ -222,6 +232,8 @@ sub first_cat_path {
     return;
 }
 
+##############################################################################
+
 =head2 first_cat_dir
 
   my $dir = $util->first_cat_dir('ick.txt', @paths);
@@ -247,6 +259,8 @@ sub first_cat_dir {
     return;
 }
 
+##############################################################################
+
 =head2 first_cat_exe
 
   my $exe = $util->first_cat_exe('ick.exe', @paths);
@@ -269,6 +283,8 @@ sub first_cat_exe {
     }
     return;
 }
+
+##############################################################################
 
 =head2 search_file
 
@@ -331,6 +347,37 @@ sub search_file {
     return unless @ret;
     return wantarray ? @ret : $#ret <= 0 ? $ret[0] : \@ret;
 }
+
+##############################################################################
+
+=head2 files_in_dir
+
+  my @files = $util->files_in_dir($dir);
+     @files = $util->files_in_dir($dir, $filter);
+  my $files = $util->files_in_dir($dir);
+     $files = $util->files_in_dir($dir, $filter);
+
+Returns an list or array reference of all of the files and directories in the
+file system directory C<$dir>. An optional second argument is a code reference
+that filters the files. The code reference should examine the C<$_> for a file
+name and return true if it's a file that you're interested and false if it's
+not.
+
+=cut
+
+sub files_in_dir {
+    my ($self, $dir, $code) = @_;
+    return unless $dir
+    local *DIR;
+    opendir DIR, $dir or Carp::croak "Cannot open $dir: $!\n";
+    my @files = $code
+        ? grep { $code->() } readdir DIR
+        : readdir DIR;
+    closedir DIR;
+    return wantarray ? @files : \@files;
+}
+
+##############################################################################
 
 =head2 multi_search_file
 
@@ -429,6 +476,8 @@ sub multi_search_file {
     return wantarray ? @ret{@regexen} : \@ret{@regexen};
 }
 
+##############################################################################
+
 =head2 lib_dirs
 
   my @dirs = $util->lib_dirs;
@@ -471,7 +520,7 @@ L<App::Info::RDBMS::PostgreSQL|App::Info::RDBMS::PostgreSQL>
 
 Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
 
-This module is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut

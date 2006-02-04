@@ -135,7 +135,9 @@ sub new {
     # Construct the object.
     my $self = shift->SUPER::new(@_);
 
-    for my $exe (qw(search_conf_dirs search_conf_names), map { "search_$_\_names" } @EXES) {
+    for my $exe (qw(search_conf_dirs search_conf_names),
+                 map { "search_$_\_names" } @EXES
+    ) {
         if (exists $self->{$exe}) {
             $self->{$exe} = [$self->{$exe}] unless ref $self->{$exe} eq 'ARRAY';
         } else {
@@ -147,23 +149,25 @@ sub new {
     $self->info("Looking for Apache executable");
 
     my @paths = $self->search_bin_dirs;
-    my @exes = $self->search_exe_names;
+    my @exes  = $self->search_exe_names;
 
     if (my $exe = $u->first_cat_exe(\@exes, @paths)) {
         # We found httpd. Confirm.
-        $self->{executable} =
-          $self->confirm( key      => 'path to httpd',
-                          prompt   => 'Path to your httpd executable?',
-                          value    => $exe,
-                          callback => sub { -x },
-                          error    => 'Not an executable');
+        $self->{executable} = $self->confirm(
+            key      => 'path to httpd',
+            prompt   => 'Path to your httpd executable?',
+            value    => $exe,
+            callback => sub { -x },
+            error    => 'Not an executable',
+        );
     } else {
         # Handle an unknown value.
-        $self->{executable} =
-          $self->unknown( key      => 'path to httpd',
-                          prompt   => 'Path to your httpd executable?',
-                          callback => sub { -x },
-                          error    => 'Not an executable');
+        $self->{executable} = $self->unknown(
+            key      => 'path to httpd',
+            prompt   => 'Path to your httpd executable?',
+            callback => sub { -x },
+            error    => 'Not an executable',
+        );
     }
     return $self;
 };
@@ -1107,10 +1111,10 @@ Enter a valid Apache library directory
 =head3 static_mods
 
 Returns a list (in an array context) or an anonymous array (in a scalar
-reference) of all of the modules statically compiled into Apache. These are
+context) of all of the modules statically compiled into Apache. These are
 collected from the system call C<`httpd -l`>. If Apache is not installed,
-C<static_mods()> throws an error and returns an empty list in an array context
-or an empty anonymous array in a scalar context.
+C<static_mods()> returns an empty list in an array context or an empty
+anonymous array in a scalar context.
 
 B<Events:>
 
@@ -1137,7 +1141,7 @@ my $get_static_mods = sub {
     my $data = `"$self->{executable}" -l`;
     unless ($data) {
         $self->error("Unable to extract needed data from ".
-                     qq{`"$self->{executable}" =l`});
+                     qq{`"$self->{executable}" -l`});
         return;
     }
 
@@ -1157,6 +1161,61 @@ sub static_mods {
     $get_static_mods->($self) unless exists $self->{static_mods};
     return unless $self->{static_mods};
     return wantarray ? @{$self->{static_mods}} : $self->{static_mods};
+}
+
+##############################################################################
+
+=head3 shared_mods
+
+Returns a list (in an array context) or an anonymous array (in a scalar
+context) of all of the shared modules compiled for Apache. These are collected
+by searching for all files ending in F<.so> in the directory returned from the
+system call C<`apxs -q LIBEXECDIR`>. If Apache is not installed,
+C<shared_mods()> returns an empty list in an array context or an empty
+anonymous array in a scalar context.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Looking for apxs
+
+Executing `apxs -q LIBEXECDIR`
+
+=item error
+
+Unable to extract module directory name from `apxs -q LIBEXECDIR`
+
+=back
+
+=cut
+
+# This code reference collects the list of static modules from Apache. Used by
+# static_mods() and mod_perl(), whichever gets called first.
+my $get_shared_mods = sub {
+    my $self = shift;
+    my $apxs = $self->apxs or return;
+
+    $self->info(qq{Executing `"$apxs" -q LIBEXECDIR`});
+    my $mod_dir = `"$apxs" -q LIBEXECDIR`;
+    chomp $mod_dir;
+
+    return $self->error(
+        qq{Unable to extract module directory name `"$apxs" -q LIBEXECDIR`}
+    ) unless $mod_dir && -d $mod_dir;
+
+    $self->{so_mods} = $u->files_in_dir( $mod_dir, sub { s/\.so$//} );
+    $self->{mod_perl} ||= grep { /perl/ } @{ $self->{so_mods} };
+};
+
+sub shared_mods {
+    my $self = shift;
+    return unless $self->{executable};
+    $get_shared_mods->($self) unless exists $self->{so_mods};
+    return unless $self->{static_mods};
+    return wantarray ? @{$self->{so_mods}} : $self->{so_mods};
 }
 
 ##############################################################################
@@ -1196,7 +1255,8 @@ sub mod_so {
 
 Boolean method that returns true when mod_perl has been statically compiled
 into Apache, and false if it has not. The presence or absence of mod_perl is
-determined by the system call C<`httpd -l`>.
+determined by the system call C<`httpd -l`> or, for a dynamic mod_perl, by the
+contents of the directory returned by the system call C<`apxs -q LIBEXECDIR`>.
 
 B<Events:>
 
@@ -1205,6 +1265,10 @@ B<Events:>
 =item info
 
 Executing `httpd -l`
+
+Looking for apxs
+
+Executing `apxs -q LIBEXECDIR`
 
 =item error
 
@@ -1218,6 +1282,8 @@ sub mod_perl {
     my $self = shift;
     return unless $self->{executable};
     $get_static_mods->($self) unless exists $self->{static_mods};
+    $get_shared_mods->($self)
+        unless $self->{mod_perl} || exists $self->{so_mods};
     return $self->{mod_perl};
 }
 
@@ -1259,7 +1325,7 @@ each on Win32.
 
 sub search_exe_names {
     my $self = shift;
-    my @exes = qw(httpd apache-perl apache);
+    my @exes = qw(httpd apache-perl apache apache2);
     if (WIN32) { $_ .= ".exe" for @exes }
     return ($self->SUPER::search_exe_names, @exes);
 }
@@ -1312,21 +1378,29 @@ C<< File::Spec->path >>, as well as the following directories:
 
 sub search_bin_dirs {
     return (
-      shift->SUPER::search_bin_dirs,
-      $u->path,
-      qw(/usr/local/apache/bin
-         /usr/local/bin
-         /usr/local/sbin
-         /usr/bin
-         /usr/sbin
-         /bin
-         /opt/apache/bin
-         /etc/httpd/bin
-         /etc/apache/bin
-         /home/httpd/bin
-         /home/apache/bin
-         /sw/bin
-         /sw/sbin));
+        shift->SUPER::search_bin_dirs,
+        $u->path,
+        qw(
+           /usr/local/apache2/bin
+           /opt/apache2/bin
+
+           /usr/local/apache/bin
+           /opt/apache/bin
+
+           /usr/local/bin
+           /usr/local/sbin
+           /usr/bin
+           /usr/sbin
+           /bin
+           /etc/httpd/bin
+           /etc/apache/bin
+           /home/httpd/bin
+           /home/apache/bin
+           /sw/bin
+           /sw/sbin
+           /web/httpd
+        )
+    );
 }
 
 ##############################################################################
@@ -1355,12 +1429,13 @@ sub search_lib_dirs {
     my $self = shift;
     my $root = $self->httpd_root;
     return (
-      $self->SUPER::search_lib_dirs,
-      ( $root
-        ? map { $u->catdir($root, $_) } qw(lib modules libexec)
-        : ()
-      ),
-      '/usr/lib/apache/1.3'
+        $self->SUPER::search_lib_dirs,
+        ( $root
+          ? map { $u->catdir($root, $_) } qw(lib libexec modules)
+          : ()
+        ),
+        '/usr/lib/apache/1.3',
+        '/usr/lib/apache/2.0',
     );
 }
 

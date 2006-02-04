@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id: util.t,v 1.8 2002/06/08 16:06:49 david Exp $
+# $Id$
 
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 22;
 use File::Spec::Functions;
 use File::Path;
 
@@ -110,3 +110,12 @@ is_deeply([$util->multi_search_file($tmp_file, qr/(of\sthe)\s+(who\?)/,
 
 # Don't forget to delete our temporary file.
 rmtree $tmp_file;
+
+# Test files_in_dir.
+is_deeply scalar $util->files_in_dir(catdir(qw(t testmod))),
+    [qw(. .. mod_dir.so mod_include.so mod_perl.so not_mod.txt)],
+    'files_for_dir should return all files in a directory';
+is_deeply scalar $util->files_in_dir( catdir(qw(t testmod)), sub { /^mod_/ } ),
+    [qw(mod_dir.so mod_include.so mod_perl.so)],
+    'files_for_dir should use the filter I pass';
+
