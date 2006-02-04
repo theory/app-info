@@ -9,6 +9,9 @@ Revision history for Perl extension App::Info.
       - The mod_perl() method of App::Info::HTTPD::Apache now also checks the
         shared object libraries to determine whether mod_perl is supported by
         the installed Apache.
+      - Corrected some documentation pastos in App::Info::Lib::OSSPUUID.
+      - Added perl_module() method to App::Info::Lib::OSSPUUID, since the OSSP
+        library might be installed, but not OSSP::uuid.
 
 0.47  2005-12-05T22:56:12
       - Fixed "use lib" line in Makefile.PL caused by a bug in Module::Build.

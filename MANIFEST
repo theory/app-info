@@ -21,8 +21,10 @@ MANIFEST			This list of files
 META.yml
 README
 t/apache.t
+t/apache2.t
 t/apache_info.t
 t/bin/httpd
+t/bin/httpd2
 t/bin/iconv
 t/bin/myapxs
 t/bin/mycreatedb
@@ -54,6 +56,10 @@ t/testlib/httpd.conf
 t/testlib/libexpat.so
 t/testlib/libiconv.so
 t/testlib/libsqlite3.so
+t/testmod/mod_dir.so
+t/testmod/mod_include.so
+t/testmod/mod_perl.so
+t/testmod/not_mod.txt
 t/util.t
 t/uuid.t
 t/uuid_info.t

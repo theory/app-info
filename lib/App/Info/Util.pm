@@ -367,7 +367,7 @@ not.
 
 sub files_in_dir {
     my ($self, $dir, $code) = @_;
-    return unless $dir
+    return unless $dir;
     local *DIR;
     opendir DIR, $dir or Carp::croak "Cannot open $dir: $!\n";
     my @files = $code

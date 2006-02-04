@@ -26,13 +26,14 @@ App::Info::Lib::OSSPUUID supplies information about the OSSP UUID library
 installed on the local system. It implements all of the methods defined by
 App::Info::Lib. Methods that trigger events will trigger them only the first
 time they're called (See L<App::Info|App::Info> for documentation on handling
-events). To start over (after, say, someone has installed Expat) construct a
-new App::Info::Lib::OSSPUUID object to aggregate new metadata.
+events). To start over (after, say, someone has installed the OSSP UUID
+library) construct a new App::Info::Lib::OSSPUUID object to aggregate new
+metadata.
 
 Some of the methods trigger the same events. This is due to cross-calling of
 shared subroutines. However, any one event should be triggered no more than
-once. For example, although the info event "Searching for 'expat.h'" is
-documented for the methods C<version()>, C<major_version()>,
+once. For example, although the info event "Executing `uuid-config --version`"
+is documented for the methods C<name()> C<version()>, C<major_version()>,
 C<minor_version()>, and C<patch_version()>, rest assured that it will only be
 triggered once, by whichever of those four methods is called first.
 
@@ -41,6 +42,7 @@ triggered once, by whichever of those four methods is called first.
 use strict;
 use App::Info::Util;
 use App::Info::Lib;
+use File::Spec::Functions 'catfile';
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
@@ -64,8 +66,9 @@ complete description of argument parameters.
 
 When called, C<new()> searches all of the paths returned by the
 C<search_lib_dirs()> method for one of the files returned by the
-C<search_lib_names()> method. If any of is found, then Expat is assumed to be
-installed. Otherwise, most of the object methods will return C<undef>.
+C<search_lib_names()> method. If any of is found, then the OSSP UUID library
+is assumed to be installed. Otherwise, most of the object methods will return
+C<undef>.
 
 B<Events:>
 
@@ -73,15 +76,15 @@ B<Events:>
 
 =item info
 
-Searching for Expat libraries
+Looking for uuid-config
 
 =item confirm
 
-Path to Expat library directory?
+Path to uuid-config?
 
 =item unknown
 
-Path to Expat library directory?
+Path to uuid-config?
 
 =back
 
@@ -158,8 +161,7 @@ sub key_name { 'OSSP UUID' }
 
 =head3 installed
 
-  print "Expat is ", ($uuid->installed ? '' : 'not '),
-    "installed.\n";
+  print "UUID is ", ($uuid->installed ? '' : 'not '), "installed.\n";
 
 Returns true if the OSSP UUID library is installed, and false if it is not.
 App::Info::Lib::OSSPUUID determines whether the library is installed based on
@@ -266,7 +268,7 @@ sub name {
 
   my $version = $uuid->version;
 
-Returns the OSSP UUIDQL version number. App::Info::Lib::OSSPUUID parses the
+Returns the OSSP UUID version number. App::Info::Lib::OSSPUUID parses the
 version number from the system call C<`uuid-config --version`>.
 
 B<Events:>
@@ -818,6 +820,38 @@ sub ldflags {
     }
 
     return $self->{ldflags};
+}
+
+##############################################################################
+
+=head3 perl_module
+
+  my $bool = $uuid->perl_module;
+
+Return true if C<OSSP::uuid> is installed and can be loaded, and false if not.
+C<OSSP::uuid> must be able to be loaed by the currently running instance of
+the Perl interpreter.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Loading OSSP::uuid
+
+=back
+
+=cut
+
+sub perl_module {
+    my $self = shift;
+    $self->info('Loading OSSP::uuuid');
+    $self->{perl_module} ||= do {
+        eval 'use OSSP::uuid';
+        $INC{catfile qw(OSSP uuid.pm)};
+    };
+    return $self->{perl_module};
 }
 
 ##############################################################################
