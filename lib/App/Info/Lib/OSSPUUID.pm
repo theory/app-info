@@ -1,6 +1,6 @@
 package App::Info::Lib::OSSPUUID;
 
-# $Id: Expat.pm 2193 2005-11-08 06:05:50Z theory $
+# $Id$
 
 =head1 NAME
 
