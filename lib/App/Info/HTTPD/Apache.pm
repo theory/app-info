@@ -1317,15 +1317,28 @@ sub download_url { "http://www.apache.org/dist/httpd/" }
 
   my @search_exe_names = $apache->search_exe_names;
 
-Returns a list of possible names for the Apache executable. The names are
-F<httpd>, F<apache-perl>, and F<apache> by default; F<.exe> is appended to
-each on Win32.
+Returns a list of possible names for the Apache executabl; F<.exe> is appended
+to each on Win32. By default, the names are:
+
+=over
+
+=item httpd
+
+=item httpd2
+
+=item apache-perl
+
+=item apache
+
+=item apache2
+
+=back
 
 =cut
 
 sub search_exe_names {
     my $self = shift;
-    my @exes = qw(httpd apache-perl apache apache2);
+    my @exes = qw(httpd httpd2 apache-perl apache apache2);
     if (WIN32) { $_ .= ".exe" for @exes }
     return ($self->SUPER::search_exe_names, @exes);
 }

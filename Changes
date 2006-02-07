@@ -7,6 +7,8 @@ Revision history for Perl extension App::Info.
       - Added the value returned by Apache2::BuildConfig->new->{APXS_BINDIR},
         if Apache2::Build config is installed, to the list of bin directories
         returned by search_bin_dirs() in App::Info::HTTPD::Apache.
+      - Added "httpd2" to the list of names returned by search_exe_names() in
+        App::Info::HTTPD::Apache.
 
 0.48  2006-02-05T03:09:38
       - Added support for Apache2 to App::Info::HTTPD::Apache.
