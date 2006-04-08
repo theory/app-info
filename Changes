@@ -1,6 +1,8 @@
 Revision history for Perl extension App::Info.
 
-0.49  2006-04-08T05:34:31
+0.50
+
+0.49  2006-04-08T05:35:31
       - Fixed typos in App::Info::HTTPD::Apache.
       - Changed keys for Apache executables such as apxs from, e.g., "apache
         apxs" to "path to apxs".

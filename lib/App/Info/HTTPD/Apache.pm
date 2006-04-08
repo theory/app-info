@@ -44,7 +44,7 @@ use App::Info::HTTPD;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::HTTPD);
-$VERSION = '0.49';
+$VERSION = '0.50';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
