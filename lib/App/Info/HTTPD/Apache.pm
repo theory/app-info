@@ -1340,7 +1340,7 @@ sub search_exe_names {
     my $self = shift;
     my @exes = qw(httpd httpd2 apache-perl apache apache2);
     if (WIN32) { $_ .= ".exe" for @exes }
-    return ($self->SUPER::search_exe_names, @exes);
+    return ( $self->SUPER::search_exe_names, @exes );
 }
 
 ##############################################################################

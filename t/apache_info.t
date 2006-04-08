@@ -45,7 +45,7 @@ is( $info->message, "Looking for Apache executable",
 ##########################################################################
 # Check name.
 $apache->name;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -v`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -v`$/,
      "Check name info" );
 $apache->name;
 ok( ! defined $info->message, "No info" );
@@ -58,7 +58,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 2");
 $info->message; # Throw away constructor message.
 $apache->version;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -v`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -v`$/,
      "Check version info" );
 
 $apache->version;
@@ -72,7 +72,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 3");
 $info->message; # Throw away constructor message.
 $apache->major_version;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -v`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -v`$/,
      "Check major info" );
 
 ##########################################################################
@@ -81,7 +81,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 4");
 $info->message; # Throw away constructor message.
 $apache->minor_version;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -v`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -v`$/,
      "Check minor info" );
 
 ##########################################################################
@@ -90,13 +90,13 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 5");
 $info->message; # Throw away constructor message.
 $apache->patch_version;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -v`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -v`$/,
      "Check patch info" );
 
 ##########################################################################
 # Check inc_dir method.
 $apache->inc_dir;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check inc_dir info" );
 is( $info->message, "Searching for include directory",
     "Check inc info again" );
@@ -110,7 +110,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
 $info->message; # Throw away constructor message.
 
 $apache->inc_dir;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check inc info new" );
 is( $info->message, "Searching for include directory",
     "Check inc info again" );
@@ -131,7 +131,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
 $info->message; # Throw away constructor message.
 
 $apache->lib_dir;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check lib info new" );
 is( $info->message, "Searching for library directory",
     "Check lib info again" );
@@ -144,7 +144,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
 $info->message; # Throw away constructor message.
 
 $apache->httpd_root;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check httpd_root info" );
 ok( ! defined $info->message, "No more httpd_root info" );
 $apache->httpd_root;
@@ -158,7 +158,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 10");
 $info->message; # Throw away constructor message.
 $apache->magic_number;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check magic_number info" );
 ok( ! defined $info->message, "No more magic_number info" );
 
@@ -170,7 +170,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 10");
 $info->message; # Throw away constructor message.
 $apache->compile_option;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check compile_option info" );
 ok( ! defined $info->message, "No more compile_option info" );
 
@@ -195,7 +195,7 @@ $info->message; # Throw away constructor message.
 $apache->user;
 is( $info->message, "Searching for Apache configuration file",
     "Check user info 2" );
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check user info 3" );
 is( $info->message, "Parsing Apache configuration file",
     "Check user info 4" );
@@ -211,7 +211,7 @@ $info->message; # Throw away constructor message.
 $apache->group;
 is( $info->message, "Searching for Apache configuration file",
     "Check group info 2" );
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check group info 3" );
 is( $info->message, "Parsing Apache configuration file",
     "Check group info 4" );
@@ -227,7 +227,7 @@ $info->message; # Throw away constructor message.
 $apache->port;
 is( $info->message, "Searching for Apache configuration file",
     "Check port info 2" );
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -V`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check port info 3" );
 is( $info->message, "Parsing Apache configuration file",
     "Check port info 4" );
@@ -236,7 +236,7 @@ ok( ! defined $info->message, "No more port info" );
 ##########################################################################
 # Tests static_mods().
 $apache->static_mods;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -l`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -l`$/,
       "Check static_mods info" );
 ok( ! defined $info->message, "No more static_mods info" );
 
@@ -246,7 +246,7 @@ $apache->shared_mods;
 is( $info->message, 'Looking for apxs',
     'Shared modes should look for apxs' );
 like( $info->message,
-      qr/^Executing `"t.$scripts.myapxs(?:.exe)?" -q LIBEXECDIR`$/,
+      qr/^Executing `"t.$scripts.myapxs(?:.bat)?" -q LIBEXECDIR`$/,
       "Check shared_mods info" );
 ok( ! defined $info->message, "No more shared_mods info" );
 
@@ -258,7 +258,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 12");
 $info->message; # Throw away constructor message.
 $apache->mod_so;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -l`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -l`$/,
       "Check mod_so info" );
 ok( ! defined $info->message, "No more mod_so info" );
 
@@ -270,7 +270,7 @@ ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 13");
 $info->message; # Throw away constructor message.
 $apache->mod_perl;
-like($info->message, qr/^Executing `"t.$scripts.httpd(?:.exe)?" -l`$/,
+like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -l`$/,
       "Check mod_perl info" );
 ok( ! defined $info->message, "No more mod_perl info" );
 
