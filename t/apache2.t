@@ -59,7 +59,7 @@ is( $apache->apxs, $exes{myapxs}, 'Test apxs' );
 is( $apache->so_lib_dir, $conf_dir, 'Test so lib dir' );
 is( $apache->inc_dir, $inc_dir, 'Test inc dir' );
 is_deeply( scalar $apache->static_mods, \@mods, 'Check static mods' );
-is_deeply( scalar $apache->shared_mods, \@so_mods, 'Check so mods' );
+is_deeply( [ sort $apache->shared_mods ], \@so_mods, 'Check so mods' );
 is( $apache->magic_number, '20020903:11', 'Test magic number' );
 is( $apache->port, '80', 'Test port' );
 ok( $apache->mod_so, 'Test mod_so' );

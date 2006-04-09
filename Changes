@@ -1,6 +1,8 @@
 Revision history for Perl extension App::Info.
 
 0.50
+      - Fixed test failures due to lack of sorting of files and directories
+        returned by files_in_dir() on some platforms.
 
 0.49  2006-04-08T05:35:31
       - Fixed typos in App::Info::HTTPD::Apache.

@@ -117,11 +117,12 @@ my @dirs = (
     (-d '.svn' ? '.svn' : ()),
     qw(mod_dir.so mod_include.so mod_perl.so not_mod.txt)
 );
-is_deeply scalar $util->files_in_dir(catdir(qw(t testmod))), \@dirs,
+is_deeply [sort $util->files_in_dir(catdir(qw(t testmod))) ], \@dirs,
     'files_for_dir should return all files in a directory';
 
 @dirs = grep { /^mod_/ } @dirs;
-is_deeply scalar $util->files_in_dir( catdir(qw(t testmod)), sub { /^mod_/ } ),
+is_deeply
+    sort [ $util->files_in_dir( catdir(qw(t testmod)), sub { /^mod_/ } ) ],
     \@dirs,
     'files_for_dir should use the filter I pass';
 
