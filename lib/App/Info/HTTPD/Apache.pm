@@ -916,15 +916,15 @@ Returns the path to the Apache executable, which will be defined by one of the
 names returned by C<search_exe_names()>. The executable is searched for in
 C<new()>, so there are no events for this method.
 
-=cut
-
-sub executable { shift->{executable} }
-
 =head3 httpd
 
   my $httpd = $apache->httpd;
 
 An alias for C<executable()>.
+
+=cut
+
+sub executable { shift->{executable} }
 
 ##############################################################################
 

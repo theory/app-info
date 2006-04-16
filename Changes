@@ -3,6 +3,9 @@ Revision history for Perl extension App::Info.
 0.50
       - Fixed test failures due to lack of sorting of files and directories
         returned by files_in_dir() on some platforms.
+      - Fixed documentation in App::Info::HTTPD::Apache so that a line of hash
+        symbols (#s) doesn't show up in the docs. This actually created an
+        error in man pages. Reported by Nacho Barrientos.
 
 0.49  2006-04-08T05:35:31
       - Fixed typos in App::Info::HTTPD::Apache.
