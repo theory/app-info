@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.51
+
 0.50  2006-09-15T23:52:17
       - Fixed test failures due to lack of sorting of files and directories
         returned by files_in_dir() on some platforms.
