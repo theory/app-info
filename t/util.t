@@ -122,7 +122,7 @@ is_deeply [sort $util->files_in_dir(catdir(qw(t testmod))) ], \@dirs,
 
 @dirs = grep { /^mod_/ } @dirs;
 is_deeply
-    sort [ $util->files_in_dir( catdir(qw(t testmod)), sub { /^mod_/ } ) ],
+    [ sort $util->files_in_dir( catdir(qw(t testmod)), sub { /^mod_/ } ) ],
     \@dirs,
     'files_for_dir should use the filter I pass';
 
