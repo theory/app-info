@@ -3,6 +3,8 @@ Revision history for Perl extension App::Info.
 0.51
       - Really fixed the unsorted test failure by putting the sort in the
         right place.
+      - Tests now run properly when the `build` action has not been run.
+        Reported By Alex Chorny (Ticket # 21281).
 
 0.50  2006-09-15T23:52:17
       - Fixed test failures due to lack of sorting of files and directories

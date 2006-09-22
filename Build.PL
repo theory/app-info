@@ -3,10 +3,10 @@ use Module::Build;
 my $class = Module::Build->subclass(
     class => 'My::Builder',
     code => q{
-        sub ACTION_build {
+        sub ACTION_code {
              use File::Spec::Functions;
              my $self = shift;
-             $self->SUPER::ACTION_build(@_);
+             $self->SUPER::ACTION_code(@_);
              # Copy the test scripts and then set the shebang line and make
              # sure that they're executable.
              my $from_dir = $self->localize_file_path("t/bin");
