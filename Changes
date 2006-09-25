@@ -9,6 +9,8 @@ Revision history for Perl extension App::Info.
         Alex Chorny (Ticket # 21281).
       - Fixed test failures under bleedperl where Carp was not properly
         loaded. Reported by Andreas Koenig (Ticket # 21641).
+      - "OS-Dependent" skipped tests in 't/util.t' are no longer OS dependent
+        or skipped.
 
 0.50  2006-09-15T23:52:17
       - Fixed test failures due to lack of sorting of files and directories

@@ -11,6 +11,10 @@ BEGIN { use_ok('App::Info::Util') }
 
 ok( my $util = App::Info::Util->new, "Create Util object" );
 
+my $ext = $^O eq 'MSWin32' ? '.bat' : '';
+my $bin_dir = catdir 't', 'scripts';
+$bin_dir = catdir 't', 'bin' unless -d $bin_dir;
+
 # Test inheritance.
 my $root = $util->rootdir;
 is( $root, File::Spec::Functions::rootdir, "Inherited rootdir()" );
@@ -62,23 +66,19 @@ is( $util->first_cat_dir(['foo24342434.foo', 'bar4323423.foo', 'app-info.tst',
                           'ick'], $util->path, $tmpdir, "C:\\mytemp"),
     $tmpdir, "Test first_cat_path with array" );
 
-SKIP: {
-    # These tests are OS dependent. Skip them unless the maintainer is running
-    # it.
-    skip "OS dependent", 3 unless $ENV{APP_INFO_MAINTAINER};
-    # Find an executable.
-    is( $util->first_exe("this.foo", "that.exe", "/bin/sh"), "/bin/sh",
-        "Find executable" );
+# Find an executable.
+is( $util->first_exe('this.foo', 'that.exe', "$bin_dir/iconv$ext"),
+    "$bin_dir/iconv$ext", 'Find executable' );
 
-    # Test first_cat_exe().
-    is( $util->first_cat_exe('sh', $util->path, $tmpdir), '/bin/sh',
-        "Test first_cat_exe" );
+# Test first_cat_exe().
+is( $util->first_cat_exe("iconv$ext", '.', $bin_dir),
+    "$bin_dir/iconv$ext", 'Test first_cat_exe' );
 
-    # Test it again with an array.
-    is( $util->first_cat_exe(['foowerwe.foo', 'barwere.foo', 'sh', 'ickrs34'],
-                          $util->path, $tmpdir, "C:\\mytemp"),
-    '/bin/sh', "Test first_cat_exe with array" );
-}
+# Test it again with an array.
+is( $util->first_cat_exe(
+    ['foowerwe.foo', 'barwere.foo', "iconv$ext", 'ickrs34'],
+    '.', $bin_dir
+), "$bin_dir/iconv$ext", "Test first_cat_exe with array" );
 
 # Look for stuff in the file.
 is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
