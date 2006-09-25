@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.51
+0.51  2006-09-25T17:52:53
       - Really fixed the unsorted test failure by putting the sort in the
         right place.
       - The code that creates the 't/scripts' directory now runs during the
