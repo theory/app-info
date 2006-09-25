@@ -335,7 +335,7 @@ C<multi_search_file()>, instead.
 sub search_file {
     my ($self, $file, $regex) = @_;
     return unless $file && $regex;
-    open F, "<$file" or Carp::croak "Cannot open $file: $!\n";
+    open F, "<$file" or require Carp && Carp::croak("Cannot open $file: $!\n");
     my @ret;
     while (<F>) {
         # If we find a match, we're done.
@@ -369,7 +369,7 @@ sub files_in_dir {
     my ($self, $dir, $code) = @_;
     return unless $dir;
     local *DIR;
-    opendir DIR, $dir or Carp::croak "Cannot open $dir: $!\n";
+    opendir DIR, $dir or require Carp && Carp::croak("Cannot open $dir: $!\n");
     my @files = $code
         ? grep { $code->() } readdir DIR
         : readdir DIR;
@@ -450,7 +450,7 @@ sub multi_search_file {
     my ($self, $file, @regexen) = @_;
     return unless $file && @regexen;
     my @each = @regexen;
-    open F, "<$file" or Carp::croak "Cannot open $file: $!\n";
+    open F, "<$file" or require Carp && Carp::croak("Cannot open $file: $!\n");
     my %ret;
     while (my $line = <F>) {
         my @splice;

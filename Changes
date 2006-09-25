@@ -7,6 +7,8 @@ Revision history for Perl extension App::Info.
         'code' action rather than the 'build' action, allowing the tests to
         run properly when the 'build' action has not been run. Reported By
         Alex Chorny (Ticket # 21281).
+      - Fixed test failures under bleedperl where Carp was not properly
+        loaded. Reported by Andreas Koenig (Ticket # 21641).
 
 0.50  2006-09-15T23:52:17
       - Fixed test failures due to lack of sorting of files and directories
