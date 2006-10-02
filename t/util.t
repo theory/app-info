@@ -72,13 +72,13 @@ is( $util->first_exe('this.foo', 'that.exe', "$bin_dir/iconv$ext"),
 
 # Test first_cat_exe().
 is( $util->first_cat_exe("iconv$ext", '.', $bin_dir),
-    "$bin_dir/iconv$ext", 'Test first_cat_exe' );
+    catfile($bin_dir, "iconv$ext"), 'Test first_cat_exe' );
 
 # Test it again with an array.
 is( $util->first_cat_exe(
     ['foowerwe.foo', 'barwere.foo', "iconv$ext", 'ickrs34'],
     '.', $bin_dir
-), "$bin_dir/iconv$ext", "Test first_cat_exe with array" );
+), catfile($bin_dir, "iconv$ext"), "Test first_cat_exe with array" );
 
 # Look for stuff in the file.
 is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
