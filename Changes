@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.53
+
 0.52  2007-08-13T18:24:54
       - Fixed test failures on Win32 in 't/util.t.' Reported by Alex Chorny
         via the cpan-testers mail list.
