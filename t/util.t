@@ -53,7 +53,7 @@ is( $util->first_cat_path('app-info.tst', $util->path, $tmpdir),
     $tmp_file, "Test first_cat_path" );
 
 # And test it again using an array.
-is( $util->first_cat_path(['foo334.foo', 'bar224.foo', 'app-info.tst', 'ick'],
+is( $util->first_cat_path(['foo334.foo', 'bar224.foo', 'app-info.tst', '__ickypoo__'],
                           $util->path, $tmpdir, "C:\\mytemp"),
     $tmp_file, "Test first_cat_path with array" );
 
@@ -63,7 +63,7 @@ is( $util->first_cat_dir('app-info.tst', $util->path, $tmpdir),
 
 # And test it again using an array.
 is( $util->first_cat_dir(['foo24342434.foo', 'bar4323423.foo', 'app-info.tst',
-                          'ick'], $util->path, $tmpdir, "C:\\mytemp"),
+                          '__ickypoo__'], $util->path, $tmpdir, "C:\\mytemp"),
     $tmpdir, "Test first_cat_path with array" );
 
 # Find an executable.
@@ -76,7 +76,7 @@ is( $util->first_cat_exe("iconv$ext", '.', $bin_dir),
 
 # Test it again with an array.
 is( $util->first_cat_exe(
-    ['foowerwe.foo', 'barwere.foo', "iconv$ext", 'ickrs34'],
+    ['foowerwe.foo', 'barwere.foo', "iconv$ext", '__ickypoo__rs34'],
     '.', $bin_dir
 ), catfile($bin_dir, "iconv$ext"), "Test first_cat_exe with array" );
 
@@ -88,7 +88,7 @@ is( $util->search_file($tmp_file, qr/(of.*\?)/), 'of the who?',
 is_deeply( [$util->search_file($tmp_file, qr/(of\sthe)\s+(who\?)/)],
            ['of the', 'who?'], "Find 'of the' and 'who?'" );
 
-ok( ! defined  $util->search_file($tmp_file, qr/(ick)/),
+ok( ! defined  $util->search_file($tmp_file, qr/(__ickypoo__)/),
     "Find nothing" );
 
 # Look for a couple of things.
@@ -100,7 +100,7 @@ is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(Ki[mn]g)/)],
           ['of the who?', "King"], "Find a couple on one line" );
 
 # Look for a couple of things, but have one be undef.
-is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(ick)/)],
+is_deeply([$util->multi_search_file($tmp_file, qr/(of.*\?)/, qr/(__ickypoo__)/)],
           ['of the who?', undef], "Find one but not the other" );
 
 # And finally, find a couple of things where one is an array.
