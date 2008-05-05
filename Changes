@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.54
+
 0.53  2008-05-05T17:47:18
       - Added the "configure_requires" and "build_requires" parameters to
         Build.PL.
