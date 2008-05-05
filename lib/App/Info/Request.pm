@@ -295,7 +295,7 @@ exemplars for using App::Info::Request objects when handling events.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2002-2006, David Wheeler. All Rights Reserved.
+Copyright (c) 2002-2008, David Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
