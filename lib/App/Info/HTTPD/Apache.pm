@@ -752,6 +752,8 @@ Cannot parse group from file
 
 Cannot parse port from file
 
+Cannot parse DocumentRoot from file
+
 =item unknown
 
 Location of httpd.conf file?
@@ -775,16 +777,20 @@ my $parse_conf_file = sub {
 
     # This is the place to add more regexes to collect stuff from the
     # config file in the future.
-    my @regexen = (qr/^\s*User\s+(.*)$/,
-                   qr/^\s*Group\s+(.*)$/,
-                   qr/^\s*Port\s+(.*)$/ );
-    my ($usr, $grp, $prt) = $u->multi_search_file($conf, @regexen);
+    my @regexen = (
+        qr/^\s*User\s+(.*)$/,
+        qr/^\s*Group\s+(.*)$/,
+        qr/^\s*Port\s+(.*)$/,
+        qr/^\s*DocumentRoot\s+"?([^"]+)"?\s*$/,
+    );
+    my ($usr, $grp, $prt, $droot) = $u->multi_search_file($conf, @regexen);
     # Issue a warning if we couldn't find the user and group.
     $self->error("Cannot parse user from file '$conf'") unless $usr;
     $self->error("Cannot parse group from file '$conf'") unless $grp;
     $self->error("Cannot parse port from file '$conf'") unless $prt;
+    $self->error("Cannot parse DocumentRoot from file '$conf'") unless $droot;
     # Assign them anyway.
-    @{$self}{qw(user group port)} = ($usr, $grp, $prt);
+    @{$self}{qw(user group port doc_root)} = ($usr, $grp, $prt, $droot);
 };
 
 sub user {
@@ -828,6 +834,8 @@ Cannot parse user from file
 Cannot parse group from file
 
 Cannot parse port from file
+
+Cannot parse DocumentRoot from file
 
 =item unknown
 
@@ -882,6 +890,8 @@ Cannot parse group from file
 
 Cannot parse port from file
 
+Cannot parse DocumentRoot from file
+
 =item unknown
 
 Location of httpd.conf file?
@@ -905,6 +915,61 @@ sub port {
       unless $self->{port};
     return $self->{port};
 }
+
+##############################################################################
+
+=head3 doc_root
+
+Returns the local physical path where web pages are stored. This value is
+collected from Apache configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Executing `httpd -V`
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Cannot parse user from file
+
+Cannot parse group from file
+
+Cannot parse port from file
+
+Cannot parse DocumentRoot from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter DocumentRoot actual directory
+
+=back
+
+=cut
+
+sub doc_root {
+    my $self = shift;
+    return unless $self->{executable};
+    $parse_conf_file->($self) unless exists $self->{doc_root};
+    # Handle an unknown value.
+    $self->{doc_root} = $self->unknown(
+        key      => 'doc root',
+        prompt   => 'Enter DocumentRoot directory',
+        callback => $is_dir,
+        error    => "Not a directory"
+    ) unless $self->{doc_root};
+    return $self->{doc_root};
+} # doc_root
 
 ##############################################################################
 

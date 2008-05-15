@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 30;
+use Test::More tests => 31;
 use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
@@ -60,6 +60,7 @@ is( $apache->inc_dir, $inc_dir, "Test inc dir" );
 ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
 is( $apache->magic_number, '19990320:16', "Test magic number" );
 is( $apache->port, '80', "Test port" );
+is( $apache->doc_root, '/test/doc/root', 'Test doc_root' );
 ok( $apache->mod_so, "Test mod_so" );
 is( $apache->home_url, 'http://httpd.apache.org/', "Get home URL" );
 is( $apache->download_url, 'http://www.apache.org/dist/httpd/',

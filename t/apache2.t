@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 31;
+use Test::More tests => 32;
 use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
@@ -62,6 +62,7 @@ is_deeply( scalar $apache->static_mods, \@mods, 'Check static mods' );
 is_deeply( [ sort $apache->shared_mods ], \@so_mods, 'Check so mods' );
 is( $apache->magic_number, '20020903:11', 'Test magic number' );
 is( $apache->port, '80', 'Test port' );
+is( $apache->doc_root, '/test/doc/root', 'Test doc_root' );
 ok( $apache->mod_so, 'Test mod_so' );
 is( $apache->home_url, 'http://httpd.apache.org/', 'Get home URL' );
 is( $apache->download_url, 'http://www.apache.org/dist/httpd/',
