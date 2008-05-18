@@ -46,7 +46,7 @@ use File::Spec::Functions 'catfile';
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
-$VERSION = '0.54';
+$VERSION = '0.55';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;
