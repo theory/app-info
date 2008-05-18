@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.54
+0.54  2008-05-18T04:01:50
       - Added the doc_root() method to App::Info::HTTPD::Apache. Patch
         from Martin Thurn.
       - Added an undistributed spell-checking test, which means that the
