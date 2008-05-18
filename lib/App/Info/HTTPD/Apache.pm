@@ -27,7 +27,7 @@ installed on the local system. It implements all of the methods defined by
 App::Info::HTTPD. Methods that trigger events will trigger them only the first
 time they're called (See L<App::Info|App::Info> for documentation on handling
 events). To start over (after, say, someone has installed Apache) construct a
-new App::Info::HTTPD::Apache object to aggregate new metadata.
+new App::Info::HTTPD::Apache object to aggregate new meta data.
 
 Some of the methods trigger the same events. This is due to cross-calling of
 methods or of functions common to methods. However, any one event should be
@@ -63,7 +63,7 @@ complete description of argument parameters.
 
 When called, C<new()> searches the the directories returned by
 C<search_bin_dirs()> for an executable with a name returned by
-C<search_exe_names()>. If found, the executable (hereafer referred to as
+C<search_exe_names()>. If found, the executable (hereafter referred to as
 F<httpd>, regardless of how it was actually found to be named) will be called
 by the object methods below to gather the data necessary for each. If F<httpd>
 cannot be found, then Apache is assumed not to be installed, and each of the
@@ -662,7 +662,7 @@ sub compile_option {
 
 Returns the full path to the Apache configuration file. C<conf_file()> looks
 for the configuration file in a number of locations and under a number of
-names. First it tries to use the file specifed by the C<SERVER_CONFIG_FILE>
+names. First it tries to use the file specified by the C<SERVER_CONFIG_FILE>
 compile option (as returned by a call to C<compile_option()>) -- and if it's a
 relative file name, it gets appended to the directory returned by
 C<httpd_root()>. If that file isn't found, C<conf_file()> then looks for a
@@ -998,7 +998,7 @@ sub executable { shift->{executable} }
   my $bin_dir = $apache->bin_dir;
 
 Returns the SQLite binary directory path. App::Info::HTTPD::Apache simply
-retreives it as the directory part of the path to the HTTPD executable.
+retrieves it as the directory part of the path to the HTTPD executable.
 
 =cut
 
@@ -1382,8 +1382,8 @@ sub download_url { "http://www.apache.org/dist/httpd/" }
 
   my @search_exe_names = $apache->search_exe_names;
 
-Returns a list of possible names for the Apache executabl; F<.exe> is appended
-to each on Win32. By default, the names are:
+Returns a list of possible names for the Apache executable; F<.exe> is
+appended to each on Win32. By default, the names are:
 
 =over
 

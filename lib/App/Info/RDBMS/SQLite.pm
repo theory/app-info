@@ -27,7 +27,7 @@ installed on the local system. It implements all of the methods defined by
 App::Info::RDBMS. Methods that trigger events will trigger them only the first
 time they're called (See L<App::Info|App::Info> for documentation on handling
 events). To start over (after, say, someone has installed SQLite) construct a
-new App::Info::RDBMS::SQLite object to aggregate new metadata.
+new App::Info::RDBMS::SQLite object to aggregate new meta data.
 
 Some of the methods trigger the same events. This is due to cross-calling of
 shared subroutines. However, any one event should be triggered no more than
@@ -213,7 +213,7 @@ my $get_version = sub {
         $self->info('Grabbing version from DBD::SQLite');
         $version = $self->{dbh}->{sqlite_version};
         unless ($version) {
-            $self->error("Failed to retreive SQLite version from DBD::SQLite");
+            $self->error("Failed to retrieve SQLite version from DBD::SQLite");
             return;
         }
 
@@ -245,7 +245,7 @@ my $get_version = sub {
   my $version = $sqlite->version;
 
 Returns the SQLite version number. App::Info::RDBMS::SQLite parses the version
-number from the system call C<`sqlite -version`> or retreives it from
+number from the system call C<`sqlite -version`> or retrieves it from
 DBD::SQLite.
 
 B<Events:>
@@ -260,7 +260,7 @@ Executing `sqlite -version`
 
 Failed to find SQLite version with `sqlite -version`
 
-Failed to retreive SQLite version from DBD::SQLite
+Failed to retrieve SQLite version from DBD::SQLite
 
 Unable to parse name from string
 
@@ -309,7 +309,7 @@ sub version {
   my $major_version = $sqlite->major_version;
 
 Returns the SQLite major version number. App::Info::RDBMS::SQLite parses the
-version number from the system call C<`sqlite -version`> or retreives it from
+version number from the system call C<`sqlite -version`> or retrieves it from
 DBD::SQLite. For example, if C<version()> returns "3.0.8", then this method
 returns "3".
 
@@ -325,7 +325,7 @@ Executing `sqlite -version`
 
 Failed to find SQLite version with `sqlite -version`
 
-Failed to retreive SQLite version from DBD::SQLite
+Failed to retrieve SQLite version from DBD::SQLite
 
 Unable to parse name from string
 
@@ -364,7 +364,7 @@ sub major_version {
   my $minor_version = $sqlite->minor_version;
 
 Returns the SQLite minor version number. App::Info::RDBMS::SQLite parses the
-version number from the system call C<`sqlite -version`> or retreives it from
+version number from the system call C<`sqlite -version`> or retrieves it from
 DBD::SQLite. For example, if C<version()> returns "3.0.8", then this method
 returns "0".
 
@@ -380,7 +380,7 @@ Executing `sqlite -version`
 
 Failed to find SQLite version with `sqlite -version`
 
-Failed to retreive SQLite version from DBD::SQLite
+Failed to retrieve SQLite version from DBD::SQLite
 
 Unable to parse name from string
 
@@ -415,7 +415,7 @@ sub minor_version {
   my $patch_version = $sqlite->patch_version;
 
 Returns the SQLite patch version number. App::Info::RDBMS::SQLite parses the
-version number from the system call C<`sqlite -version`> or retreives it from
+version number from the system call C<`sqlite -version`> or retrieves it from
 DBD::SQLite. For example, if C<version()> returns "3.0.8", then this method
 returns "8".
 
@@ -431,7 +431,7 @@ Executing `sqlite -version`
 
 Failed to find SQLite version with `sqlite -version`
 
-Failed to retreive SQLite version from DBD::SQLite
+Failed to retrieve SQLite version from DBD::SQLite
 
 Unable to parse name from string
 
@@ -465,7 +465,7 @@ sub patch_version {
 
   my $executable = $sqlite->executable;
 
-Returns the path to the Sqlite executable, usually F<sqlite3> or F<sqlite>,
+Returns the path to the SQLite executable, usually F<sqlite3> or F<sqlite>,
 which will be defined by one of the names returned byC<search_exe_names()>.
 The executable is searched for in C<new()>, so there are no events for this
 method.
@@ -481,7 +481,7 @@ sub executable { shift->{executable} }
   my $bin_dir = $sqlite->bin_dir;
 
 Returns the SQLite binary directory path. App::Info::RDBMS::SQLite simply
-retreives it as the directory part of the path to the SQLite executable.
+retrieves it as the directory part of the path to the SQLite executable.
 
 =cut
 
@@ -519,7 +519,7 @@ Searching for shared object library directory
 
 =item error
 
-Cannot find shared object library direcory
+Cannot find shared object library directory
 
 =item unknown
 
@@ -535,7 +535,7 @@ my $lib_dir = sub {
     $self->info("Searching for $label directory");
     my $dir;
     unless ($dir = $u->first_cat_dir(\@_, $self->search_lib_dirs)) {
-        $self->error("Cannot find $label direcory");
+        $self->error("Cannot find $label directory");
         $dir = $self->unknown(
             key      => "sqlite $key dir",
             callback => sub { $u->first_cat_dir(\@_, $_) },
@@ -576,7 +576,7 @@ Searching for shared object library directory
 
 =item error
 
-Cannot find shared object library direcory
+Cannot find shared object library directory
 
 =item unknown
 

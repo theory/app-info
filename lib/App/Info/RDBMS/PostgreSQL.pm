@@ -28,7 +28,7 @@ methods defined by App::Info::RDBMS. Methods that trigger events will trigger
 them only the first time they're called (See L<App::Info|App::Info> for
 documentation on handling events). To start over (after, say, someone has
 installed PostgreSQL) construct a new App::Info::RDBMS::PostgreSQL object to
-aggregate new metadata.
+aggregate new meta data.
 
 Some of the methods trigger the same events. This is due to cross-calling of
 shared subroutines. However, any one event should be triggered no more than

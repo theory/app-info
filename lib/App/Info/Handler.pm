@@ -53,7 +53,7 @@ This class method may be used by App::Info::Handler subclasses to register
 themselves with App::Info::Handler. Multiple registrations are supported. The
 idea is that a subclass can define different functionality by specifying
 different strings that represent different modes of constructing an
-App::Info::Handler subclass object. The keys are case-sensitve, and should be
+App::Info::Handler subclass object. The keys are case-sensitive, and should be
 unique across App::Info::Handler subclasses so that many subclasses can be
 loaded and used separately. If the C<$key> is already registered,
 C<register_handler()> will throw an exception. The values are code references
@@ -133,7 +133,7 @@ __END__
 =head1 SUBCLASSING
 
 I hatched the idea of the App::Info event model with its subclassable handlers
-as a way of separating the aggregation of application metadata from writing a
+as a way of separating the aggregation of application meta data from writing a
 user interface for handling certain conditions. I felt it a better idea to
 allow people to create their own user interfaces, and instead to provide only
 a few examples. The App::Info::Handler class defines the API interface for
@@ -218,7 +218,7 @@ The final step in creating a new App::Info event handler is to implement the
 C<handler()> method itself. This method takes a single argument, an
 App::Info::Request object, and is expected to return true if it handled the
 request, and false if it did not. The App::Info::Request object contains all
-the metadata relevant to a request, including the type of event that triggered
+the meta data relevant to a request, including the type of event that triggered
 it; see L<App::Info::Request|App::Info::Request> for its documentation.
 
 Use the App::Info::Request object however you like to handle the request

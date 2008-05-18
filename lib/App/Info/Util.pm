@@ -38,7 +38,7 @@ utility may be considered more general, so feel free to use it elsewhere.
 The methods added in addition to the usual File::Spec suspects are designed to
 facilitate locating files and directories on the file system, as well as
 searching those files. The assumption is that, in order to provide useful
-metadata about a given software package, an App::Info subclass must find
+meta data about a given software package, an App::Info subclass must find
 relevant files and directories and parse them with regular expressions. This
 class offers methods that simplify those tasks.
 
@@ -51,11 +51,13 @@ use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
 $VERSION = '0.54';
 
-my %path_dems = (MacOS   => qr',',
-                 MSWin32 => qr';',
-                 os2     => qr';',
-                 VMS     => undef,
-                 epoc    => undef);
+my %path_dems = (
+    MacOS   => qr',',
+    MSWin32 => qr';',
+    os2     => qr';',
+    VMS     => undef,
+    epoc    => undef
+);
 
 my $path_dem = exists $path_dems{$^O} ? $path_dems{$^O} : qr':';
 
@@ -106,27 +108,27 @@ sub first_dir {
   $dir = $util->first_path($path);
 
 Takes the $path string and splits it into a list of directory paths, based on
-the path demarcator on the local file system. Then calls C<first_dir()> to
-return the first directoy in the path list that exists on the local file
-system. The path demarcator is specified for the following file systems:
+the path delimiter on the local file system. Then calls C<first_dir()> to
+return the first directory in the path list that exists on the local file
+system. The path delimiter is specified for the following file systems:
 
 =over 4
 
-=item MacOS: ","
+=item * MacOS: ","
 
-=item MSWin32: ";"
+=item * MSWin32: ";"
 
-=item os2: ";"
+=item * os2: ";"
 
-=item VMS: undef
+=item * VMS: undef
 
 This method always returns undef on VMS. Patches welcome.
 
-=item epoc: undef
+=item * epoc: undef
 
 This method always returns undef on epoch. Patches welcome.
 
-=item Unix: ":"
+=item * Unix: ":"
 
 All other operating systems are assumed to be Unix-based.
 
@@ -239,7 +241,7 @@ sub first_cat_path {
   my $dir = $util->first_cat_dir('ick.txt', @paths);
   $dir = $util->first_cat_dir(['this.txt', 'that.txt'], @paths);
 
-Funtionally identical to C<first_cat_path()>, except that it returns the
+Functionally identical to C<first_cat_path()>, except that it returns the
 directory path in which the first file was found, rather than the full
 concatenated path. Thus, in the above example, if the file found was
 F</usr/bin/httpd>, while C<first_cat_path()> would return that value,
@@ -266,7 +268,7 @@ sub first_cat_dir {
   my $exe = $util->first_cat_exe('ick.exe', @paths);
   $exe = $util->first_cat_exe(['this.exe', 'that.exe'], @paths);
 
-Funtionally identical to C<first_cat_path()>, except that it returns the full
+Functionally identical to C<first_cat_path()>, except that it returns the full
 path to the first executable file found, rather than simply the first file
 found.
 
@@ -304,7 +306,7 @@ be grabbed like this:
   my @nums = $util->search_file($file, $regex);
 
 Now C<@nums> will contain the values C<(6, 5, 8)>. Note that in a scalar
-context, the above search would yeild an array reference:
+context, the above search would yield an array reference:
 
   my $regex = qr/Version\s+(\d+)\.(\d+),[^\d]*(\d+)/;
   my $nums = $util->search_file($file, $regex);
@@ -324,7 +326,7 @@ contains a single element: C<("the who?")>.
 
 Note that a regular expression without parentheses -- that is, one that
 doesn't grab values and put them into $1, $2, etc., will never successfully
-match a line in this method. You must include something to parentetically
+match a line in this method. You must include something to parenthetically
 match. If you just want to know the value of what was matched, parenthesize
 the whole thing and if the value returns, you have a match. Also, if you need
 to match patterns across lines, try using multiple regular expressions with
@@ -384,12 +386,12 @@ sub files_in_dir {
   my @regexen = (qr/(one)/, qr/(two)\s+(three)/);
   my @matches = $util->multi_search_file($file, @regexen);
 
-Like C<search_file()>, this mehod opens C<$file> and parses it for regular
-expresion matches. This method, however, can take a list of regular
+Like C<search_file()>, this method opens C<$file> and parses it for regular
+expression matches. This method, however, can take a list of regular
 expressions to look for, and will return the values found for all of them.
 Regular expressions that match and return multiple values will be returned as
-array referernces, while those that match and return a single value will
-return just that single value.
+array references, while those that match and return a single value will return
+just that single value.
 
 For example, say you are parsing a file with lines like the following:
 

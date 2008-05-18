@@ -27,7 +27,7 @@ installed on the local system. It implements all of the methods defined by
 App::Info::Lib. Methods that trigger events will trigger them only the first
 time they're called (See L<App::Info|App::Info> for documentation on handling
 events). To start over (after, say, someone has installed Expat) construct a
-new App::Info::Lib::Expat object to aggregate new metadata.
+new App::Info::Lib::Expat object to aggregate new meta data.
 
 Some of the methods trigger the same events. This is due to cross-calling of
 shared subroutines. However, any one event should be triggered no more than
@@ -165,7 +165,7 @@ sub name { 'Expat' }
 
 =head3 version
 
-Returns the full version number for Expat. App::Info::Lib::Expat attempts to
+Returns the full version number for Expat. App::Info::Lib::Expat attempts
 parse the version number from the F<expat.h> file, if it exists.
 
 B<Events:>
@@ -307,7 +307,7 @@ sub major_version {
 
   my $minor_version = $expat->minor_version;
 
-Returns the Expat minor version number. App::Info::Lib::Expat attempst to
+Returns the Expat minor version number. App::Info::Lib::Expat attempts to
 parse the version number from the F<expat.h> file, if it exists. For example,
 if C<version()> returns "1.95.2", then this method returns "95".
 
@@ -360,7 +360,7 @@ sub minor_version {
 
   my $patch_version = $expat->patch_version;
 
-Returns the Expat patch version number. App::Info::Lib::Expat attempst to
+Returns the Expat patch version number. App::Info::Lib::Expat attempts to
 parse the version number from the F<expat.h> file, if it exists. For example,
 C<version()> returns "1.95.2", then this method returns "2".
 
@@ -547,7 +547,7 @@ Searching for shared object library directory
 
 =item error
 
-Cannot find shared object library direcory
+Cannot find shared object library directory
 
 =item unknown
 
@@ -568,7 +568,7 @@ sub so_lib_dir {
         if (my $dir = $u->first_cat_dir(\@libs, $self->search_lib_dirs)) {
             $self->{so_lib_dir} = $dir;
         } else {
-            $self->error("Cannot find shared object library direcory");
+            $self->error("Cannot find shared object library directory");
             $self->{so_lib_dir} =
               $self->unknown( key      => 'expat so dir',
                               callback => $cb,
