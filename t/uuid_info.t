@@ -17,6 +17,8 @@ use EventTest;
 ##############################################################################
 BEGIN { use_ok('App::Info::Lib::OSSPUUID') }
 
+my $ext = $^O eq 'MSWin32' ? '[.]exe' : '';
+
 # Test info events.
 ok( my $info = EventTest->new, "Create info EventTest" );
 ok( my $uuid = App::Info::Lib::OSSPUUID->new( on_info => $info ),
@@ -29,7 +31,7 @@ SKIP: {
 
     # Check name.
     $uuid->name;
-    like($info->message, qr/^Executing `".*uuid-config" --version`$/,
+    like($info->message, qr/^Executing `".*uuid-config$ext" --version`$/,
          "Check name info" );
     $uuid->name;
     ok( ! defined $info->message, "No info" );
@@ -41,7 +43,7 @@ SKIP: {
         "Got Object 2");
     $info->message; # Throw away constructor message.
     $uuid->version;
-    like($info->message, qr/^Executing `".*uuid-config" --version`$/,
+    like($info->message, qr/^Executing `".*uuid-config$ext" --version`$/,
         "Check version info" );
 
     $uuid->version;
@@ -54,7 +56,7 @@ SKIP: {
         "Got Object 3");
     $info->message; # Throw away constructor message.
     $uuid->major_version;
-    like($info->message, qr/^Executing `".*uuid-config" --version`$/,
+    like($info->message, qr/^Executing `".*uuid-config$ext" --version`$/,
         "Check major info" );
 
     # Check minor version.
@@ -62,7 +64,7 @@ SKIP: {
         "Got Object 4");
     $info->message; # Throw away constructor message.
     $uuid->minor_version;
-    like($info->message, qr/^Executing `".*uuid-config" --version`$/,
+    like($info->message, qr/^Executing `".*uuid-config$ext" --version`$/,
         "Check minor info" );
 
     # Check patch version.
@@ -70,26 +72,26 @@ SKIP: {
         "Got Object 5");
     $info->message; # Throw away constructor message.
     $uuid->patch_version;
-    like($info->message, qr/^Executing `".*uuid-config" --version`$/,
+    like($info->message, qr/^Executing `".*uuid-config$ext" --version`$/,
         "Check patch info" );
 
     # Check dir methods.
     $uuid->bin_dir;
-    like( $info->message, qr/^Executing `".*uuid-config" --bindir`$/,
+    like( $info->message, qr/^Executing `".*uuid-config$ext" --bindir`$/,
           "Check bin info" );
     $uuid->inc_dir;
-    like( $info->message, qr/^Executing `".*uuid-config" --includedir`$/,
+    like( $info->message, qr/^Executing `".*uuid-config$ext" --includedir`$/,
         "Check inc info" );
     $uuid->lib_dir;
-    like( $info->message, qr/^Executing `".*uuid-config" --libdir`$/,
+    like( $info->message, qr/^Executing `".*uuid-config$ext" --libdir`$/,
           "Check lib info" );
     $uuid->cflags;
 
     # Check configure info.
-    like( $info->message, qr/^Executing `".*uuid-config" --cflags`$/,
+    like( $info->message, qr/^Executing `".*uuid-config$ext" --cflags`$/,
         "Check cflags info" );
     $uuid->ldflags;
-    like( $info->message, qr/^Executing `".*uuid-config" --ldflags`$/,
+    like( $info->message, qr/^Executing `".*uuid-config$ext" --ldflags`$/,
         "Check ldflags info" );
 }
 

@@ -22,6 +22,8 @@ use EventTest;
 ##############################################################################
 BEGIN { use_ok('App::Info::RDBMS::PostgreSQL') }
 
+my $ext = $^O eq 'MSWin32' ? '[.]exe' : '';
+
 # Test info events.
 ok( my $info = EventTest->new, "Create info EventTest" );
 ok( my $pg = App::Info::RDBMS::PostgreSQL->new( on_info => $info ),
@@ -34,7 +36,7 @@ SKIP: {
 
     # Check name.
     $pg->name;
-    like($info->message, qr/^Executing `".*pg_config" --version`$/,
+    like($info->message, qr/^Executing `".*pg_config$ext" --version`$/,
          "Check name info" );
     $pg->name;
     ok( ! defined $info->message, "No info" );
@@ -46,7 +48,7 @@ SKIP: {
         "Got Object 2");
     $info->message; # Throw away constructor message.
     $pg->version;
-    like($info->message, qr/^Executing `".*pg_config" --version`$/,
+    like($info->message, qr/^Executing `".*pg_config$ext" --version`$/,
         "Check version info" );
 
     $pg->version;
@@ -59,7 +61,7 @@ SKIP: {
         "Got Object 3");
     $info->message; # Throw away constructor message.
     $pg->major_version;
-    like($info->message, qr/^Executing `".*pg_config" --version`$/,
+    like($info->message, qr/^Executing `".*pg_config$ext" --version`$/,
         "Check major info" );
 
     # Check minor version.
@@ -67,7 +69,7 @@ SKIP: {
         "Got Object 4");
     $info->message; # Throw away constructor message.
     $pg->minor_version;
-    like($info->message, qr/^Executing `".*pg_config" --version`$/,
+    like($info->message, qr/^Executing `".*pg_config$ext" --version`$/,
         "Check minor info" );
 
     # Check patch version.
@@ -75,24 +77,24 @@ SKIP: {
         "Got Object 5");
     $info->message; # Throw away constructor message.
     $pg->patch_version;
-    like($info->message, qr/^Executing `".*pg_config" --version`$/,
+    like($info->message, qr/^Executing `".*pg_config$ext" --version`$/,
         "Check patch info" );
 
     # Check dir methods.
     $pg->bin_dir;
-    like( $info->message, qr/^Executing `".*pg_config" --bindir`$/,
+    like( $info->message, qr/^Executing `".*pg_config$ext" --bindir`$/,
           "Check bin info" );
     $pg->inc_dir;
-    like( $info->message, qr/^Executing `".*pg_config" --includedir`$/,
+    like( $info->message, qr/^Executing `".*pg_config$ext" --includedir`$/,
         "Check inc info" );
     $pg->lib_dir;
-    like( $info->message, qr/^Executing `".*pg_config" --libdir`$/,
+    like( $info->message, qr/^Executing `".*pg_config$ext" --libdir`$/,
           "Check lib info" );
     $pg->so_lib_dir;
-    like( $info->message, qr/^Executing `".*pg_config" --pkglibdir`$/,
+    like( $info->message, qr/^Executing `".*pg_config$ext" --pkglibdir`$/,
         "Check so lib info" );
     $pg->configure;
-    like( $info->message, qr/^Executing `".*pg_config" --configure`$/,
+    like( $info->message, qr/^Executing `".*pg_config$ext" --configure`$/,
         "Check configure info" );
 }
 
