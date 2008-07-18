@@ -1,6 +1,6 @@
 Revision history for Perl extension App::Info.
 
-0.55
+0.55  2008-07-18T16:18:12
       - Fixed some test failures on Windows boxes with PostgreSQL installed.
        Patch from Taro Nishino.
 
