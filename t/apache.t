@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 31;
+use Test::More tests => 33;
 use File::Spec::Functions;
 
 BEGIN { use_ok('App::Info::HTTPD::Apache') }
@@ -61,6 +61,8 @@ ok( eq_set( scalar $apache->static_mods, \@mods, ), "Check static mods" );
 is( $apache->magic_number, '19990320:16', "Test magic number" );
 is( $apache->port, '80', "Test port" );
 is( $apache->doc_root, '/test/doc/root', 'Test doc_root' );
+is( $apache->cgibin_virtual, '/test/cgi-bin/', 'Test cgibin_virtual');
+is( $apache->cgibin_physical, '/this/is/a/test/cgi-bin/', 'Test cgibin_physical');
 ok( $apache->mod_so, "Test mod_so" );
 is( $apache->home_url, 'http://httpd.apache.org/', "Get home URL" );
 is( $apache->download_url, 'http://www.apache.org/dist/httpd/',

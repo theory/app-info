@@ -63,3 +63,5 @@ Automake
 CPAN
 FooApp
 one's
+cgi
+ScriptAlias

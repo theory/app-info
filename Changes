@@ -1,10 +1,12 @@
 Revision history for Perl extension App::Info.
 
 0.56
+      - Added `cgibin_physical()` and `cgibin_virtual()` to
+        SVN::Notify::HTTPD::Apache. Patch from Martin Thurn.
 
 0.55  2008-07-18T16:18:12
       - Fixed some test failures on Windows boxes with PostgreSQL installed.
-       Patch from Taro Nishino.
+        Patch from Taro Nishino.
 
 0.54  2008-05-18T04:01:50
       - Added the doc_root() method to App::Info::HTTPD::Apache. Patch

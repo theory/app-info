@@ -782,15 +782,18 @@ my $parse_conf_file = sub {
         qr/^\s*Group\s+(.*)$/,
         qr/^\s*Port\s+(.*)$/,
         qr/^\s*DocumentRoot\s+"?([^"]+)"?\s*$/,
+        qr/^\s*ScriptAlias\s+(  \S+?)\s"?(?:[^"\r\n]+)"?\s*$/x,
+        qr/^\s*ScriptAlias\s+(?:\S+?)\s"?(  [^"\r\n]+)"?\s*$/x,
     );
-    my ($usr, $grp, $prt, $droot) = $u->multi_search_file($conf, @regexen);
+    my ($usr, $grp, $prt, $droot, $cgibinv, $cgibinp) = $u->multi_search_file($conf, @regexen);
     # Issue a warning if we couldn't find the user and group.
     $self->error("Cannot parse user from file '$conf'") unless $usr;
     $self->error("Cannot parse group from file '$conf'") unless $grp;
     $self->error("Cannot parse port from file '$conf'") unless $prt;
     $self->error("Cannot parse DocumentRoot from file '$conf'") unless $droot;
+    $self->error("Cannot parse ScriptAlias from file '$conf'") if (! ($cgibinv && $cgibinp));
     # Assign them anyway.
-    @{$self}{qw(user group port doc_root)} = ($usr, $grp, $prt, $droot);
+    @{$self}{qw(user group port doc_root cgibinv cgibinp)} = ($usr, $grp, $prt, $droot, $cgibinv, $cgibinp);
 };
 
 sub user {
@@ -970,6 +973,116 @@ sub doc_root {
     ) unless $self->{doc_root};
     return $self->{doc_root};
 } # doc_root
+
+##############################################################################
+
+=head3 cgibin_virtual
+
+Returns the virtual path where cgi-bin programs are stored. This value is
+collected from Apache configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Executing `httpd -V`
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Cannot parse user from file
+
+Cannot parse group from file
+
+Cannot parse port from file
+
+Cannot parse ScriptAlias from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter ScriptAlias virtual directory
+
+=back
+
+=cut
+
+sub cgibin_virtual {
+    my $self = shift;
+    return unless $self->{executable};
+    $parse_conf_file->($self) unless exists $self->{cgibinv};
+    # Handle an unknown value.
+    $self->{cgibinv} = $self->unknown(
+        key      => 'virtual cgi-bin',
+        prompt   => 'Enter ScriptAlias (cgi-bin) virtual directory',
+        callback => $is_dir,
+        error    => "Not a directory"
+    ) unless $self->{cgibinv};
+    return $self->{cgibinv};
+}
+
+##############################################################################
+
+=head3 cgibin_physical
+
+Returns the physical path where cgi-bin programs are stored. This value is
+collected from Apache configuration file as returned by C<conf_file()>.
+
+B<Events:>
+
+=over 4
+
+=item info
+
+Searching for Apache configuration file
+
+Executing `httpd -V`
+
+Parsing Apache configuration file
+
+=item error
+
+No Apache config file found
+
+Cannot parse user from file
+
+Cannot parse group from file
+
+Cannot parse port from file
+
+Cannot parse ScriptAlias from file
+
+=item unknown
+
+Location of httpd.conf file?
+
+Enter ScriptAlias physical directory
+
+=back
+
+=cut
+
+sub cgibin_physical {
+    my $self = shift;
+    return unless $self->{executable};
+    $parse_conf_file->($self) unless exists $self->{cgibinp};
+    # Handle an unknown value.
+    $self->{cgibinp} = $self->unknown(
+        key      => 'physical cgi-bin',
+        prompt   => 'Enter ScriptAlias (cgi-bin) physical directory',
+        callback => $is_dir,
+        error    => "Not a directory"
+    ) unless $self->{cgibinp};
+    return $self->{cgibinp};
+}
 
 ##############################################################################
 
