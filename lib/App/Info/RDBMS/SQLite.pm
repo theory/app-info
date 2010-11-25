@@ -43,7 +43,6 @@ triggered once, by whichever of those four methods is called first.
 use strict;
 use App::Info::RDBMS;
 use App::Info::Util;
-use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
 $VERSION = '0.56';

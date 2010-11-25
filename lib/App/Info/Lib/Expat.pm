@@ -41,7 +41,6 @@ triggered once, by whichever of those four methods is called first.
 use strict;
 use App::Info::Util;
 use App::Info::Lib;
-use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::Lib);
 $VERSION = '0.56';
