@@ -495,8 +495,10 @@ sub lib_dirs {
     grep { defined and length }
     map { split ' ' }
     grep { defined }
-    $Config{libsdirs},
-    $Config{loclibpth},
+    # Quote Config access to work around
+    # http://bugs.activestate.com/show_bug.cgi?id=89447
+    "$Config{libsdirs}",
+    "$Config{loclibpth}",
     '/sw/lib';
 }
 

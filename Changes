@@ -4,6 +4,10 @@ Revision history for Perl extension App::Info.
       - Added `cgibin_physical()` and `cgibin_virtual()` to
         SVN::Notify::HTTPD::Apache. Patch from Martin Thurn.
       - Removed some superfluous `use Config;`s.
+      - Added workaround for a bizarre crash when accessing `%Config` via
+        `grep` on ActivePerl
+        ([bug](http://bugs.activestate.com/show_bug.cgi?id=89447)). Thanks to
+        Christian Walde for the analysis.
 
 0.55  2008-07-18T16:18:12
       - Fixed some test failures on Windows boxes with PostgreSQL installed.
