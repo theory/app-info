@@ -1,5 +1,7 @@
 Revision history for Perl extension App::Info.
 
+0.57
+
 0.56  2011-02-22T21:02:39
       - Added `cgibin_physical()` and `cgibin_virtual()` to
         SVN::Notify::HTTPD::Apache. Patch from Martin Thurn.

@@ -64,3 +64,4 @@ t/util.t
 t/uuid.t
 t/uuid_info.t
 t/zpod.t
+META.json

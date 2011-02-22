@@ -35,7 +35,7 @@ handlers, read on!
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.56';
+$VERSION = '0.57';
 
 my %handlers;
 
