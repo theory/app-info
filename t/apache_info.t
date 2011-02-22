@@ -164,12 +164,12 @@ ok( ! defined $info->message, "No more magic_number info" );
 
 ##########################################################################
 # Test compile_option().
-$apache->compile_option;
+$apache->compile_option('foo');
 ok( ! defined $info->message, "No compile_option info" );
 ok( $apache = App::Info::HTTPD::Apache->new( @params, on_info => $info ),
     "Got Object 10");
 $info->message; # Throw away constructor message.
-$apache->compile_option;
+$apache->compile_option('foo');
 like($info->message, qr/^Executing `"t.$scripts.httpd(?:.bat)?" -V`$/,
       "Check compile_option info" );
 ok( ! defined $info->message, "No more compile_option info" );
