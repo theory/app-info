@@ -38,7 +38,7 @@ my $build = $class->new(
     module_name        => 'App::Info',
     license            => 'perl',
     configure_requires => { 'Module::Build' => '0.2701' },
-    recommends         => { 'Test::Pod'     => '1.20'   },
+    recommends         => { 'Test::Pod'     => '1.41'   },
     requires           => { File::Spec    => 0          },
     build_requires     => {
         'Module::Build' => '0.2701',
