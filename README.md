@@ -25,28 +25,30 @@ App::Info abstract base class relevant to the category of software they're
 managing, e.g. App::Info::HTTPD or App::Info::RDBMS. New categories will be
 added as needed.
 
-INSTALLATION
+Installation
+------------
 
 To install this module, type the following:
 
-   perl Build.PL
-   ./Build
-   ./Build test
-   ./Build install
+    perl Build.PL
+    ./Build
+    ./Build test
+    ./Build install
 
 Or, if you don't have Module::Build installed, type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Makefile.PL
+    make
+    make test
+    make install
 
-DEPENDENCIES
+Dependencies
+------------
 
 This module requires these other modules and libraries:
 
-  File::Spec
-  Test::More -- For testing only -- part of the Test::Simple distribution.
+* File::Spec
+* Test::More -- For testing only -- part of the Test::Simple distribution.
 
 COPYRIGHT AND LICENCE
 
