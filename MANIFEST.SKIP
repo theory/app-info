@@ -5,5 +5,7 @@
 \.bak$
 ^MANIFEST\.SKIP$
 ^App-Info
-\.svn
+\.git
 pod-spelling.t$
+^MYMETA\.yml$
+^MYMETA\.json$
