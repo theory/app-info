@@ -263,10 +263,15 @@ their logical examples. Consult the App::Info documentation of the L<event
 methods|App::Info/"Events"> for details on how App::Info constructs the
 App::Info::Request object for each event type.
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-app-info@rt.cpan.org> or file them at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/app-info/>. Feel free to fork and
+contribute!
+
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/app-info/issues/> or by sending mail to
+L<bug-App-Info@rt.cpan.org|mailto:bug-App-Info@rt.cpan.org>.
 
 =head1 AUTHOR
 

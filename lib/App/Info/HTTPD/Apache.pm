@@ -1858,10 +1858,15 @@ who know a great deal more about interrogating Apache will be most welcome.
 Add method to return the names of available DSOs. These should either be
 parsed from the F<httpd.conf> file or C<glob>bed from the file system.
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-app-info@rt.cpan.org> or file them at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=App-Info>.
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/app-info/>. Feel free to fork and
+contribute!
+
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/app-info/issues/> or by sending mail to
+L<bug-App-Info@rt.cpan.org|mailto:bug-App-Info@rt.cpan.org>.
 
 =head1 AUTHOR
 
