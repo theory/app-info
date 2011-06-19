@@ -44,5 +44,12 @@ my $build = $class->new(
         'Module::Build' => '0.2701',
         'Test::More'    => '0.17',
     },
+    meta_merge => {
+        resources => {
+            homepage   => 'http://search.cpan.org/dist/App-Info/',
+            bugtracker => 'http://github.com/theory/app-info/issues/',
+            repository => 'http://github.com/theory/app-info/',
+        }
+    },
 );
 $build->create_build_script;
