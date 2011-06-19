@@ -37,7 +37,6 @@ my $class = Module::Build->subclass(
 my $build = $class->new(
     module_name        => 'App::Info',
     license            => 'perl',
-    create_makefile_pl => 'passthrough',
     configure_requires => { 'Module::Build' => '0.2701' },
     recommends         => { 'Test::Pod'     => '1.20'   },
     requires           => { File::Spec    => 0          },
