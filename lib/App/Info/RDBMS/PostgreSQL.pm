@@ -42,7 +42,7 @@ use App::Info::RDBMS;
 use App::Info::Util;
 use vars qw(@ISA $VERSION);
 @ISA = qw(App::Info::RDBMS);
-$VERSION = '0.57';
+$VERSION = '0.58';
 use constant WIN32 => $^O eq 'MSWin32';
 
 my $u = App::Info::Util->new;

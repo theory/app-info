@@ -47,7 +47,7 @@ use File::Spec ();
 use Config;
 use vars qw(@ISA $VERSION);
 @ISA = qw(File::Spec);
-$VERSION = '0.57';
+$VERSION = '0.58';
 
 my %path_dems = (
     MacOS   => qr',',

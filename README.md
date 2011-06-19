@@ -1,4 +1,4 @@
-App/Info version 0.57
+App/Info version 0.58
 =====================
 
 App::Info provides a generalized interface for providing metadata about
