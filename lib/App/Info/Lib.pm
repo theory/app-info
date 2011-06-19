@@ -1,7 +1,5 @@
 package App::Info::Lib;
 
-# $Id$
-
 use strict;
 use App::Info;
 use vars qw(@ISA $VERSION);

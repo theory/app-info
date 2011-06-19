@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id: iconv_info.t,v 1.2 2002/06/27 19:57:35 david Exp $
-
 use strict;
 use Test::More tests => 19;
 use constant SKIP => 15;

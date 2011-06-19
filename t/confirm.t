@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id: confirm.t,v 1.3 2002/07/03 17:33:18 david Exp $
-
 use strict;
 use File::Spec::Functions qw(tmpdir);
 use Test::More tests => 14;

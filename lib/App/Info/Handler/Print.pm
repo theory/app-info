@@ -1,7 +1,5 @@
 package App::Info::Handler::Print;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::Handler::Print - Print App::Info event messages

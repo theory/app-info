@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id$
-
 # Make sure that we can use the stuff that's in our local lib directory.
 BEGIN {
     if( $ENV{PERL_CORE} ) {

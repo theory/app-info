@@ -1,7 +1,5 @@
 package App::Info::Lib::Expat;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::Lib::Expat - Information about the Expat XML parser

@@ -1,7 +1,5 @@
 package App::Info::Lib::Iconv;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::Lib::Iconv - Information about libiconv

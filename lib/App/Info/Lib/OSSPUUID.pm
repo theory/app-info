@@ -1,7 +1,5 @@
 package App::Info::Lib::OSSPUUID;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::Lib::OSSPUUID - Information about the OSSP UUID library

@@ -1,7 +1,5 @@
 package App::Info::Handler::Carp;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::Handler::Carp - Use Carp to handle App::Info events

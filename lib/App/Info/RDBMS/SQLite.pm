@@ -1,7 +1,5 @@
 package App::Info::RDBMS::SQLite;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::RDBMS::SQLite - Information about SQLite

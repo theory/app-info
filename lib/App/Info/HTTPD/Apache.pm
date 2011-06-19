@@ -1,7 +1,5 @@
 package App::Info::HTTPD::Apache;
 
-# $Id$
-
 =head1 NAME
 
 App::Info::HTTPD::Apache - Information about Apache web server
