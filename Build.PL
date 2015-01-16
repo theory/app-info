@@ -47,8 +47,8 @@ my $build = $class->new(
     meta_merge => {
         resources => {
             homepage   => 'http://search.cpan.org/dist/App-Info/',
-            bugtracker => 'http://github.com/theory/app-info/issues/',
-            repository => 'http://github.com/theory/app-info/',
+            bugtracker => 'https://github.com/theory/app-info/issues/',
+            repository => 'https://github.com/theory/app-info/',
         }
     },
 );
